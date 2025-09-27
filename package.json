@@ -70,6 +70,7 @@
     "@adonisjs/static": "^1.1.1",
     "@adonisjs/vite": "^4.0.0",
     "@inertiajs/react": "^2.2.0",
+    "@japa/api-client": "^3.1.0",
     "@types/uuid": "^10.0.0",
     "@vinejs/vine": "^3.0.1",
     "edge.js": "^6.2.1",
