@@ -17,6 +17,7 @@
     "#users/*": "./app/users/*.ts",
     "#organizations/*": "./app/organizations/*.ts",
     "#admin/*": "./app/admin/*.ts",
+    "#sessions/*": "./app/sessions/*.ts",
     "#shared/*": "./app/shared/*.ts",
     "#auth/*": "./app/auth/*.ts",
     "#controllers/*": "./app/controllers/*.js",

@@ -18,7 +18,7 @@ export default class PasswordResetRepository {
       id: token.id,
       email: token.email,
       token: token.token,
-      expiresAt: token.expiresAt
+      expiresAt: token.expiresAt,
     }
   }
 
@@ -43,19 +43,15 @@ export default class PasswordResetRepository {
    */
   async deleteExpiredTokens(): Promise<number> {
     // Compter d'abord les tokens à supprimer
-    const toDelete = await PasswordResetToken
-      .query()
+    const toDelete = await PasswordResetToken.query()
       .where('expires_at', '<', DateTime.now().toSQL())
       .count('* as total')
 
-    const count = parseInt(toDelete[0].$extras.total)
+    const count = Number.parseInt(toDelete[0].$extras.total)
 
     if (count > 0) {
       // Supprimer les tokens expirés
-      await PasswordResetToken
-        .query()
-        .where('expires_at', '<', DateTime.now().toSQL())
-        .delete()
+      await PasswordResetToken.query().where('expires_at', '<', DateTime.now().toSQL()).delete()
     }
 
     return count
@@ -66,19 +62,13 @@ export default class PasswordResetRepository {
    */
   async deleteByEmail(email: string): Promise<number> {
     // Compter d'abord les tokens à supprimer
-    const toDelete = await PasswordResetToken
-      .query()
-      .where('email', email)
-      .count('* as total')
+    const toDelete = await PasswordResetToken.query().where('email', email).count('* as total')
 
-    const count = parseInt(toDelete[0].$extras.total)
+    const count = Number.parseInt(toDelete[0].$extras.total)
 
     if (count > 0) {
       // Supprimer les tokens
-      await PasswordResetToken
-        .query()
-        .where('email', email)
-        .delete()
+      await PasswordResetToken.query().where('email', email).delete()
     }
 
     return count
@@ -88,8 +78,7 @@ export default class PasswordResetRepository {
    * Trouve tous les tokens valides pour un email
    */
   async findValidByEmail(email: string): Promise<PasswordResetToken[]> {
-    return await PasswordResetToken
-      .query()
+    return await PasswordResetToken.query()
       .where('email', email)
       .where('expires_at', '>', DateTime.now().toSQL())
       .whereNull('used_at')

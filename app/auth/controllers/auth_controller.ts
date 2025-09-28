@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import AuthService from '#auth/services/auth_service'
 import type { LoginData } from '#shared/types/auth'
 import User from '#users/models/user'
+import SessionService from '#sessions/services/session_service'
 
 export default class AuthController {
   async login({ request, response, session }: HttpContext) {
@@ -21,6 +22,16 @@ export default class AuthController {
     // Créer la session utilisateur
     session.put('user_id', result.user!.id)
 
+    // Créer l'entrée de session dans la base
+    const userSession = await SessionService.createSession({
+      userId: result.user!.id,
+      ipAddress: request.ip(),
+      userAgent: request.header('user-agent') || 'Unknown',
+    })
+
+    // Stocker l'ID de session pour pouvoir la fermer au logout
+    session.put('session_id', userSession.id)
+
     return response.json({
       success: true,
       user: {
@@ -31,6 +42,12 @@ export default class AuthController {
   }
 
   async logout({ response, session }: HttpContext) {
+    const sessionId = session.get('session_id')
+
+    if (sessionId) {
+      await SessionService.endSession(sessionId)
+    }
+
     session.forget('user_id')
 
     return response.json({

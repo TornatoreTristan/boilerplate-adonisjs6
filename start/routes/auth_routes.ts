@@ -18,7 +18,7 @@ router
     router.get('/me', [AuthController, 'me'])
   })
   .prefix('/auth')
-  .use(middleware.auth())
+  .use([middleware.auth(), middleware.updateSessionActivity()])
 
 // Routes de réinitialisation de mot de passe
 router
