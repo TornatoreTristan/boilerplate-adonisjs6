@@ -22,11 +22,21 @@ export default class AuthController {
     // Créer la session utilisateur
     session.put('user_id', result.user!.id)
 
+    // Extraire les données UTM et referrer
+    const utmSource = request.input('utm_source')
+    const utmMedium = request.input('utm_medium')
+    const utmCampaign = request.input('utm_campaign')
+    const referrer = request.header('referer')
+
     // Créer l'entrée de session dans la base
     const userSession = await SessionService.createSession({
       userId: result.user!.id,
       ipAddress: request.ip(),
       userAgent: request.header('user-agent') || 'Unknown',
+      referrer,
+      utmSource,
+      utmMedium,
+      utmCampaign,
     })
 
     // Stocker l'ID de session pour pouvoir la fermer au logout
