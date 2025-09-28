@@ -75,4 +75,22 @@ export default class SessionService {
     session.lastActivity = DateTime.now()
     await session.save()
   }
+
+  static async getUserActiveSessions(userId: string): Promise<SessionData[]> {
+    return await UserSession.query()
+      .where('user_id', userId)
+      .where('is_active', true)
+      .orderBy('last_activity', 'desc')
+  }
+
+  static async endAllOtherSessions(userId: string, currentSessionId: string): Promise<void> {
+    await UserSession.query()
+      .where('user_id', userId)
+      .where('id', '!=', currentSessionId)
+      .where('is_active', true)
+      .update({
+        ended_at: DateTime.now(),
+        is_active: false,
+      })
+  }
 }

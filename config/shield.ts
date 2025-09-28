@@ -17,13 +17,17 @@ const shieldConfig = defineConfig({
    */
   csrf: {
     enabled: true,
-    exceptRoutes: [
-      '/auth/login',
-      '/auth/logout',
-      '/password/forgot',
-      '/password/reset/:token',
-      '/password/reset'
-    ],
+    exceptRoutes: (ctx) => {
+      const url = ctx.request.url()
+      return (
+        url.startsWith('/api/') ||
+        url === '/auth/login' ||
+        url === '/auth/logout' ||
+        url === '/password/forgot' ||
+        url === '/password/reset' ||
+        url.startsWith('/password/reset/')
+      )
+    },
     enableXsrfCookie: true,
     methods: ['POST', 'PUT', 'PATCH', 'DELETE'],
   },
