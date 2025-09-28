@@ -6,4 +6,16 @@ export default class UserRepository {
     const user = await UserModel.create(userData)
     return user
   }
+
+  async findByEmail(email: string): Promise<User | null> {
+    const user = await UserModel.findBy('email', email)
+    return user
+  }
+
+  async updatePassword(userId: string, hashedPassword: string): Promise<User> {
+    const user = await UserModel.findOrFail(userId)
+    user.password = hashedPassword
+    await user.save()
+    return user
+  }
 }
