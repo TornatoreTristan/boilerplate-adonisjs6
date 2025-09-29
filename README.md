@@ -8,9 +8,16 @@ Un boilerplate complet avec authentification, organisations et administration.
 
 ## 📝 TODO
 
-[ ] User creation (TDD)
-[ ] Authentication system
+[X] User creation
+
+[X] Login/Logout
+
+[X] Session tracking management
+
+[ ] oAuth Google API
+
 [ ] Organizations management
+
 [ ] Super-admin dashboard
 
 ## 🚀 Quick Start

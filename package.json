@@ -76,6 +76,7 @@
     "@japa/api-client": "^3.1.0",
     "@radix-ui/react-slot": "^1.2.3",
     "@tailwindcss/vite": "^4.1.13",
+    "@tuyau/inertia": "^0.0.15",
     "@types/uuid": "^10.0.0",
     "@vinejs/vine": "^3.0.1",
     "class-variance-authority": "^0.7.1",
