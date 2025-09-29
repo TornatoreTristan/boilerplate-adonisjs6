@@ -17,7 +17,7 @@ test.group('Auth Middleware', (group) => {
     const loginResponse = await client.post('/auth/login').json({
       email: 'user@example.com',
       password: 'password123',
-      rememberMe: false,
+      remember: false,
     })
 
     // Act - Accéder à route protégée avec session active
@@ -36,7 +36,10 @@ test.group('Auth Middleware', (group) => {
     response.assertStatus(401)
     response.assertBodyContains({
       success: false,
-      error: 'Non authentifié',
+      error: {
+        message: 'Authentification requise',
+        code: 'AUTH_FAILED',
+      },
     })
   })
 })

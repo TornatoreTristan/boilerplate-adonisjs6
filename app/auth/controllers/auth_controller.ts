@@ -1,8 +1,8 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import AuthService from '#auth/services/auth_service'
 import type { LoginData } from '#shared/types/auth'
-import User from '#users/models/user'
 import SessionService from '#sessions/services/session_service'
+import { E } from '#shared/exceptions/index'
 
 export default class AuthController {
   async login({ request, response, session }: HttpContext) {
@@ -12,11 +12,9 @@ export default class AuthController {
     // Utiliser AuthService pour vérifier les credentials
     const result = await AuthService.login(loginData)
 
+    // Si l'authentification échoue, lever une exception
     if (!result.success) {
-      return response.status(401).json({
-        success: false,
-        error: result.error,
-      })
+      E.invalidCredentials(result.error)
     }
 
     // Créer la session utilisateur
@@ -42,11 +40,14 @@ export default class AuthController {
     // Stocker l'ID de session pour pouvoir la fermer au logout
     session.put('session_id', userSession.id)
 
+    // Réponse standardisée de succès
     return response.json({
       success: true,
-      user: {
-        id: result.user!.id,
-        email: result.user!.email,
+      data: {
+        user: {
+          id: result.user!.id,
+          email: result.user!.email,
+        },
       },
     })
   }
@@ -59,38 +60,28 @@ export default class AuthController {
     }
 
     session.forget('user_id')
+    session.forget('session_id')
 
     return response.json({
       success: true,
-      message: 'Déconnecté avec succès',
+      data: {
+        message: 'Déconnecté avec succès',
+      },
     })
   }
 
-  async me({ response, session }: HttpContext) {
-    const userId = session.get('user_id')
-
-    if (!userId) {
-      return response.status(401).json({
-        success: false,
-        error: 'Non authentifié',
-      })
-    }
-
-    // Récupérer l'utilisateur depuis la session
-    const user = await User.find(userId)
-
-    if (!user) {
-      return response.status(401).json({
-        success: false,
-        error: 'Utilisateur introuvable',
-      })
-    }
+  async me({ response, user }: HttpContext) {
+    // L'utilisateur est maintenant automatiquement chargé par le middleware auth
+    // Si on arrive ici, c'est qu'il est authentifié
+    E.assertUserExists(user)
 
     return response.json({
       success: true,
-      user: {
-        id: user.id,
-        email: user.email,
+      data: {
+        user: {
+          id: user.id,
+          email: user.email,
+        },
       },
     })
   }

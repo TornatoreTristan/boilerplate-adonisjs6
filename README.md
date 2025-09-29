@@ -1,68 +1,137 @@
-# AdonisJS 6 Boilerplate
+# 🚀 AdonisJS 6 Enterprise Boilerplate
 
-Project start : 27 sept 2025
-Last update : 27 sept 2025
-version : 0.0.01
+> Un boilerplate AdonisJS 6 moderne avec architecture avancée pour applications d'entreprise
 
-Un boilerplate complet avec authentification, organisations et administration.
+[![AdonisJS](https://img.shields.io/badge/AdonisJS-6.x-purple.svg)](https://adonisjs.com)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue.svg)](https://typescriptlang.org)
+[![Node.js](https://img.shields.io/badge/Node.js-20+-green.svg)](https://nodejs.org)
 
-## 📝 TODO
+**Project start:** 27 sept 2025 | **Last update:** 29 sept 2025 | **Version:** 0.1.0
 
-[X] User creation
+## ✨ Fonctionnalités
 
-[X] Login/Logout
+- 🔐 **Authentification complète** - Login/logout avec sessions sécurisées
+- 👥 **Multi-tenant** - Gestion d'organisations avec contexte utilisateur
+- 🗄️ **Repository Pattern** - CRUD avancé avec soft deletes et cache Redis
+- 🎯 **DDD Architecture** - Domain-Driven Design avec IoC Container (Inversify)
+- ⚡ **Performance** - Cache Redis avec invalidation par tags
+- 📊 **Audit & Tracking** - Suivi des sessions utilisateur avec UTM/referrer
+- 🔧 **Error Handling** - Système d'exceptions personnalisées robuste
+- 🎪 **Event System** - Bus d'événements avec Bull queues
+- 🧪 **Tests complets** - Unit & functional tests avec Japa
 
-[X] Session tracking management
+## 🛠️ Stack Technique
 
-[ ] oAuth Google API
+- **Backend:** AdonisJS 6 + TypeScript
+- **Base de données:** PostgreSQL avec Lucid ORM
+- **Cache:** Redis avec stratégie de tags
+- **Queues:** Bull pour les événements asynchrones
+- **DI Container:** Inversify pour l'injection de dépendances
+- **Tests:** Japa avec couverture complète
+- **Frontend:** Inertia.js + React (prêt)
 
-[ ] Organizations management
-
-[ ] Super-admin dashboard
-
-## 🚀 Quick Start
-
-1. **Clone le projet**
-
-```bash
-   git clone https://github.com/ton-username/boilerplate-adonisjs6.git
-   cd boilerplate-adonisjs6
-```
-
-2. **Installation**
-
-```bash
-   npm install
-   cp .env.example .env
-```
-
-3. **Bases de données (Docker)**
+## 🚀 Installation Rapide
 
 ```bash
-  docker-compose up -d
+# 1. Clone et installation
+git clone https://github.com/votre-username/boilerplate-adonisjs6.git
+cd boilerplate-adonisjs6
+npm install
+
+# 2. Configuration
+cp .env.example .env
+# Configurez vos variables d'environnement
+
+# 3. Services (Docker)
+docker-compose up -d
+
+# 4. Base de données
+node ace migration:run
+
+# 5. Démarrage
+npm run dev
 ```
 
-4. **Migrations**
+## 📖 Documentation
+
+- [📐 Architecture Overview](docs/architecture/overview.md)
+- [🏗️ Repository Pattern](docs/architecture/repository-pattern.md)
+- [🔐 Authentication System](docs/features/authentication.md)
+- [🏢 Organizations & Multi-tenancy](docs/features/organizations.md)
+- [⚡ Caching Strategy](docs/architecture/caching.md)
+- [🎯 Error Handling](docs/architecture/error-handling.md)
+
+## 🧪 Tests
 
 ```bash
-  node ace migration:run
+# Tous les tests
+npm run test
+
+# Tests avec watch
+npm run test -- --watch
+
+# Tests spécifiques
+npm run test -- --grep "Repository"
 ```
 
-4. **Démarrage**
+## 📊 Architecture Highlights
 
-```bash
-    npm run dev
+### Repository Pattern avec BaseRepository
+```typescript
+// CRUD automatique avec cache et événements
+const user = await userRepository.create(userData)
+await userRepository.delete(userId, { soft: true })
+const restored = await userRepository.restore(userId)
 ```
 
-🏗️ Architecture
-
-Backend: AdonisJS 6 + PostgreSQL + Redis
-Frontend: Inertia.js + React
-Tests: TDD avec Japa
-Docker: PostgreSQL + Redis en développement
-
-🧪 Tests
-
-```bash
-  npm run test
+### Container IoC avec Inversify
+```typescript
+// Injection de dépendances automatique
+@injectable()
+class UserService {
+  constructor(
+    @inject(TYPES.UserRepository) private userRepo: UserRepository,
+    @inject(TYPES.CacheService) private cache: CacheService
+  ) {}
+}
 ```
+
+### Cache Redis avec Tags
+```typescript
+// Invalidation intelligente par tags
+await cache.set('user:123', user, { tags: ['users', 'user_123'] })
+await cache.invalidateTags(['users']) // Invalide tous les utilisateurs
+```
+
+## 🏗️ Structure du Projet
+
+```
+app/
+├── auth/                 # Authentification
+├── organizations/        # Multi-tenant
+├── users/               # Gestion utilisateurs
+├── sessions/            # Tracking sessions
+├── shared/              # Code partagé
+│   ├── container/       # IoC Container
+│   ├── repositories/    # BaseRepository
+│   ├── services/        # Services métier
+│   └── exceptions/      # Gestion erreurs
+docs/                    # Documentation
+tests/                   # Tests complets
+```
+
+## 🎯 Prochaines Étapes
+
+- [ ] OAuth Google Integration
+- [ ] Super-admin Dashboard
+- [ ] API Rate Limiting
+- [ ] WebSocket Real-time
+- [ ] File Upload System
+
+## 🤝 Contribution
+
+Ce boilerplate est conçu pour être un point de départ solide pour vos applications d'entreprise. N'hésitez pas à l'adapter selon vos besoins !
+
+---
+
+**Développé avec ❤️ en utilisant AdonisJS 6**

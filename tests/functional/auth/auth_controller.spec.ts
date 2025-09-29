@@ -19,7 +19,7 @@ test.group('AuthController - Login', (group) => {
     const response = await client.post('/auth/login').json({
       email: 'user@example.com',
       password: 'password123',
-      rememberMe: false,
+      remember: false,
     })
 
     // Assert
@@ -40,7 +40,7 @@ test.group('AuthController - Login', (group) => {
     const loginResponse = await client.post('/auth/login').json({
       email: 'user@example.com',
       password: 'password123',
-      rememberMe: false,
+      remember: false,
     })
 
     loginResponse.assertStatus(200)
@@ -52,7 +52,9 @@ test.group('AuthController - Login', (group) => {
     logoutResponse.assertStatus(200)
     logoutResponse.assertBodyContains({
       success: true,
-      message: 'Déconnecté avec succès',
+      data: {
+        message: 'Déconnecté avec succès',
+      },
     })
 
     // Vérification avancée - Tenter d'accéder à une route protégée
