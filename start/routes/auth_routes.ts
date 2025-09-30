@@ -11,6 +11,7 @@ router
     router.post('/logout', [AuthController, 'logout'])
   })
   .prefix('/auth')
+  .use([middleware.throttle({ maxRequests: 5, windowMs: 60000 })])
 
 // Routes protégées (sans middleware - vous pouvez l'ajouter plus tard)
 router
@@ -23,8 +24,12 @@ router
 // Routes de réinitialisation de mot de passe
 router
   .group(() => {
-    router.post('/forgot', [PasswordResetController, 'forgot'])
+    router.post('/forgot', [PasswordResetController, 'forgot']).use([
+      middleware.throttle({ maxRequests: 3, windowMs: 300000, keyPrefix: 'password-forgot' }),
+    ])
     router.get('/reset/:token', [PasswordResetController, 'validateToken'])
-    router.post('/reset', [PasswordResetController, 'reset'])
+    router.post('/reset', [PasswordResetController, 'reset']).use([
+      middleware.throttle({ maxRequests: 5, windowMs: 300000, keyPrefix: 'password-reset' }),
+    ])
   })
   .prefix('/password')

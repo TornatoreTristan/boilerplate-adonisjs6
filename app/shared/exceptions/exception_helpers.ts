@@ -12,6 +12,7 @@ import {
   UserNotMemberException,
   InsufficientRoleException,
   SessionNotOwnedException,
+  RateLimitException,
 } from './domain_exceptions.js'
 import type { ErrorDetails } from './app_exception.js'
 
@@ -120,6 +121,14 @@ export class ExceptionHelpers {
       sessionId ? `La session ${sessionId} ne vous appartient pas` : undefined,
       details
     )
+  }
+
+  // =====================================================
+  // RATE LIMIT HELPERS
+  // =====================================================
+
+  static tooManyRequests(message?: string, retryAfter?: number): never {
+    throw new RateLimitException(message, { retryAfter })
   }
 
   // =====================================================

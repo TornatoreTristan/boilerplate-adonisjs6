@@ -21,6 +21,7 @@ export const TYPES = {
   EventBus: Symbol.for('EventBus'),
   QueueService: Symbol.for('QueueService'),
   Logger: Symbol.for('Logger'),
+  RateLimitService: Symbol.for('RateLimitService'),
 
   // External services
   EmailService: Symbol.for('EmailService'),

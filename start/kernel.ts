@@ -50,4 +50,5 @@ export const middleware = router.named({
   guest: () => import('#middleware/guest_middleware'),
   auth: () => import('#middleware/auth_middleware'),
   updateSessionActivity: () => import('#sessions/middleware/update_session_activity'),
+  throttle: () => import('#middleware/throttle_middleware'),
 })

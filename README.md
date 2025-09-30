@@ -18,6 +18,7 @@
 - 📊 **Audit & Tracking** - Suivi des sessions utilisateur avec UTM/referrer
 - 🔧 **Error Handling** - Système d'exceptions personnalisées robuste
 - 🎪 **Event System** - Bus d'événements avec Bull queues
+- 🛡️ **Rate Limiting** - Protection contre les abus avec Redis sliding window
 - 🧪 **Tests complets** - Unit & functional tests avec Japa
 
 ## 🛠️ Stack Technique
@@ -60,6 +61,7 @@ npm run dev
 - [🏢 Organizations & Multi-tenancy](docs/features/organizations.md)
 - [⚡ Caching Strategy](docs/architecture/caching.md)
 - [🎯 Error Handling](docs/architecture/error-handling.md)
+- [🛡️ Rate Limiting](docs/features/rate-limiting.md)
 
 ## 🧪 Tests
 
@@ -122,9 +124,9 @@ tests/                   # Tests complets
 
 ## 🎯 Prochaines Étapes
 
+- [x] API Rate Limiting
 - [ ] OAuth Google Integration
 - [ ] Super-admin Dashboard
-- [ ] API Rate Limiting
 - [ ] WebSocket Real-time
 - [ ] File Upload System
 
