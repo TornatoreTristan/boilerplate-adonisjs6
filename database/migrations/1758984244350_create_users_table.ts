@@ -8,7 +8,11 @@ export default class extends BaseSchema {
       table.uuid('id').primary().defaultTo(this.raw('gen_random_uuid()'))
       table.string('full_name').nullable()
       table.string('email', 254).notNullable().unique()
-      table.string('password').notNullable()
+      table.string('password').nullable()
+
+      // OAuth fields
+      table.string('google_id').nullable().unique()
+      table.string('avatar_url').nullable()
 
       // Soft delete
       table.timestamp('deleted_at').nullable()

@@ -1,9 +1,11 @@
 import { DateTime } from 'luxon'
+import { injectable } from 'inversify'
 import UserSession from '#sessions/models/user_session'
 import type { CreateSessionData, SessionData } from '#shared/types/session'
 
+@injectable()
 export default class SessionService {
-  static async createSession(sessionData: CreateSessionData): Promise<SessionData> {
+  async createSession(sessionData: CreateSessionData): Promise<SessionData> {
     const now = DateTime.now()
 
     // Parser automatiquement le User-Agent
@@ -55,7 +57,7 @@ export default class SessionService {
     })
   }
 
-  static async endSession(sessionId: string): Promise<SessionData> {
+  async endSession(sessionId: string): Promise<SessionData> {
     const session = await UserSession.findOrFail(sessionId)
 
     session.endedAt = DateTime.now()
@@ -66,24 +68,24 @@ export default class SessionService {
     return session
   }
 
-  static async findById(sessionId: string): Promise<SessionData> {
+  async findById(sessionId: string): Promise<SessionData> {
     return await UserSession.findOrFail(sessionId)
   }
 
-  static async updateActivity(sessionId: string): Promise<void> {
+  async updateActivity(sessionId: string): Promise<void> {
     const session = await UserSession.findOrFail(sessionId)
     session.lastActivity = DateTime.now()
     await session.save()
   }
 
-  static async getUserActiveSessions(userId: string): Promise<SessionData[]> {
+  async getUserActiveSessions(userId: string): Promise<SessionData[]> {
     return await UserSession.query()
       .where('user_id', userId)
       .where('is_active', true)
       .orderBy('last_activity', 'desc')
   }
 
-  static async endAllOtherSessions(userId: string, currentSessionId: string): Promise<void> {
+  async endAllOtherSessions(userId: string, currentSessionId: string): Promise<void> {
     await UserSession.query()
       .where('user_id', userId)
       .where('id', '!=', currentSessionId)
@@ -92,5 +94,35 @@ export default class SessionService {
         ended_at: DateTime.now(),
         is_active: false,
       })
+  }
+
+  static async createSession(sessionData: CreateSessionData): Promise<SessionData> {
+    const service = new SessionService()
+    return service.createSession(sessionData)
+  }
+
+  static async endSession(sessionId: string): Promise<SessionData> {
+    const service = new SessionService()
+    return service.endSession(sessionId)
+  }
+
+  static async findById(sessionId: string): Promise<SessionData> {
+    const service = new SessionService()
+    return service.findById(sessionId)
+  }
+
+  static async updateActivity(sessionId: string): Promise<void> {
+    const service = new SessionService()
+    return service.updateActivity(sessionId)
+  }
+
+  static async getUserActiveSessions(userId: string): Promise<SessionData[]> {
+    const service = new SessionService()
+    return service.getUserActiveSessions(userId)
+  }
+
+  static async endAllOtherSessions(userId: string, currentSessionId: string): Promise<void> {
+    const service = new SessionService()
+    return service.endAllOtherSessions(userId, currentSessionId)
   }
 }

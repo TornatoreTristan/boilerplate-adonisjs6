@@ -17,6 +17,10 @@ import UserRepository from '#users/repositories/user_repository'
 import OrganizationRepository from '#organizations/repositories/organization_repository'
 import SessionRepository from '#sessions/repositories/session_repository'
 
+// Domain Services
+import SessionService from '#sessions/services/session_service'
+import GoogleAuthService from '#auth/services/google_auth_service'
+
 // Create container
 const container = new Container()
 
@@ -67,10 +71,11 @@ export function configureContainer(): Container {
   container.bind(TYPES.SessionRepository).to(SessionRepository)
 
   // ==========================================
-  // SERVICES (à migrer)
+  // DOMAIN SERVICES
   // ==========================================
-  // container.bind<UserService>(TYPES.UserService).to(UserService)
-  // container.bind<AuthService>(TYPES.AuthService).to(AuthService)
+
+  container.bind<SessionService>(TYPES.SessionService).to(SessionService)
+  container.bind<GoogleAuthService>(TYPES.GoogleAuthService).to(GoogleAuthService)
 
   return container
 }

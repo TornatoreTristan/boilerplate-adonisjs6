@@ -8,10 +8,19 @@ export default class User extends BaseModel {
   declare id: string
 
   @column()
+  declare fullName: string | null
+
+  @column()
   declare email: string
 
   @column({ serializeAs: null })
-  declare password: string
+  declare password: string | null
+
+  @column()
+  declare googleId: string | null
+
+  @column()
+  declare avatarUrl: string | null
 
   @column.dateTime()
   declare deleted_at: DateTime

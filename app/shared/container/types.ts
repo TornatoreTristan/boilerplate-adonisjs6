@@ -15,6 +15,7 @@ export const TYPES = {
   OrganizationService: Symbol.for('OrganizationService'),
   SessionService: Symbol.for('SessionService'),
   PasswordResetService: Symbol.for('PasswordResetService'),
+  GoogleAuthService: Symbol.for('GoogleAuthService'),
 
   // Infrastructure
   CacheService: Symbol.for('CacheService'),

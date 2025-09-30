@@ -11,6 +11,7 @@
 ## ✨ Fonctionnalités
 
 - 🔐 **Authentification complète** - Login/logout avec sessions sécurisées
+- 🔑 **Google OAuth** - Connexion avec Google (auto-création et liaison de compte)
 - 👥 **Multi-tenant** - Gestion d'organisations avec contexte utilisateur
 - 🗄️ **Repository Pattern** - CRUD avancé avec soft deletes et cache Redis
 - 🎯 **DDD Architecture** - Domain-Driven Design avec IoC Container (Inversify)
@@ -58,6 +59,7 @@ npm run dev
 - [📐 Architecture Overview](docs/architecture/overview.md)
 - [🏗️ Repository Pattern](docs/architecture/repository-pattern.md)
 - [🔐 Authentication System](docs/features/authentication.md)
+- [🔑 Google OAuth](docs/features/google-oauth.md)
 - [🏢 Organizations & Multi-tenancy](docs/features/organizations.md)
 - [⚡ Caching Strategy](docs/architecture/caching.md)
 - [🎯 Error Handling](docs/architecture/error-handling.md)
@@ -125,7 +127,8 @@ tests/                   # Tests complets
 ## 🎯 Prochaines Étapes
 
 - [x] API Rate Limiting
-- [ ] OAuth Google Integration
+- [x] Google OAuth Integration
+- [ ] Multi-provider OAuth (GitHub, Facebook)
 - [ ] Super-admin Dashboard
 - [ ] WebSocket Real-time
 - [ ] File Upload System
