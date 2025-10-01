@@ -11,6 +11,7 @@ import CacheService from '#shared/services/cache_service'
 import EventBusService from '#shared/services/event_bus_service'
 import QueueService from '#shared/services/queue_service'
 import RateLimitService from '#shared/services/rate_limit_service'
+import EmailService from '#mailing/services/email_service'
 
 // Repositories
 import UserRepository from '#users/repositories/user_repository'
@@ -61,6 +62,9 @@ export function configureContainer(): Container {
 
   // Rate Limit Service
   container.bind<RateLimitService>(TYPES.RateLimitService).to(RateLimitService).inSingletonScope()
+
+  // Email Service
+  container.bind<EmailService>(TYPES.EmailService).to(EmailService).inSingletonScope()
 
   // ==========================================
   // REPOSITORIES

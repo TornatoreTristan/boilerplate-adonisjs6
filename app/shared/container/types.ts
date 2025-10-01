@@ -23,9 +23,9 @@ export const TYPES = {
   QueueService: Symbol.for('QueueService'),
   Logger: Symbol.for('Logger'),
   RateLimitService: Symbol.for('RateLimitService'),
+  EmailService: Symbol.for('EmailService'),
 
   // External services
-  EmailService: Symbol.for('EmailService'),
   RedisClient: Symbol.for('RedisClient'),
 } as const
 
