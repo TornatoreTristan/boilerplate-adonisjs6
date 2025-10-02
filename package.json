@@ -18,6 +18,7 @@
     "#organizations/*": "./app/organizations/*.ts",
     "#admin/*": "./app/admin/*.ts",
     "#sessions/*": "./app/sessions/*.ts",
+    "#notifications/*": "./app/notifications/*.ts",
     "#shared/*": "./app/shared/*.ts",
     "#auth/*": "./app/auth/*.ts",
     "#mailing/*": "./app/mailing/*.ts",

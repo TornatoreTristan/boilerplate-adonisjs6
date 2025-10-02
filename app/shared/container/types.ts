@@ -8,6 +8,7 @@ export const TYPES = {
   OrganizationRepository: Symbol.for('OrganizationRepository'),
   SessionRepository: Symbol.for('SessionRepository'),
   PasswordResetRepository: Symbol.for('PasswordResetRepository'),
+  NotificationRepository: Symbol.for('NotificationRepository'),
 
   // Services
   UserService: Symbol.for('UserService'),
@@ -16,6 +17,7 @@ export const TYPES = {
   SessionService: Symbol.for('SessionService'),
   PasswordResetService: Symbol.for('PasswordResetService'),
   GoogleAuthService: Symbol.for('GoogleAuthService'),
+  NotificationService: Symbol.for('NotificationService'),
 
   // Infrastructure
   CacheService: Symbol.for('CacheService'),

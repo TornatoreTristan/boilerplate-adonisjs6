@@ -17,10 +17,12 @@ import EmailService from '#mailing/services/email_service'
 import UserRepository from '#users/repositories/user_repository'
 import OrganizationRepository from '#organizations/repositories/organization_repository'
 import SessionRepository from '#sessions/repositories/session_repository'
+import NotificationRepository from '#notifications/repositories/notification_repository'
 
 // Domain Services
 import SessionService from '#sessions/services/session_service'
 import GoogleAuthService from '#auth/services/google_auth_service'
+import NotificationService from '#notifications/services/notification_service'
 
 // Create container
 const container = new Container()
@@ -73,6 +75,7 @@ export function configureContainer(): Container {
   container.bind(TYPES.UserRepository).to(UserRepository)
   container.bind(TYPES.OrganizationRepository).to(OrganizationRepository)
   container.bind(TYPES.SessionRepository).to(SessionRepository)
+  container.bind(TYPES.NotificationRepository).to(NotificationRepository)
 
   // ==========================================
   // DOMAIN SERVICES
@@ -80,6 +83,7 @@ export function configureContainer(): Container {
 
   container.bind<SessionService>(TYPES.SessionService).to(SessionService)
   container.bind<GoogleAuthService>(TYPES.GoogleAuthService).to(GoogleAuthService)
+  container.bind<NotificationService>(TYPES.NotificationService).to(NotificationService)
 
   return container
 }
