@@ -18,6 +18,13 @@ import UserRepository from '#users/repositories/user_repository'
 import OrganizationRepository from '#organizations/repositories/organization_repository'
 import SessionRepository from '#sessions/repositories/session_repository'
 import NotificationRepository from '#notifications/repositories/notification_repository'
+import UploadRepository from '#uploads/repositories/upload_repository'
+
+// Upload Services
+import StorageService from '#uploads/services/storage_service'
+import LocalStorageDriver from '#uploads/services/storage/local_storage_driver'
+import S3StorageDriver from '#uploads/services/storage/s3_storage_driver'
+import UploadService from '#uploads/services/upload_service'
 
 // Domain Services
 import SessionService from '#sessions/services/session_service'
@@ -76,6 +83,7 @@ export function configureContainer(): Container {
   container.bind(TYPES.OrganizationRepository).to(OrganizationRepository)
   container.bind(TYPES.SessionRepository).to(SessionRepository)
   container.bind(TYPES.NotificationRepository).to(NotificationRepository)
+  container.bind(TYPES.UploadRepository).to(UploadRepository)
 
   // ==========================================
   // DOMAIN SERVICES
@@ -84,6 +92,15 @@ export function configureContainer(): Container {
   container.bind<SessionService>(TYPES.SessionService).to(SessionService)
   container.bind<GoogleAuthService>(TYPES.GoogleAuthService).to(GoogleAuthService)
   container.bind<NotificationService>(TYPES.NotificationService).to(NotificationService)
+
+  // ==========================================
+  // UPLOAD SERVICES
+  // ==========================================
+
+  container.bind<LocalStorageDriver>(TYPES.LocalStorageDriver).to(LocalStorageDriver).inSingletonScope()
+  container.bind<S3StorageDriver>(TYPES.S3StorageDriver).to(S3StorageDriver).inSingletonScope()
+  container.bind<StorageService>(TYPES.StorageService).to(StorageService).inSingletonScope()
+  container.bind<UploadService>(TYPES.UploadService).to(UploadService)
 
   return container
 }

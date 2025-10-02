@@ -62,4 +62,19 @@ export default await Env.create(new URL('../', import.meta.url), {
   RESEND_API_KEY: Env.schema.string(),
   EMAIL_FROM_ADDRESS: Env.schema.string(),
   EMAIL_FROM_NAME: Env.schema.string(),
+
+  /*
+  |----------------------------------------------------------
+  | Variables for configuring file uploads
+  |----------------------------------------------------------
+  */
+  UPLOADS_DISK: Env.schema.enum(['local', 's3'] as const),
+  UPLOADS_MAX_SIZE: Env.schema.number(),
+  UPLOADS_ALLOWED_MIMES: Env.schema.string(),
+
+  AWS_ACCESS_KEY_ID: Env.schema.string.optional(),
+  AWS_SECRET_ACCESS_KEY: Env.schema.string.optional(),
+  AWS_REGION: Env.schema.string.optional(),
+  AWS_BUCKET: Env.schema.string.optional(),
+  AWS_ENDPOINT: Env.schema.string.optional(),
 })
