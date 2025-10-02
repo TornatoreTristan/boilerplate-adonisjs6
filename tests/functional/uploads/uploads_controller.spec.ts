@@ -4,9 +4,20 @@ import { getService } from '#shared/container/container'
 import { TYPES } from '#shared/container/types'
 import UserRepository from '#users/repositories/user_repository'
 import UploadService from '#uploads/services/upload_service'
+import fs from 'node:fs/promises'
+import path from 'node:path'
 
 test.group('UploadsController', (group) => {
   group.each.setup(() => testUtils.db().withGlobalTransaction())
+
+  group.each.teardown(async () => {
+    const uploadsPath = path.join(process.cwd(), 'storage', 'uploads')
+    try {
+      await fs.rm(uploadsPath, { recursive: true, force: true })
+    } catch (error) {
+      // Ignore if directory doesn't exist
+    }
+  })
 
   test('should upload a file via POST /api/uploads', async ({ client, assert }) => {
     const userRepo = getService<UserRepository>(TYPES.UserRepository)

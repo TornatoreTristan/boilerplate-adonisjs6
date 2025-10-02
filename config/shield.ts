@@ -25,7 +25,8 @@ const shieldConfig = defineConfig({
         url === '/auth/logout' ||
         url === '/password/forgot' ||
         url === '/password/reset' ||
-        url.startsWith('/password/reset/')
+        url.startsWith('/password/reset/') ||
+        url.startsWith('/auth/email/')
       )
     },
     enableXsrfCookie: true,

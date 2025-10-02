@@ -17,6 +17,7 @@ import EmailService from '#mailing/services/email_service'
 import UserRepository from '#users/repositories/user_repository'
 import OrganizationRepository from '#organizations/repositories/organization_repository'
 import SessionRepository from '#sessions/repositories/session_repository'
+import EmailVerificationRepository from '#auth/repositories/email_verification_repository'
 import NotificationRepository from '#notifications/repositories/notification_repository'
 import UploadRepository from '#uploads/repositories/upload_repository'
 
@@ -29,6 +30,7 @@ import UploadService from '#uploads/services/upload_service'
 // Domain Services
 import SessionService from '#sessions/services/session_service'
 import GoogleAuthService from '#auth/services/google_auth_service'
+import EmailVerificationService from '#auth/services/email_verification_service'
 import NotificationService from '#notifications/services/notification_service'
 
 // Create container
@@ -82,6 +84,7 @@ export function configureContainer(): Container {
   container.bind(TYPES.UserRepository).to(UserRepository)
   container.bind(TYPES.OrganizationRepository).to(OrganizationRepository)
   container.bind(TYPES.SessionRepository).to(SessionRepository)
+  container.bind(TYPES.EmailVerificationRepository).to(EmailVerificationRepository)
   container.bind(TYPES.NotificationRepository).to(NotificationRepository)
   container.bind(TYPES.UploadRepository).to(UploadRepository)
 
@@ -91,6 +94,7 @@ export function configureContainer(): Container {
 
   container.bind<SessionService>(TYPES.SessionService).to(SessionService)
   container.bind<GoogleAuthService>(TYPES.GoogleAuthService).to(GoogleAuthService)
+  container.bind<EmailVerificationService>(TYPES.EmailVerificationService).to(EmailVerificationService)
   container.bind<NotificationService>(TYPES.NotificationService).to(NotificationService)
 
   // ==========================================

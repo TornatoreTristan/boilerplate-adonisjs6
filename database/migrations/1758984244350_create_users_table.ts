@@ -14,6 +14,9 @@ export default class extends BaseSchema {
       table.string('google_id').nullable().unique()
       table.string('avatar_url').nullable()
 
+      // Validation
+      table.timestamp('email_verified_at').nullable()
+
       // Soft delete
       table.timestamp('deleted_at').nullable()
 

@@ -5,9 +5,20 @@ import UploadService from '#uploads/services/upload_service'
 import UserRepository from '#users/repositories/user_repository'
 import UploadRepository from '#uploads/repositories/upload_repository'
 import testUtils from '@adonisjs/core/services/test_utils'
+import fs from 'node:fs/promises'
+import path from 'node:path'
 
 test.group('UploadService', (group) => {
   group.each.setup(() => testUtils.db().withGlobalTransaction())
+
+  group.each.teardown(async () => {
+    const uploadsPath = path.join(process.cwd(), 'storage', 'uploads')
+    try {
+      await fs.rm(uploadsPath, { recursive: true, force: true })
+    } catch (error) {
+      // Ignore if directory doesn't exist
+    }
+  })
 
   test('should upload a file and create database record', async ({ assert }) => {
     const uploadService = getService<UploadService>(TYPES.UploadService)

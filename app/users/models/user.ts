@@ -23,6 +23,9 @@ export default class User extends BaseModel {
   declare avatarUrl: string | null
 
   @column.dateTime()
+  declare emailVerifiedAt: DateTime | null
+
+  @column.dateTime()
   declare deleted_at: DateTime
 
   @column.dateTime({ autoCreate: true })
@@ -30,6 +33,11 @@ export default class User extends BaseModel {
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime
+
+  // Getters
+  get isEmailVerified(): boolean {
+    return this.emailVerifiedAt !== null
+  }
 
   @manyToMany(() => Organization, {
     pivotTable: 'user_organizations',
