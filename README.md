@@ -6,13 +6,14 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue.svg)](https://typescriptlang.org)
 [![Node.js](https://img.shields.io/badge/Node.js-20+-green.svg)](https://nodejs.org)
 
-**Project start:** 27 sept 2025 | **Last update:** 29 sept 2025 | **Version:** 0.1.0
+**Project start:** 27 sept 2025 | **Last update:** 01 oct 2025 | **Version:** 0.1.1
 
 ## ✨ Fonctionnalités
 
 - 🔐 **Authentification complète** - Login/logout avec sessions sécurisées
 - 🔑 **Google OAuth** - Connexion avec Google (auto-création et liaison de compte)
 - 👥 **Multi-tenant** - Gestion d'organisations avec contexte utilisateur
+- 📦 **File Upload System** - Multi-storage (local/S3) avec polymorphic attachments
 - 🗄️ **Repository Pattern** - CRUD avancé avec soft deletes et cache Redis
 - 🎯 **DDD Architecture** - Domain-Driven Design avec IoC Container (Inversify)
 - ⚡ **Performance** - Cache Redis avec invalidation par tags
@@ -20,6 +21,7 @@
 - 🔧 **Error Handling** - Système d'exceptions personnalisées robuste
 - 🎪 **Event System** - Bus d'événements avec Bull queues
 - 🛡️ **Rate Limiting** - Protection contre les abus avec Redis sliding window
+- 🔔 **Notifications** - Système complet avec types personnalisables
 - 🧪 **Tests complets** - Unit & functional tests avec Japa
 
 ## 🛠️ Stack Technique
@@ -27,6 +29,7 @@
 - **Backend:** AdonisJS 6 + TypeScript
 - **Base de données:** PostgreSQL avec Lucid ORM
 - **Cache:** Redis avec stratégie de tags
+- **Storage:** Local filesystem + AWS S3
 - **Queues:** Bull pour les événements asynchrones
 - **DI Container:** Inversify pour l'injection de dépendances
 - **Tests:** Japa avec couverture complète
@@ -61,6 +64,8 @@ npm run dev
 - [🔐 Authentication System](docs/features/authentication.md)
 - [🔑 Google OAuth](docs/features/google-oauth.md)
 - [🏢 Organizations & Multi-tenancy](docs/features/organizations.md)
+- [📦 File Upload System](docs/features/uploads.md)
+- [🔔 Notifications](docs/features/notifications.md)
 - [⚡ Caching Strategy](docs/architecture/caching.md)
 - [🎯 Error Handling](docs/architecture/error-handling.md)
 - [🛡️ Rate Limiting](docs/features/rate-limiting.md)
@@ -81,6 +86,7 @@ npm run test -- --grep "Repository"
 ## 📊 Architecture Highlights
 
 ### Repository Pattern avec BaseRepository
+
 ```typescript
 // CRUD automatique avec cache et événements
 const user = await userRepository.create(userData)
@@ -89,6 +95,7 @@ const restored = await userRepository.restore(userId)
 ```
 
 ### Container IoC avec Inversify
+
 ```typescript
 // Injection de dépendances automatique
 @injectable()
@@ -101,10 +108,26 @@ class UserService {
 ```
 
 ### Cache Redis avec Tags
+
 ```typescript
 // Invalidation intelligente par tags
 await cache.set('user:123', user, { tags: ['users', 'user_123'] })
 await cache.invalidateTags(['users']) // Invalide tous les utilisateurs
+```
+
+### File Upload Multi-Storage
+
+```typescript
+// Upload vers S3 avec polymorphic attachment
+const upload = await uploadService.uploadFile({
+  userId: user.id,
+  file: fileBuffer,
+  filename: 'avatar.jpg',
+  disk: 's3',
+  visibility: 'public',
+  uploadableType: 'User',
+  uploadableId: user.id,
+})
 ```
 
 ## 🏗️ Structure du Projet
@@ -115,6 +138,8 @@ app/
 ├── organizations/        # Multi-tenant
 ├── users/               # Gestion utilisateurs
 ├── sessions/            # Tracking sessions
+├── uploads/             # File upload system
+├── notifications/       # Système de notifications
 ├── shared/              # Code partagé
 │   ├── container/       # IoC Container
 │   ├── repositories/    # BaseRepository
@@ -128,10 +153,12 @@ tests/                   # Tests complets
 
 - [x] API Rate Limiting
 - [x] Google OAuth Integration
+- [x] File Upload System (Local + S3)
+- [x] Notifications System
 - [ ] Multi-provider OAuth (GitHub, Facebook)
 - [ ] Super-admin Dashboard
 - [ ] WebSocket Real-time
-- [ ] File Upload System
+- [ ] Email Templates & Mailing
 
 ## 🤝 Contribution
 
