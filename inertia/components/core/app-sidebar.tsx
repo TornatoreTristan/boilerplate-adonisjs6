@@ -1,4 +1,5 @@
 import { Home } from 'lucide-react'
+import { usePage } from '@inertiajs/react'
 
 import {
   Sidebar,
@@ -17,19 +18,23 @@ import { NavUser } from './nav-user'
 const items = [
   {
     title: 'Home',
-    url: '#',
+    url: '/',
     icon: Home,
   },
 ]
 
-// Mock user
-const user = {
-  name: 'Jean LASSALE',
-  email: 'jeanlassale@gmail.com',
-  avatar: 'test',
-}
-
 export function AppSidebar() {
+  const { auth } = usePage().props
+
+  // Mapper les données user pour NavUser
+  const userData = auth.user
+    ? {
+        name: auth.user.fullName || 'Utilisateur',
+        email: auth.user.email,
+        avatar: auth.user.avatarUrl || '',
+      }
+    : null
+
   return (
     <Sidebar>
       <SidebarContent>
@@ -51,9 +56,7 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter>
-        <NavUser user={user} />
-      </SidebarFooter>
+      <SidebarFooter>{userData && <NavUser user={userData} />}</SidebarFooter>
     </Sidebar>
   )
 }
