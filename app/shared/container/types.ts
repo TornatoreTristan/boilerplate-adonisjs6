@@ -11,6 +11,8 @@ export const TYPES = {
   EmailVerificationRepository: Symbol.for('EmailVerificationRepository'),
   NotificationRepository: Symbol.for('NotificationRepository'),
   UploadRepository: Symbol.for('UploadRepository'),
+  RoleRepository: Symbol.for('RoleRepository'),
+  PermissionRepository: Symbol.for('PermissionRepository'),
 
   // Services
   UserService: Symbol.for('UserService'),
@@ -25,6 +27,7 @@ export const TYPES = {
   StorageService: Symbol.for('StorageService'),
   LocalStorageDriver: Symbol.for('LocalStorageDriver'),
   S3StorageDriver: Symbol.for('S3StorageDriver'),
+  AuthorizationService: Symbol.for('AuthorizationService'),
 
   // Infrastructure
   CacheService: Symbol.for('CacheService'),

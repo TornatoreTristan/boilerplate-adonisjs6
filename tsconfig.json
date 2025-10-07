@@ -9,6 +9,7 @@
       "#admin/*": ["./app/admin/*"],
       "#shared/*": ["./app/shared/*"],
       "#auth/*": ["./app/auth/*"],
+      "#roles/*": ["./app/roles/*"],
       "@/*": ["./inertia/*"]
     }
   },
