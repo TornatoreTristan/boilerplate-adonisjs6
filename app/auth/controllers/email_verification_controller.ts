@@ -5,13 +5,14 @@ import EmailVerificationService from '#auth/services/email_verification_service'
 import { requestEmailChangeValidator } from '#auth/validators/email_verification_validator'
 import { errors } from '@vinejs/vine'
 import { AppException } from '#shared/exceptions/index'
+import SessionService from '#sessions/services/session_service'
 
 export default class EmailVerificationController {
   /**
    * Resend verification email to authenticated user
    * POST /auth/email/resend
    */
-  async resend({ response, session }: HttpContext) {
+  async resend({ request, response, session }: HttpContext) {
     const userId = session.get('user_id')
 
     if (!userId) {
@@ -30,6 +31,14 @@ export default class EmailVerificationController {
       }
 
       await emailVerificationService.resendVerificationEmail(user.id)
+
+      // Vérifier si c'est une requête Inertia
+      const isInertiaRequest = request.header('x-inertia')
+
+      if (isInertiaRequest) {
+        // Pour Inertia, recharger la même page avec un message de succès
+        return response.redirect().back()
+      }
 
       return response.ok({
         success: true,
@@ -54,7 +63,7 @@ export default class EmailVerificationController {
    * Verify email with token
    * GET /auth/email/verify/:token
    */
-  async verify({ params, response }: HttpContext) {
+  async verify({ params, response, inertia, session, request }: HttpContext) {
     const { token } = params
 
     const emailVerificationService = getService<EmailVerificationService>(
@@ -64,16 +73,30 @@ export default class EmailVerificationController {
     const result = await emailVerificationService.verifyToken(token)
 
     if (!result.success) {
-      return response.badRequest({
+      // Pour Inertia, rediriger vers login avec erreur
+      return inertia.render('auth/email-verification-result', {
         success: false,
         error: result.error,
       })
     }
 
-    return response.ok({
-      success: true,
-      message: 'Email vérifié avec succès',
-    })
+    // Connecter automatiquement l'utilisateur après vérification
+    session.put('user_id', result.userId)
+
+    // Si l'utilisateur n'a pas de session active, en créer une nouvelle
+    const existingSessionId = session.get('session_id')
+    if (!existingSessionId) {
+      const userSession = await SessionService.createSession({
+        userId: result.userId,
+        ipAddress: request.ip(),
+        userAgent: request.header('user-agent') || 'Unknown',
+        referrer: request.header('referer'),
+      })
+      session.put('session_id', userSession.id)
+    }
+
+    // Rediriger vers la page d'accueil
+    return response.redirect('/')
   }
 
   /**

@@ -9,7 +9,8 @@ import './routes/notification_routes.js'
 import './routes/upload_routes.js'
 import { middleware } from './kernel.js'
 
-router.on('/').renderInertia('home')
+// Page d'accueil (protégée par authentification)
+router.on('/').renderInertia('home').use(middleware.auth())
 
 // Route temporaire pour tester le middleware
 router

@@ -1,4 +1,5 @@
 import { injectable, inject } from 'inversify'
+import { DateTime } from 'luxon'
 import { TYPES } from '#shared/container/types'
 import UserRepository from '#users/repositories/user_repository'
 import SessionService from '#sessions/services/session_service'
@@ -74,6 +75,7 @@ export default class GoogleAuthService {
       googleId: oauthData.providerId,
       fullName: oauthData.name,
       avatarUrl: oauthData.avatar || null,
+      emailVerifiedAt: DateTime.now(),
     })
   }
 
@@ -82,6 +84,7 @@ export default class GoogleAuthService {
       googleId: oauthData.providerId,
       fullName: oauthData.name,
       avatarUrl: oauthData.avatar || user.avatarUrl,
+      emailVerifiedAt: user.emailVerifiedAt || DateTime.now(),
     })
   }
 

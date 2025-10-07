@@ -56,6 +56,13 @@ export default await Env.create(new URL('../', import.meta.url), {
 
   /*
   |----------------------------------------------------------
+  | Variables for configuring the app
+  |----------------------------------------------------------
+  */
+  APP_URL: Env.schema.string(),
+
+  /*
+  |----------------------------------------------------------
   | Variables for configuring email (Resend)
   |----------------------------------------------------------
   */

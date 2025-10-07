@@ -12,7 +12,7 @@ export default class extends BaseSchema {
 
       // OAuth fields
       table.string('google_id').nullable().unique()
-      table.string('avatar_url').nullable()
+      table.text('avatar_url').nullable()
 
       // Validation
       table.timestamp('email_verified_at').nullable()

@@ -15,6 +15,7 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar'
 import { Bell, CreditCard, EllipsisVertical, LogOutIcon, User } from 'lucide-react'
+import { router } from '@inertiajs/react'
 
 export function NavUser({
   user,
@@ -26,6 +27,10 @@ export function NavUser({
   }
 }) {
   const { isMobile } = useSidebar()
+
+  const handleLogout = () => {
+    router.post('/auth/logout')
+  }
 
   return (
     <SidebarMenu>
@@ -81,7 +86,7 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogout}>
               <LogOutIcon />
               Déconnexion
             </DropdownMenuItem>
