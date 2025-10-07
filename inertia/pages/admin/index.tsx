@@ -1,4 +1,6 @@
-import AdminLayout from '#inertia/components/layouts/admin-layout'
+import AdminLayout from '@/components/layouts/admin-layout'
+import { PageHeader } from '@/components/core/page-header'
+import { Head } from '@inertiajs/react'
 
 interface AdminIndexProps {
   user: {
@@ -10,12 +12,21 @@ interface AdminIndexProps {
 
 const Index = ({ user }: AdminIndexProps) => {
   return (
-    <AdminLayout>
-      <div className="p-8">
-        <h1 className="text-lg font-bold">Hello {user.fullName || user.email}</h1>
-        <p className="text-muted-foreground mt-2">Bienvenue dans l'interface d'administration</p>
-      </div>
-    </AdminLayout>
+    <>
+      <Head title="Administration" />
+      <AdminLayout>
+        <div className="flex flex-col gap-6 p-6">
+          <PageHeader
+            title="Administration"
+            description={`Bienvenue ${user.fullName || user.email}`}
+          />
+
+          <div className="grid gap-4">
+            {/* Contenu de l'administration */}
+          </div>
+        </div>
+      </AdminLayout>
+    </>
   )
 }
 
