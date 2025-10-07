@@ -8,7 +8,8 @@
       "#organizations/*": ["./app/organizations/*"],
       "#admin/*": ["./app/admin/*"],
       "#shared/*": ["./app/shared/*"],
-      "#auth/*": ["./app/auth/*"]
+      "#auth/*": ["./app/auth/*"],
+      "@/*": ["./inertia/*"]
     }
   },
   "exclude": ["./inertia/**/*", "node_modules", "build"]
