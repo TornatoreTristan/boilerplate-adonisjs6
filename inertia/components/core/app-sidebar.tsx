@@ -24,7 +24,17 @@ const items = [
 ]
 
 export function AppSidebar() {
-  const { auth } = usePage().props
+  const { auth } = usePage<{
+    auth: {
+      user: {
+        id: string
+        fullName: string | null
+        email: string
+        avatarUrl: string | null
+        isEmailVerified: boolean
+      } | null
+    }
+  }>().props
 
   // Mapper les données user pour NavUser
   const userData = auth.user
