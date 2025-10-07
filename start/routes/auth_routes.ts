@@ -26,7 +26,7 @@ router
     router.post('/logout', [AuthController, 'logout'])
   })
   .prefix('/auth')
-  .use([middleware.throttle({ maxRequests: 5, windowMs: 60000 })])
+  .use([middleware.throttle({ maxRequests: 10, windowMs: 60000 })])
 
 // Routes protégées (sans middleware - vous pouvez l'ajouter plus tard)
 router
@@ -42,11 +42,13 @@ router
     router
       .post('/forgot', [PasswordResetController, 'forgot'])
       .use([
-        middleware.throttle({ maxRequests: 3, windowMs: 300000, keyPrefix: 'password-forgot' }),
+        middleware.throttle({ maxRequests: 10, windowMs: 300000, keyPrefix: 'password-forgot' }),
       ])
     router.get('/reset/:token', [PasswordResetController, 'validateToken'])
     router
       .post('/reset', [PasswordResetController, 'reset'])
-      .use([middleware.throttle({ maxRequests: 5, windowMs: 300000, keyPrefix: 'password-reset' })])
+      .use([
+        middleware.throttle({ maxRequests: 10, windowMs: 300000, keyPrefix: 'password-reset' }),
+      ])
   })
   .prefix('/password')

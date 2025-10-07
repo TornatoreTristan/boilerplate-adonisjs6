@@ -89,4 +89,15 @@ export default class User extends BaseModel {
     const authService = getService<AuthorizationService>(TYPES.AuthorizationService)
     return authService.getUserPermissions(this.id, organizationId)
   }
+
+  async isSuperAdmin(): Promise<boolean> {
+    const { default: db } = await import('@adonisjs/lucid/services/db')
+    const result = await db
+      .from('user_roles')
+      .where('user_id', this.id)
+      .where('role_slug', 'super-admin')
+      .first()
+
+    return !!result
+  }
 }

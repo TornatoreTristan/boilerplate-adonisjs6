@@ -53,4 +53,5 @@ export const middleware = router.named({
   throttle: () => import('#middleware/throttle_middleware'),
   role: () => import('#middleware/role_middleware'),
   permission: () => import('#middleware/permission_middleware'),
+  superAdmin: () => import('#middleware/super_admin_middleware'),
 })

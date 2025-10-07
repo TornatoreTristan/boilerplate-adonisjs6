@@ -32,10 +32,7 @@ export default class ThrottleMiddleware {
       const retryAfter = Math.ceil((result.resetAt.getTime() - Date.now()) / 1000)
       ctx.response.header('Retry-After', retryAfter.toString())
 
-      E.tooManyRequests(
-        `Too many requests. Please try again in ${retryAfter} seconds.`,
-        retryAfter
-      )
+      E.tooManyRequests(`Too many requests. Please try again in ${retryAfter} seconds.`, retryAfter)
     }
 
     return next()
@@ -55,7 +52,7 @@ export default class ThrottleMiddleware {
 
   private getIpAddress(ctx: HttpContext): string {
     return (
-      (ctx.request.header('x-forwarded-for')?.split(',')[0]?.trim()) ||
+      ctx.request.header('x-forwarded-for')?.split(',')[0]?.trim() ||
       ctx.request.header('x-real-ip') ||
       ctx.request.ip() ||
       'unknown'

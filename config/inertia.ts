@@ -10,7 +10,7 @@ const inertiaConfig = defineConfig({
    * Data that should be shared with all rendered pages
    */
   sharedData: {
-    auth: (ctx) => ({
+    auth: async (ctx) => ({
       user: ctx.user
         ? {
             id: ctx.user.id,
@@ -18,6 +18,7 @@ const inertiaConfig = defineConfig({
             email: ctx.user.email,
             avatarUrl: ctx.user.avatarUrl,
             isEmailVerified: ctx.user.isEmailVerified,
+            isSuperAdmin: await ctx.user.isSuperAdmin(),
           }
         : null,
     }),

@@ -40,6 +40,8 @@ export default class AuthMiddleware {
       ctx.request.header('accept')?.includes('application/json') ||
       ctx.request.url().startsWith('/api/') ||
       ctx.request.url().startsWith('/auth/') ||
+      ctx.request.url().startsWith('/admin/') ||
+      ctx.request.url() === '/admin' ||
       ctx.request.url().startsWith('/debug/')
 
     if (isApiRequest) {

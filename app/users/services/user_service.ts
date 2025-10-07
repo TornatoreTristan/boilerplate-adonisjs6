@@ -10,6 +10,7 @@ export default class UserService {
     return await userRepository.save({
       email: userData.email,
       password: hashedPassword,
+      fullName: userData.fullName,
     })
   }
 }

@@ -7,6 +7,7 @@ import './routes/google_auth_routes.js'
 import './routes/email_verification_routes.js'
 import './routes/notification_routes.js'
 import './routes/upload_routes.js'
+import './routes/admin_routes.js'
 import { middleware } from './kernel.js'
 
 // Page d'accueil (protégée par authentification)

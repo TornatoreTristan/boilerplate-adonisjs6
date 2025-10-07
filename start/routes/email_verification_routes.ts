@@ -1,8 +1,7 @@
 import router from '@adonisjs/core/services/router'
 import { middleware } from '#start/kernel'
 
-const EmailVerificationController = () =>
-  import('#auth/controllers/email_verification_controller')
+const EmailVerificationController = () => import('#auth/controllers/email_verification_controller')
 
 // Page de notice de vérification (accessible par tous)
 router.get('/auth/verify-email-notice', async ({ inertia }) => {
@@ -10,10 +9,12 @@ router.get('/auth/verify-email-notice', async ({ inertia }) => {
 })
 
 // Routes publiques (vérification de token)
-router.group(() => {
-  router.get('/verify/:token', [EmailVerificationController, 'verify'])
-  router.get('/change/verify/:token', [EmailVerificationController, 'verifyChange'])
-}).prefix('/auth/email')
+router
+  .group(() => {
+    router.get('/verify/:token', [EmailVerificationController, 'verify'])
+    router.get('/change/verify/:token', [EmailVerificationController, 'verifyChange'])
+  })
+  .prefix('/auth/email')
 
 // Routes protégées (requièrent authentification)
 router

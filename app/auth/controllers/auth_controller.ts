@@ -17,8 +17,14 @@ export default class AuthController {
     // Utiliser AuthService pour vérifier les credentials
     const result = await AuthService.login(loginData as LoginData)
 
-    // Si l'authentification échoue, rediriger avec erreur
+    // Si l'authentification échoue
     if (!result.success) {
+      if (this.isApiRequest(request)) {
+        return response.status(401).json({
+          success: false,
+          error: { message: result.error }
+        })
+      }
       session.flashErrors({ email: result.error })
       return response.redirect().back()
     }
@@ -46,11 +52,24 @@ export default class AuthController {
     // Stocker l'ID de session pour pouvoir la ferme au logout
     session.put('session_id', userSession.id)
 
-    // Rediriger vers la page d'accueil
+    // Pour les requêtes API, retourner JSON
+    if (this.isApiRequest(request)) {
+      return response.json({ success: true })
+    }
+
+    // Sinon rediriger vers la page d'accueil
     return response.redirect('/')
   }
 
-  async logout({ response, session }: HttpContext) {
+  private isApiRequest(request: any): boolean {
+    return (
+      request.header('accept')?.includes('application/json') ||
+      request.url().startsWith('/api/') ||
+      request.url().startsWith('/auth/')
+    )
+  }
+
+  async logout({ request, response, session }: HttpContext) {
     const sessionId = session.get('session_id')
 
     if (sessionId) {
@@ -60,7 +79,15 @@ export default class AuthController {
     session.forget('user_id')
     session.forget('session_id')
 
-    // Rediriger vers la page de login
+    // Pour les requêtes API, retourner JSON
+    if (this.isApiRequest(request)) {
+      return response.json({
+        success: true,
+        data: { message: 'Déconnecté avec succès' }
+      })
+    }
+
+    // Sinon rediriger vers la page de login
     return response.redirect('/login')
   }
 

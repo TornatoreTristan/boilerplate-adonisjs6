@@ -9,6 +9,7 @@ export interface SharedUser {
   email: string
   avatarUrl: string | null
   isEmailVerified: boolean
+  isSuperAdmin: boolean
 }
 
 /**

@@ -72,7 +72,15 @@ export default class EmailVerificationController {
 
     const result = await emailVerificationService.verifyToken(token)
 
+    const isApiRequest = this.isApiRequest(request)
+
     if (!result.success) {
+      if (isApiRequest) {
+        return response.status(400).json({
+          success: false,
+          error: result.error,
+        })
+      }
       // Pour Inertia, rediriger vers login avec erreur
       return inertia.render('auth/email-verification-result', {
         success: false,
@@ -95,8 +103,23 @@ export default class EmailVerificationController {
       session.put('session_id', userSession.id)
     }
 
+    if (isApiRequest) {
+      return response.json({
+        success: true,
+        message: 'Email vérifié avec succès',
+      })
+    }
+
     // Rediriger vers la page d'accueil
     return response.redirect('/')
+  }
+
+  private isApiRequest(request: any): boolean {
+    return (
+      request.header('accept')?.includes('application/json') ||
+      request.url().startsWith('/api/') ||
+      request.url().startsWith('/auth/')
+    )
   }
 
   /**

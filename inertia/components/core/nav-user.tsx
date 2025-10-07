@@ -14,17 +14,19 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar'
-import { Bell, CreditCard, EllipsisVertical, LogOutIcon, User } from 'lucide-react'
+import { Bell, CreditCard, EllipsisVertical, LogOutIcon, Shield, User } from 'lucide-react'
 import { router } from '@inertiajs/react'
 
 export function NavUser({
   user,
+  isSuperAdmin = false,
 }: {
   user: {
     name: string
     email: string
     avatar: string
   }
+  isSuperAdmin?: boolean
 }) {
   const { isMobile } = useSidebar()
 
@@ -85,6 +87,17 @@ export function NavUser({
                 Notifications
               </DropdownMenuItem>
             </DropdownMenuGroup>
+            {isSuperAdmin && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuGroup>
+                  <DropdownMenuItem onClick={() => router.visit('/admin')}>
+                    <Shield />
+                    Administration
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+              </>
+            )}
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout}>
               <LogOutIcon />
