@@ -66,6 +66,9 @@ export default class AuthController {
   }
 
   private isApiRequest(request: any): boolean {
+    if (request.header('x-inertia')) {
+      return false
+    }
     return (
       request.header('accept')?.includes('application/json') ||
       request.header('content-type')?.includes('application/json') ||

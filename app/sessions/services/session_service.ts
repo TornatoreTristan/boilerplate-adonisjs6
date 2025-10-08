@@ -7,9 +7,7 @@ import type { CreateSessionData } from '#shared/types/session'
 
 @injectable()
 export default class SessionService {
-  constructor(
-    @inject(TYPES.SessionRepository) private sessionRepo: SessionRepository
-  ) {}
+  constructor(@inject(TYPES.SessionRepository) private sessionRepo: SessionRepository) {}
 
   async createSession(sessionData: CreateSessionData): Promise<UserSession> {
     const now = DateTime.now()

@@ -2,6 +2,17 @@ import { Head, router, usePage } from '@inertiajs/react'
 import AccountLayout from '@/components/layouts/account-layout'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 import { Monitor, Smartphone, Tablet } from 'lucide-react'
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
@@ -27,6 +38,10 @@ export default function Sessions() {
   }>().props
 
   const [activeTab, setActiveTab] = useState<TabType>('active')
+  const [sessionToDisconnect, setSessionToDisconnect] = useState<string | null>(null)
+  const [isDisconnectingAll, setIsDisconnectingAll] = useState(false)
+  const [isProcessing, setIsProcessing] = useState(false)
+
   const getDeviceIcon = (deviceType: string) => {
     switch (deviceType.toLowerCase()) {
       case 'mobile':
@@ -46,24 +61,28 @@ export default function Sessions() {
     }).format(date)
   }
 
-  const handleDisconnectSession = (sessionId: string) => {
-    if (confirm('Êtes-vous sûr de vouloir déconnecter cette session ?')) {
-      router.delete(`/account/sessions/${sessionId}`, {
-        preserveScroll: true,
-      })
-    }
+  const handleDisconnectSession = () => {
+    if (!sessionToDisconnect) return
+
+    setIsProcessing(true)
+    router.delete(`/account/sessions/${sessionToDisconnect}`, {
+      preserveScroll: true,
+      onFinish: () => {
+        setIsProcessing(false)
+        setSessionToDisconnect(null)
+      },
+    })
   }
 
   const handleDisconnectAll = () => {
-    if (
-      confirm(
-        'Êtes-vous sûr de vouloir déconnecter toutes les autres sessions ? Cela vous déconnectera de tous les appareils sauf celui-ci.'
-      )
-    ) {
-      router.delete('/account/sessions/others', {
-        preserveScroll: true,
-      })
-    }
+    setIsProcessing(true)
+    router.delete('/account/sessions/others', {
+      preserveScroll: true,
+      onFinish: () => {
+        setIsProcessing(false)
+        setIsDisconnectingAll(false)
+      },
+    })
   }
 
   const sessions = activeTab === 'active' ? activeSessions : inactiveSessions
@@ -155,13 +174,41 @@ export default function Sessions() {
                         </div>
                       </div>
                       {session.isActive && !session.isCurrent && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleDisconnectSession(session.id)}
+                        <AlertDialog
+                          open={sessionToDisconnect === session.id}
+                          onOpenChange={(open) => {
+                            if (!open) setSessionToDisconnect(null)
+                          }}
                         >
-                          Déconnecter
-                        </Button>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setSessionToDisconnect(session.id)}
+                            >
+                              Déconnecter
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Déconnecter cette session ?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Cette session sera immédiatement déconnectée. L'appareil devra se
+                                reconnecter pour accéder à nouveau à votre compte.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel disabled={isProcessing}>Annuler</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={handleDisconnectSession}
+                                disabled={isProcessing}
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              >
+                                {isProcessing ? 'Déconnexion...' : 'Déconnecter'}
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       )}
                     </div>
                     <Separator className="mt-4" />
@@ -179,9 +226,32 @@ export default function Sessions() {
                   Cela vous déconnectera de tous les appareils sauf celui-ci
                 </p>
               </div>
-              <Button variant="destructive" size="sm" onClick={handleDisconnectAll}>
-                Déconnecter tout
-              </Button>
+              <AlertDialog open={isDisconnectingAll} onOpenChange={setIsDisconnectingAll}>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" size="sm">
+                    Déconnecter tout
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Déconnecter toutes les sessions ?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Toutes vos sessions actives seront déconnectées, sauf celle-ci. Les autres
+                      appareils devront se reconnecter pour accéder à votre compte.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel disabled={isProcessing}>Annuler</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleDisconnectAll}
+                      disabled={isProcessing}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      {isProcessing ? 'Déconnexion...' : 'Tout déconnecter'}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           )}
         </div>

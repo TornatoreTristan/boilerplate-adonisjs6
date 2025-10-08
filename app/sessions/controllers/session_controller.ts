@@ -123,6 +123,7 @@ export default class SessionController {
       return response.json({ success: true })
     }
 
+    session.flash('success', 'Session déconnectée avec succès')
     return response.redirect().back()
   }
 
@@ -139,10 +140,14 @@ export default class SessionController {
       return response.json({ success: true })
     }
 
+    session.flash('success', 'Toutes les autres sessions ont été déconnectées')
     return response.redirect().back()
   }
 
   private isApiRequest(request: any): boolean {
+    if (request.header('x-inertia')) {
+      return false
+    }
     return (
       request.header('accept')?.includes('application/json') ||
       request.header('content-type')?.includes('application/json') ||

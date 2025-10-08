@@ -99,9 +99,9 @@ export default class GoogleAuthService {
   }
 
   private async updateUserProfile(user: User, oauthData: OAuthUserData): Promise<User> {
-    // Mettre à jour le profil avec les dernières données de Google
+    // Ne mettre à jour que l'avatar lors d'une reconnexion
+    // Le fullName est préservé (l'utilisateur peut l'avoir modifié manuellement)
     return this.userRepository.update(user.id, {
-      fullName: oauthData.name,
       avatarUrl: oauthData.avatar || user.avatarUrl,
     })
   }

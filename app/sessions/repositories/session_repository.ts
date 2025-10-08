@@ -11,9 +11,12 @@ export default class SessionRepository extends BaseRepository<typeof UserSession
    * Trouver toutes les sessions d'un utilisateur
    */
   async findByUserId(userId: string | number): Promise<UserSession[]> {
-    return this.findBy({ user_id: userId }, {
-      cache: { ttl: 300, tags: ['sessions', `user_sessions_${userId}`] }
-    })
+    return this.findBy(
+      { user_id: userId },
+      {
+        cache: { ttl: 300, tags: ['sessions', `user_sessions_${userId}`] },
+      }
+    )
   }
 
   /**
@@ -22,10 +25,7 @@ export default class SessionRepository extends BaseRepository<typeof UserSession
   async findActiveByUserId(userId: string | number): Promise<UserSession[]> {
     const query = this.buildBaseQuery()
 
-    return query
-      .where('user_id', userId)
-      .where('is_active', true)
-      .orderBy('last_activity', 'desc')
+    return query.where('user_id', userId).where('is_active', true).orderBy('last_activity', 'desc')
   }
 
   /**
@@ -58,9 +58,7 @@ export default class SessionRepository extends BaseRepository<typeof UserSession
     userId: string | number,
     exceptSessionId?: string | number
   ): Promise<void> {
-    const query = this.model.query()
-      .where('user_id', userId)
-      .where('is_active', true)
+    const query = this.model.query().where('user_id', userId).where('is_active', true)
 
     if (exceptSessionId) {
       query.whereNot('id', exceptSessionId)
@@ -81,13 +79,15 @@ export default class SessionRepository extends BaseRepository<typeof UserSession
   async cleanupExpiredSessions(): Promise<number> {
     const expiredDate = DateTime.now().minus({ hours: 24 }) // Sessions de plus de 24h
 
-    const expiredSessions = await this.model.query()
+    const expiredSessions = await this.model
+      .query()
       .where('last_activity', '<', expiredDate.toJSDate())
       .where('is_active', true)
 
     const count = expiredSessions.length
 
-    await this.model.query()
+    await this.model
+      .query()
       .where('last_activity', '<', expiredDate.toJSDate())
       .where('is_active', true)
       .update({
@@ -133,9 +133,9 @@ export default class SessionRepository extends BaseRepository<typeof UserSession
     ])
 
     return {
-      total: parseInt(total.toString()),
-      active: parseInt(active.toString()),
-      today: parseInt(todaySessions.toString()),
+      total: Number.parseInt(total.toString()),
+      active: Number.parseInt(active.toString()),
+      today: Number.parseInt(todaySessions.toString()),
     }
   }
 
