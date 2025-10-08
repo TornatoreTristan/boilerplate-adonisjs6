@@ -1,21 +1,25 @@
 import type { HttpContext } from '@adonisjs/core/http'
-import AuthService from '#auth/services/auth_service'
 import type { LoginData, RegisterData } from '#shared/types/auth'
-import SessionService from '#sessions/services/session_service'
 import { E } from '#shared/exceptions/index'
 import { registerValidator } from '#auth/validators/register_validator'
 import { loginValidator } from '#auth/validators/login_validator'
 import { getService } from '#shared/container/container'
 import { TYPES } from '#shared/container/types'
-import EmailVerificationService from '#auth/services/email_verification_service'
+import type AuthService from '#auth/services/auth_service'
+import type SessionService from '#sessions/services/session_service'
+import type EmailVerificationService from '#auth/services/email_verification_service'
 
 export default class AuthController {
   async login({ request, response, session }: HttpContext) {
     // Valider les données avec Vine
     const loginData = await request.validateUsing(loginValidator)
 
+    // Récupérer les services
+    const authService = getService<AuthService>(TYPES.AuthService)
+    const sessionService = getService<SessionService>(TYPES.SessionService)
+
     // Utiliser AuthService pour vérifier les credentials
-    const result = await AuthService.login(loginData as LoginData)
+    const result = await authService.login(loginData as LoginData)
 
     // Si l'authentification échoue
     if (!result.success) {
@@ -39,7 +43,7 @@ export default class AuthController {
     const referrer = request.header('referer')
 
     // Créer l'entrée de session dans la base
-    const userSession = await SessionService.createSession({
+    const userSession = await sessionService.createSession({
       userId: result.user!.id,
       ipAddress: request.ip(),
       userAgent: request.header('user-agent') || 'Unknown',
@@ -64,16 +68,18 @@ export default class AuthController {
   private isApiRequest(request: any): boolean {
     return (
       request.header('accept')?.includes('application/json') ||
+      request.header('content-type')?.includes('application/json') ||
       request.url().startsWith('/api/') ||
-      request.url().startsWith('/auth/')
+      request.header('x-requested-with') === 'XMLHttpRequest'
     )
   }
 
   async logout({ request, response, session }: HttpContext) {
     const sessionId = session.get('session_id')
+    const sessionService = getService<SessionService>(TYPES.SessionService)
 
     if (sessionId) {
-      await SessionService.endSession(sessionId)
+      await sessionService.endSession(sessionId)
     }
 
     session.forget('user_id')
@@ -111,8 +117,12 @@ export default class AuthController {
     // Valider les données avec Vine
     const registerData = await request.validateUsing(registerValidator)
 
+    // Récupérer les services
+    const authService = getService<AuthService>(TYPES.AuthService)
+    const sessionService = getService<SessionService>(TYPES.SessionService)
+
     // Utiliser AuthService pour créer l'utilisateur
-    const result = await AuthService.register(registerData as RegisterData)
+    const result = await authService.register(registerData as RegisterData)
 
     // Si l'inscription échoue, rediriger avec erreur
     if (!result.success) {
@@ -130,7 +140,7 @@ export default class AuthController {
     const referrer = request.header('referer')
 
     // Créer l'entrée de session dans la base
-    const userSession = await SessionService.createSession({
+    const userSession = await sessionService.createSession({
       userId: result.user!.id,
       ipAddress: request.ip(),
       userAgent: request.header('user-agent') || 'Unknown',
@@ -150,7 +160,6 @@ export default class AuthController {
       )
       await emailVerificationService.sendVerificationEmail(result.user!.id)
     } catch (error) {
-      // Log l'erreur mais ne bloque pas l'inscription
       console.error('Erreur lors de l\'envoi de l\'email de vérification:', error)
     }
 

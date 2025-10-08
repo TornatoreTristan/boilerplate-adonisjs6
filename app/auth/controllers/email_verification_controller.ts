@@ -94,7 +94,8 @@ export default class EmailVerificationController {
     // Si l'utilisateur n'a pas de session active, en créer une nouvelle
     const existingSessionId = session.get('session_id')
     if (!existingSessionId) {
-      const userSession = await SessionService.createSession({
+      const sessionService = getService<SessionService>(TYPES.SessionService)
+      const userSession = await sessionService.createSession({
         userId: result.userId,
         ipAddress: request.ip(),
         userAgent: request.header('user-agent') || 'Unknown',

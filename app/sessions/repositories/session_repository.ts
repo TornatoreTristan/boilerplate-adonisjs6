@@ -1,4 +1,5 @@
 import { injectable } from 'inversify'
+import { DateTime } from 'luxon'
 import UserSession from '#sessions/models/user_session'
 import { BaseRepository } from '#shared/repositories/base_repository'
 
@@ -28,12 +29,25 @@ export default class SessionRepository extends BaseRepository<typeof UserSession
   }
 
   /**
+   * Trouver les sessions inactives récentes d'un utilisateur
+   */
+  async findInactiveByUserId(userId: string | number, limit: number = 20): Promise<UserSession[]> {
+    const query = this.buildBaseQuery()
+
+    return query
+      .where('user_id', userId)
+      .where('is_active', false)
+      .orderBy('ended_at', 'desc')
+      .limit(limit)
+  }
+
+  /**
    * Fermer une session (marquer comme inactive)
    */
   async closeSession(sessionId: string | number): Promise<UserSession> {
     return this.update(sessionId, {
       is_active: false,
-      ended_at: new Date(),
+      ended_at: DateTime.now(),
     } as any)
   }
 
@@ -54,7 +68,7 @@ export default class SessionRepository extends BaseRepository<typeof UserSession
 
     await query.update({
       is_active: false,
-      ended_at: new Date(),
+      ended_at: DateTime.now(),
     })
 
     // Invalider les caches
@@ -65,21 +79,20 @@ export default class SessionRepository extends BaseRepository<typeof UserSession
    * Nettoyer les sessions expirées
    */
   async cleanupExpiredSessions(): Promise<number> {
-    const expiredDate = new Date()
-    expiredDate.setHours(expiredDate.getHours() - 24) // Sessions de plus de 24h
+    const expiredDate = DateTime.now().minus({ hours: 24 }) // Sessions de plus de 24h
 
     const expiredSessions = await this.model.query()
-      .where('last_activity', '<', expiredDate)
+      .where('last_activity', '<', expiredDate.toJSDate())
       .where('is_active', true)
 
     const count = expiredSessions.length
 
     await this.model.query()
-      .where('last_activity', '<', expiredDate)
+      .where('last_activity', '<', expiredDate.toJSDate())
       .where('is_active', true)
       .update({
         is_active: false,
-        ended_at: new Date(),
+        ended_at: DateTime.now(),
       })
 
     // Invalider tous les caches de sessions
@@ -93,7 +106,7 @@ export default class SessionRepository extends BaseRepository<typeof UserSession
    */
   async updateLastActivity(sessionId: string | number): Promise<UserSession> {
     return this.update(sessionId, {
-      last_activity: new Date(),
+      last_activity: DateTime.now(),
     } as any)
   }
 
@@ -111,13 +124,12 @@ export default class SessionRepository extends BaseRepository<typeof UserSession
       baseQuery.where('user_id', userId)
     }
 
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
+    const today = DateTime.now().startOf('day')
 
     const [total, active, todaySessions] = await Promise.all([
       baseQuery.clone().getCount(),
       baseQuery.clone().where('is_active', true).getCount(),
-      baseQuery.clone().where('created_at', '>=', today).getCount(),
+      baseQuery.clone().where('created_at', '>=', today.toJSDate()).getCount(),
     ])
 
     return {

@@ -1,12 +1,19 @@
-// app/auth/services/auth_service.ts
+import { injectable, inject } from 'inversify'
 import { LoginData, LoginResult, RegisterData, RegisterResult } from '#shared/types/auth'
+import type UserRepository from '#users/repositories/user_repository'
 import User from '#users/models/user'
 import hash from '@adonisjs/core/services/hash'
 import { ValidationException } from '#shared/exceptions/validation_exception'
 import { AUTH_MESSAGES } from '#auth/constants/auth_messages'
+import { TYPES } from '#shared/container/types'
 
+@injectable()
 export default class AuthService {
-  static async login(loginData: LoginData): Promise<LoginResult> {
+  constructor(
+    @inject(TYPES.UserRepository) private userRepo: UserRepository
+  ) {}
+
+  async login(loginData: LoginData): Promise<LoginResult> {
     try {
       // Validation des données d'entrée
       this.validateLoginData(loginData)
@@ -32,56 +39,7 @@ export default class AuthService {
     }
   }
 
-  private static validateLoginData(loginData: LoginData): void {
-    if (!loginData.email?.trim()) {
-      throw new ValidationException(AUTH_MESSAGES.EMAIL_REQUIRED)
-    }
-
-    if (!loginData.password?.trim()) {
-      throw new ValidationException(AUTH_MESSAGES.PASSWORD_REQUIRED)
-    }
-
-    if (!this.isValidEmail(loginData.email)) {
-      throw new ValidationException(AUTH_MESSAGES.INVALID_EMAIL_FORMAT)
-    }
-  }
-
-  private static async findUserByEmail(email: string): Promise<User | null> {
-    return await User.findBy('email', email.toLowerCase().trim())
-  }
-
-  private static async verifyPassword(
-    hashedPassword: string,
-    plainPassword: string
-  ): Promise<boolean> {
-    return await hash.verify(hashedPassword, plainPassword)
-  }
-
-  private static isValidEmail(email: string): boolean {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    return emailRegex.test(email)
-  }
-
-  private static createSuccessResult(user: User): LoginResult {
-    return {
-      success: true,
-      user: user,
-      error: undefined,
-    }
-  }
-
-  private static createFailureResult(errorMessage: string): LoginResult {
-    return {
-      success: false,
-      user: null,
-      error: errorMessage,
-    }
-  }
-
-  /**
-   * Inscription d'un nouvel utilisateur
-   */
-  static async register(registerData: RegisterData): Promise<RegisterResult> {
+  async register(registerData: RegisterData): Promise<RegisterResult> {
     try {
       // Validation des données d'entrée
       this.validateRegisterData(registerData)
@@ -100,12 +58,12 @@ export default class AuthService {
       // Hash du mot de passe
       const hashedPassword = await hash.make(registerData.password)
 
-      // Créer l'utilisateur
-      const user = await User.create({
+      // Créer l'utilisateur via repository
+      const user = await this.userRepo.create({
         email: registerData.email.toLowerCase().trim(),
         password: hashedPassword,
         fullName: registerData.fullName || null,
-      })
+      } as any)
 
       return this.createRegisterSuccessResult(user)
     } catch (error) {
@@ -116,7 +74,21 @@ export default class AuthService {
     }
   }
 
-  private static validateRegisterData(registerData: RegisterData): void {
+  private validateLoginData(loginData: LoginData): void {
+    if (!loginData.email?.trim()) {
+      throw new ValidationException(AUTH_MESSAGES.EMAIL_REQUIRED)
+    }
+
+    if (!loginData.password?.trim()) {
+      throw new ValidationException(AUTH_MESSAGES.PASSWORD_REQUIRED)
+    }
+
+    if (!this.isValidEmail(loginData.email)) {
+      throw new ValidationException(AUTH_MESSAGES.INVALID_EMAIL_FORMAT)
+    }
+  }
+
+  private validateRegisterData(registerData: RegisterData): void {
     if (!registerData.email?.trim()) {
       throw new ValidationException('Email requis')
     }
@@ -138,7 +110,23 @@ export default class AuthService {
     }
   }
 
-  private static createRegisterSuccessResult(user: User): RegisterResult {
+  private async findUserByEmail(email: string): Promise<User | null> {
+    return await this.userRepo.findByEmail(email.toLowerCase().trim())
+  }
+
+  private async verifyPassword(
+    hashedPassword: string,
+    plainPassword: string
+  ): Promise<boolean> {
+    return await hash.verify(hashedPassword, plainPassword)
+  }
+
+  private isValidEmail(email: string): boolean {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    return emailRegex.test(email)
+  }
+
+  private createSuccessResult(user: User): LoginResult {
     return {
       success: true,
       user: user,
@@ -146,7 +134,23 @@ export default class AuthService {
     }
   }
 
-  private static createRegisterFailureResult(errorMessage: string): RegisterResult {
+  private createFailureResult(errorMessage: string): LoginResult {
+    return {
+      success: false,
+      user: null,
+      error: errorMessage,
+    }
+  }
+
+  private createRegisterSuccessResult(user: User): RegisterResult {
+    return {
+      success: true,
+      user: user,
+      error: undefined,
+    }
+  }
+
+  private createRegisterFailureResult(errorMessage: string): RegisterResult {
     return {
       success: false,
       user: null,

@@ -17,10 +17,17 @@ const inertiaConfig = defineConfig({
             fullName: ctx.user.fullName,
             email: ctx.user.email,
             avatarUrl: ctx.user.avatarUrl,
+            googleId: ctx.user.googleId,
             isEmailVerified: ctx.user.isEmailVerified,
             isSuperAdmin: await ctx.user.isSuperAdmin(),
           }
         : null,
+    }),
+    flash: (ctx) => ({
+      success: ctx.session.flashMessages.get('success'),
+      error: ctx.session.flashMessages.get('error'),
+      info: ctx.session.flashMessages.get('info'),
+      warning: ctx.session.flashMessages.get('warning'),
     }),
   },
 

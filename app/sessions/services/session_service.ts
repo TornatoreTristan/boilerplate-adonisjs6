@@ -1,11 +1,17 @@
 import { DateTime } from 'luxon'
-import { injectable } from 'inversify'
-import UserSession from '#sessions/models/user_session'
-import type { CreateSessionData, SessionData } from '#shared/types/session'
+import { injectable, inject } from 'inversify'
+import { TYPES } from '#shared/container/types'
+import type SessionRepository from '#sessions/repositories/session_repository'
+import type UserSession from '#sessions/models/user_session'
+import type { CreateSessionData } from '#shared/types/session'
 
 @injectable()
 export default class SessionService {
-  async createSession(sessionData: CreateSessionData): Promise<SessionData> {
+  constructor(
+    @inject(TYPES.SessionRepository) private sessionRepo: SessionRepository
+  ) {}
+
+  async createSession(sessionData: CreateSessionData): Promise<UserSession> {
     const now = DateTime.now()
 
     // Parser automatiquement le User-Agent
@@ -34,7 +40,7 @@ export default class SessionService {
     else if (ua.includes('firefox')) browser = 'Firefox'
     else if (ua.includes('edg')) browser = 'Edge'
 
-    return await UserSession.create({
+    return await this.sessionRepo.create({
       userId: sessionData.userId,
       ipAddress: sessionData.ipAddress,
       userAgent: sessionData.userAgent,
@@ -42,87 +48,36 @@ export default class SessionService {
       lastActivity: now,
       endedAt: null,
       isActive: true,
-      // Données enrichies automatiquement
       deviceType,
       os,
       browser,
-      // Autres champs
       referrer: sessionData.referrer || null,
       utmSource: sessionData.utmSource || null,
       utmMedium: sessionData.utmMedium || null,
       utmCampaign: sessionData.utmCampaign || null,
-      country: null, // À implémenter plus tard avec géolocalisation
+      country: null,
       city: null,
       region: null,
-    })
+    } as any)
   }
 
-  async endSession(sessionId: string): Promise<SessionData> {
-    const session = await UserSession.findOrFail(sessionId)
-
-    session.endedAt = DateTime.now()
-    session.isActive = false
-
-    await session.save()
-
-    return session
+  async endSession(sessionId: string): Promise<UserSession> {
+    return await this.sessionRepo.closeSession(sessionId)
   }
 
-  async findById(sessionId: string): Promise<SessionData> {
-    return await UserSession.findOrFail(sessionId)
+  async findById(sessionId: string): Promise<UserSession> {
+    return await this.sessionRepo.findByIdOrFail(sessionId)
   }
 
   async updateActivity(sessionId: string): Promise<void> {
-    const session = await UserSession.findOrFail(sessionId)
-    session.lastActivity = DateTime.now()
-    await session.save()
+    await this.sessionRepo.updateLastActivity(sessionId)
   }
 
-  async getUserActiveSessions(userId: string): Promise<SessionData[]> {
-    return await UserSession.query()
-      .where('user_id', userId)
-      .where('is_active', true)
-      .orderBy('last_activity', 'desc')
+  async getUserActiveSessions(userId: string): Promise<UserSession[]> {
+    return await this.sessionRepo.findActiveByUserId(userId)
   }
 
   async endAllOtherSessions(userId: string, currentSessionId: string): Promise<void> {
-    await UserSession.query()
-      .where('user_id', userId)
-      .where('id', '!=', currentSessionId)
-      .where('is_active', true)
-      .update({
-        ended_at: DateTime.now(),
-        is_active: false,
-      })
-  }
-
-  static async createSession(sessionData: CreateSessionData): Promise<SessionData> {
-    const service = new SessionService()
-    return service.createSession(sessionData)
-  }
-
-  static async endSession(sessionId: string): Promise<SessionData> {
-    const service = new SessionService()
-    return service.endSession(sessionId)
-  }
-
-  static async findById(sessionId: string): Promise<SessionData> {
-    const service = new SessionService()
-    return service.findById(sessionId)
-  }
-
-  static async updateActivity(sessionId: string): Promise<void> {
-    const service = new SessionService()
-    return service.updateActivity(sessionId)
-  }
-
-  static async getUserActiveSessions(userId: string): Promise<SessionData[]> {
-    const service = new SessionService()
-    return service.getUserActiveSessions(userId)
-  }
-
-  static async endAllOtherSessions(userId: string, currentSessionId: string): Promise<void> {
-    const service = new SessionService()
-    return service.endAllOtherSessions(userId, currentSessionId)
+    await this.sessionRepo.closeOtherUserSessions(userId, currentSessionId)
   }
 }

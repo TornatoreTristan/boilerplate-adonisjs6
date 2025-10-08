@@ -1,3 +1,5 @@
+import { getService } from '#shared/container/container'
+import { TYPES } from '#shared/container/types'
 import { test } from '@japa/runner'
 import testUtils from '@adonisjs/core/services/test_utils'
 import UserService from '#users/services/user_service'
@@ -13,17 +15,19 @@ test.group('SessionController', (group) => {
       email: 'user@example.com',
       password: 'password123',
     }
-    const user = await UserService.create(userData)
+    const userService = getService<UserService>(TYPES.UserService)
+    const user = await userService.create(userData)
 
     // Créer 2 sessions différentes
-    const session1 = await SessionService.createSession({
+    const sessionService = getService<SessionService>(TYPES.SessionService)
+    const session1 = await sessionService.createSession({
       userId: user.id,
       ipAddress: '192.168.1.1',
       userAgent:
         'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1',
     })
 
-    const session2 = await SessionService.createSession({
+    const session2 = await sessionService.createSession({
       userId: user.id,
       ipAddress: '10.0.0.1',
       userAgent:
@@ -63,16 +67,18 @@ test.group('SessionController', (group) => {
       email: 'user@example.com',
       password: 'password123',
     }
-    const user = await UserService.create(userData)
+    const userService = getService<UserService>(TYPES.UserService)
+    const user = await userService.create(userData)
 
-    const session1 = await SessionService.createSession({
+    const sessionService = getService<SessionService>(TYPES.SessionService)
+    const session1 = await sessionService.createSession({
       userId: user.id,
       ipAddress: '192.168.1.1',
       userAgent:
         'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1',
     })
 
-    const session2 = await SessionService.createSession({
+    const session2 = await sessionService.createSession({
       userId: user.id,
       ipAddress: '10.0.0.1',
       userAgent:
@@ -89,7 +95,7 @@ test.group('SessionController', (group) => {
     response.assertBodyContains({ success: true })
 
     // Vérifier que session2 est fermée
-    const closedSession = await SessionService.findById(session2.id)
+    const closedSession = await sessionService.findById(session2.id)
     assert.isFalse(closedSession.isActive)
     assert.exists(closedSession.endedAt)
   })
@@ -103,21 +109,23 @@ test.group('SessionController', (group) => {
       email: 'user@example.com',
       password: 'password123',
     }
-    const user = await UserService.create(userData)
+    const userService = getService<UserService>(TYPES.UserService)
+    const user = await userService.create(userData)
 
-    const session1 = await SessionService.createSession({
+    const sessionService = getService<SessionService>(TYPES.SessionService)
+    const session1 = await sessionService.createSession({
       userId: user.id,
       ipAddress: '192.168.1.1',
       userAgent: 'Mozilla/5.0 iPhone',
     })
 
-    const session2 = await SessionService.createSession({
+    const session2 = await sessionService.createSession({
       userId: user.id,
       ipAddress: '10.0.0.1',
       userAgent: 'Mozilla/5.0 Windows',
     })
 
-    const session3 = await SessionService.createSession({
+    const session3 = await sessionService.createSession({
       userId: user.id,
       ipAddress: '172.16.0.1',
       userAgent: 'Mozilla/5.0 Android',
@@ -133,9 +141,9 @@ test.group('SessionController', (group) => {
     response.assertBodyContains({ success: true })
 
     // Vérifier que session1 reste active et les autres sont fermées
-    const activeSession = await SessionService.findById(session1.id)
-    const closedSession2 = await SessionService.findById(session2.id)
-    const closedSession3 = await SessionService.findById(session3.id)
+    const activeSession = await sessionService.findById(session1.id)
+    const closedSession2 = await sessionService.findById(session2.id)
+    const closedSession3 = await sessionService.findById(session3.id)
 
     assert.isTrue(activeSession.isActive)
     assert.isFalse(closedSession2.isActive)

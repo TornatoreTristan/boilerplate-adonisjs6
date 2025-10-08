@@ -1,3 +1,5 @@
+import { getService } from '#shared/container/container'
+import { TYPES } from '#shared/container/types'
 import { test } from '@japa/runner'
 import testUtils from '@adonisjs/core/services/test_utils'
 import SessionService from '#sessions/services/session_service'
@@ -13,10 +15,12 @@ test.group('SessionService', (group) => {
       email: 'user@example.com',
       password: 'password123',
     }
-    const user = await UserService.create(userData)
+    const userService = getService<UserService>(TYPES.UserService)
+    const user = await userService.create(userData)
 
     // Act - Créer une session avec un User-Agent mobile
-    const session = await SessionService.createSession({
+    const sessionService = getService<SessionService>(TYPES.SessionService)
+    const session = await sessionService.createSession({
       userId: user.id,
       ipAddress: '127.0.0.1',
       userAgent:
@@ -43,16 +47,18 @@ test.group('SessionService', (group) => {
       email: 'user@example.com',
       password: 'password123',
     }
-    const user = await UserService.create(userData)
+    const userService = getService<UserService>(TYPES.UserService)
+    const user = await userService.create(userData)
 
-    const session = await SessionService.createSession({
+    const sessionService = getService<SessionService>(TYPES.SessionService)
+    const session = await sessionService.createSession({
       userId: user.id,
       ipAddress: '127.0.0.1',
       userAgent: 'Mozilla/5.0 Test Browser',
     })
 
     // Act - Fermer la session
-    const endedSession = await SessionService.endSession(session.id)
+    const endedSession = await sessionService.endSession(session.id)
 
     // Assert
     assert.equal(endedSession.id, session.id)

@@ -1,29 +1,39 @@
 import { injectable, inject } from 'inversify'
 import { TYPES } from '#shared/container/types'
-import RoleRepository from '#roles/repositories/role_repository'
-import PermissionRepository from '#roles/repositories/permission_repository'
+import type RoleRepository from '#roles/repositories/role_repository'
+import type PermissionRepository from '#roles/repositories/permission_repository'
+import type CacheService from '#shared/services/cache_service'
 import db from '@adonisjs/lucid/services/db'
 
 @injectable()
 export default class AuthorizationService {
   constructor(
     @inject(TYPES.RoleRepository) private roleRepo: RoleRepository,
-    @inject(TYPES.PermissionRepository) private permissionRepo: PermissionRepository
+    @inject(TYPES.PermissionRepository) private permissionRepo: PermissionRepository,
+    @inject(TYPES.CacheService) private cache: CacheService
   ) {}
 
   /**
    * Check if user has a specific role in an organization
    */
   async hasRole(userId: string, organizationId: string, roleSlug: string): Promise<boolean> {
-    const result = await db
-      .from('organization_user_roles')
-      .join('roles', 'organization_user_roles.role_id', 'roles.id')
-      .where('organization_user_roles.user_id', userId)
-      .where('organization_user_roles.organization_id', organizationId)
-      .where('roles.slug', roleSlug)
-      .first()
+    const cacheKey = `auth:role:${userId}:${organizationId}:${roleSlug}`
 
-    return !!result
+    return this.cache.remember(
+      cacheKey,
+      async () => {
+        const result = await db
+          .from('organization_user_roles')
+          .join('roles', 'organization_user_roles.role_id', 'roles.id')
+          .where('organization_user_roles.user_id', userId)
+          .where('organization_user_roles.organization_id', organizationId)
+          .where('roles.slug', roleSlug)
+          .first()
+
+        return !!result
+      },
+      { ttl: 600, tags: ['auth', `auth_user_${userId}`, `auth_org_${organizationId}`] }
+    )
   }
 
   /**
@@ -74,30 +84,38 @@ export default class AuthorizationService {
     organizationId: string,
     permissionSlug: string
   ): Promise<boolean> {
-    // Check direct permissions
-    const directPermission = await db
-      .from('user_permissions')
-      .join('permissions', 'user_permissions.permission_id', 'permissions.id')
-      .where('user_permissions.user_id', userId)
-      .where('user_permissions.organization_id', organizationId)
-      .where('permissions.slug', permissionSlug)
-      .first()
+    const cacheKey = `auth:permission:${userId}:${organizationId}:${permissionSlug}`
 
-    if (directPermission) {
-      return true
-    }
+    return this.cache.remember(
+      cacheKey,
+      async () => {
+        // Check direct permissions
+        const directPermission = await db
+          .from('user_permissions')
+          .join('permissions', 'user_permissions.permission_id', 'permissions.id')
+          .where('user_permissions.user_id', userId)
+          .where('user_permissions.organization_id', organizationId)
+          .where('permissions.slug', permissionSlug)
+          .first()
 
-    // Check role-based permissions
-    const rolePermission = await db
-      .from('organization_user_roles')
-      .join('role_permissions', 'organization_user_roles.role_id', 'role_permissions.role_id')
-      .join('permissions', 'role_permissions.permission_id', 'permissions.id')
-      .where('organization_user_roles.user_id', userId)
-      .where('organization_user_roles.organization_id', organizationId)
-      .where('permissions.slug', permissionSlug)
-      .first()
+        if (directPermission) {
+          return true
+        }
 
-    return !!rolePermission
+        // Check role-based permissions
+        const rolePermission = await db
+          .from('organization_user_roles')
+          .join('role_permissions', 'organization_user_roles.role_id', 'role_permissions.role_id')
+          .join('permissions', 'role_permissions.permission_id', 'permissions.id')
+          .where('organization_user_roles.user_id', userId)
+          .where('organization_user_roles.organization_id', organizationId)
+          .where('permissions.slug', permissionSlug)
+          .first()
+
+        return !!rolePermission
+      },
+      { ttl: 600, tags: ['auth', `auth_user_${userId}`, `auth_org_${organizationId}`] }
+    )
   }
 
   /**
@@ -185,6 +203,9 @@ export default class AuthorizationService {
       role_id: roleId,
       created_at: new Date(),
     })
+
+    // Invalider les caches d'autorisation pour cet utilisateur
+    await this.cache.invalidateTags(['auth', `auth_user_${userId}`, `auth_org_${organizationId}`])
   }
 
   /**
@@ -197,6 +218,9 @@ export default class AuthorizationService {
       .where('organization_id', organizationId)
       .where('role_id', roleId)
       .delete()
+
+    // Invalider les caches d'autorisation pour cet utilisateur
+    await this.cache.invalidateTags(['auth', `auth_user_${userId}`, `auth_org_${organizationId}`])
   }
 
   /**
@@ -214,6 +238,9 @@ export default class AuthorizationService {
       permission_id: permissionId,
       created_at: new Date(),
     })
+
+    // Invalider les caches d'autorisation pour cet utilisateur
+    await this.cache.invalidateTags(['auth', `auth_user_${userId}`, `auth_org_${organizationId}`])
   }
 
   /**
@@ -230,5 +257,8 @@ export default class AuthorizationService {
       .where('organization_id', organizationId)
       .where('permission_id', permissionId)
       .delete()
+
+    // Invalider les caches d'autorisation pour cet utilisateur
+    await this.cache.invalidateTags(['auth', `auth_user_${userId}`, `auth_org_${organizationId}`])
   }
 }

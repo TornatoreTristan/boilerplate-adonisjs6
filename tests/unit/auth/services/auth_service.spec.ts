@@ -1,20 +1,25 @@
 import { test } from '@japa/runner'
-import UserService from '#users/services/user_service'
-import AuthService from '#auth/services/auth_service'
-import type { CreateUserData } from '#shared/types/user'
+import { getService } from '#shared/container/container'
+import { TYPES } from '#shared/container/types'
+import type AuthService from '#auth/services/auth_service'
+import type UserRepository from '#users/repositories/user_repository'
 import type { LoginData } from '#shared/types/auth'
 import testUtils from '@adonisjs/core/services/test_utils'
+import hash from '@adonisjs/core/services/hash'
 
 test.group('AuthService - Login', (group) => {
   group.each.setup(() => testUtils.db().withGlobalTransaction())
 
   test('should login with valid credentials', async ({ assert }) => {
     // Arrange - Créer un utilisateur
-    const userData: CreateUserData = {
+    const userRepo = getService<UserRepository>(TYPES.UserRepository)
+    const authService = getService<AuthService>(TYPES.AuthService)
+
+    const hashedPassword = await hash.make('test123')
+    await userRepo.create({
       email: 'test@example.fr',
-      password: 'test123',
-    }
-    await UserService.create(userData)
+      password: hashedPassword,
+    } as any)
 
     // Act - Tenter la connexion avec LoginData
     const loginData: LoginData = {
@@ -22,7 +27,7 @@ test.group('AuthService - Login', (group) => {
       password: 'test123',
       remember: false,
     }
-    const result = await AuthService.login(loginData)
+    const result = await authService.login(loginData)
 
     // Assert - Vérifier le succès complet
     assert.isTrue(result.success)
@@ -33,11 +38,14 @@ test.group('AuthService - Login', (group) => {
 
   test('should fail with invalid password', async ({ assert }) => {
     // Arrange - Créer un utilisateur
-    const userData: CreateUserData = {
+    const userRepo = getService<UserRepository>(TYPES.UserRepository)
+    const authService = getService<AuthService>(TYPES.AuthService)
+
+    const hashedPassword = await hash.make('test123')
+    await userRepo.create({
       email: 'test@example.fr',
-      password: 'test123',
-    }
-    await UserService.create(userData)
+      password: hashedPassword,
+    } as any)
 
     // Act - Tenter avec mauvais password
     const loginData: LoginData = {
@@ -45,7 +53,7 @@ test.group('AuthService - Login', (group) => {
       password: 'wrongpassword',
       remember: false,
     }
-    const result = await AuthService.login(loginData)
+    const result = await authService.login(loginData)
 
     // Assert - Vérifier l'échec complet
     assert.isFalse(result.success)
@@ -54,26 +62,30 @@ test.group('AuthService - Login', (group) => {
   })
 
   test('should fail with empty email', async ({ assert }) => {
+    const authService = getService<AuthService>(TYPES.AuthService)
+
     const loginData: LoginData = {
       email: '',
       password: 'test123',
       remember: false,
     }
 
-    const result = await AuthService.login(loginData)
+    const result = await authService.login(loginData)
 
     assert.isFalse(result.success)
     assert.equal(result.error, 'Email requis')
   })
 
   test('should fail with invalid email format', async ({ assert }) => {
+    const authService = getService<AuthService>(TYPES.AuthService)
+
     const loginData: LoginData = {
       email: 'invalid-email',
       password: 'test123',
       remember: false,
     }
 
-    const result = await AuthService.login(loginData)
+    const result = await authService.login(loginData)
 
     assert.isFalse(result.success)
     assert.equal(result.error, 'Format email invalide')

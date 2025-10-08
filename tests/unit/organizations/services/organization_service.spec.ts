@@ -1,3 +1,5 @@
+import { getService } from '#shared/container/container'
+import { TYPES } from '#shared/container/types'
 import { test } from '@japa/runner'
 import testUtils from '@adonisjs/core/services/test_utils'
 import OrganizationService from '#organizations/services/organization_service'
@@ -14,7 +16,8 @@ test.group('OrganizationService', (group) => {
       email: 'admin@example.com',
       password: 'password123',
     }
-    const user = await UserService.create(userData)
+    const userService = getService<UserService>(TYPES.UserService)
+    const user = await userService.create(userData)
 
     // Act - Créer une organisation avec cet utilisateur comme admin
     const orgData: CreateOrganizationData = {
@@ -33,12 +36,13 @@ test.group('OrganizationService', (group) => {
 
   test('should add user to organization with specific role', async ({ assert }) => {
     // Arrange - Créer une organisation et un utilisateur
-    const adminUser = await UserService.create({
+    const userService = getService<UserService>(TYPES.UserService)
+    const adminUser = await userService.create({
       email: 'admin@example.com',
       password: 'password123',
     })
 
-    const memberUser = await UserService.create({
+    const memberUser = await userService.create({
       email: 'member@example.com',
       password: 'password123',
     })

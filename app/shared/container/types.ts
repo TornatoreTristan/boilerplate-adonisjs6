@@ -15,8 +15,8 @@ export const TYPES = {
   PermissionRepository: Symbol.for('PermissionRepository'),
 
   // Services
-  UserService: Symbol.for('UserService'),
   AuthService: Symbol.for('AuthService'),
+  UserService: Symbol.for('UserService'),
   OrganizationService: Symbol.for('OrganizationService'),
   SessionService: Symbol.for('SessionService'),
   PasswordResetService: Symbol.for('PasswordResetService'),

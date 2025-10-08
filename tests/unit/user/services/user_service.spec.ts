@@ -1,5 +1,7 @@
 import { test } from '@japa/runner'
-import UserService from '#users/services/user_service'
+import { getService } from '#shared/container/container'
+import { TYPES } from '#shared/container/types'
+import type UserService from '#users/services/user_service'
 import type { CreateUserData } from '#shared/types/user'
 import testUtils from '@adonisjs/core/services/test_utils'
 
@@ -8,13 +10,14 @@ test.group('UserService - Create User', (group) => {
 
   test('should create a user with email and a hashed password', async ({ assert }) => {
     // Arrange - Préparer les données
+    const userService = getService<UserService>(TYPES.UserService)
     const userData: CreateUserData = {
       email: 'test@example.com',
       password: 'test',
     }
 
     // Act - Exécuter l'action
-    const user = await UserService.create(userData)
+    const user = await userService.create(userData)
 
     // Assert - Vérifier les résultats
     assert.isString(user.id)

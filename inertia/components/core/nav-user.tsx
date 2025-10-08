@@ -74,7 +74,7 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.visit('/account/profile')}>
                 <User />
                 Compte
               </DropdownMenuItem>

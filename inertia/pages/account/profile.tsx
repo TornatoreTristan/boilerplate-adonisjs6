@@ -1,0 +1,199 @@
+import { Head, usePage, useForm, router } from '@inertiajs/react'
+import AccountLayout from '@/components/layouts/account-layout'
+import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { Separator } from '@/components/ui/separator'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
+import { Info } from 'lucide-react'
+import { useState } from 'react'
+
+export default function Profile() {
+  const { auth } = usePage<{
+    auth: {
+      user: {
+        id: string
+        fullName: string | null
+        email: string
+        avatarUrl: string | null
+        googleId: string | null
+        isEmailVerified: boolean
+      } | null
+    }
+  }>().props
+
+  const user = auth.user
+
+  const { data, setData, put, processing, errors } = useForm({
+    fullName: user?.fullName || '',
+  })
+
+  const [isDeleting, setIsDeleting] = useState(false)
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    put('/account/profile')
+  }
+
+  const handleDeleteAccount = () => {
+    setIsDeleting(true)
+    router.delete('/account/delete', {
+      onFinish: () => setIsDeleting(false),
+    })
+  }
+
+  if (!user) return null
+
+  return (
+    <>
+      <Head title="Mes informations" />
+      <AccountLayout>
+        <div className="max-w-2xl space-y-10">
+          {/* Photo de profil */}
+          <div className="space-y-4">
+              <h3 className="text-base font-medium">Photo de profil</h3>
+              <div className="flex items-center gap-4">
+                <Avatar className="h-20 w-20">
+                  <AvatarImage src={user.avatarUrl || ''} alt={user.fullName || 'Avatar'} />
+                  <AvatarFallback className="text-lg">
+                    {user.fullName
+                      ? user.fullName
+                          .split(' ')
+                          .map((n) => n[0])
+                          .join('')
+                          .toUpperCase()
+                      : user.email[0].toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <Button variant="outline" size="sm">
+                  Changer
+                </Button>
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* Informations personnelles */}
+            <div className="space-y-4">
+              <h3 className="text-base font-medium">Informations personnelles</h3>
+              <form onSubmit={handleSubmit} className="grid gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="fullName">Nom complet</Label>
+                  <Input
+                    id="fullName"
+                    value={data.fullName}
+                    onChange={(e) => setData('fullName', e.target.value)}
+                    placeholder="Votre nom complet"
+                  />
+                  {errors.fullName && (
+                    <p className="text-destructive text-xs">{errors.fullName}</p>
+                  )}
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input id="email" type="email" defaultValue={user.email} disabled />
+                  {!user.isEmailVerified && (
+                    <p className="text-destructive text-xs">
+                      Email non vérifié - <button className="underline">Renvoyer l'email</button>
+                    </p>
+                  )}
+                </div>
+
+                <Button type="submit" className="w-fit" disabled={processing}>
+                  {processing ? 'Enregistrement...' : 'Enregistrer'}
+                </Button>
+              </form>
+            </div>
+
+            <Separator />
+
+            {/* Mot de passe */}
+            <div className="space-y-4">
+              <h3 className="text-base font-medium">Mot de passe</h3>
+              {user.googleId ? (
+                <Alert>
+                  <Info className="h-4 w-4" />
+                  <AlertDescription>
+                    Vous êtes connecté via Google. La gestion du mot de passe n'est pas
+                    nécessaire pour votre compte.
+                  </AlertDescription>
+                </Alert>
+              ) : (
+                <div className="grid gap-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="current-password">Mot de passe actuel</Label>
+                    <Input id="current-password" type="password" />
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label htmlFor="new-password">Nouveau mot de passe</Label>
+                    <Input id="new-password" type="password" />
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label htmlFor="confirm-password">Confirmer le mot de passe</Label>
+                    <Input id="confirm-password" type="password" />
+                  </div>
+
+                  <Button variant="outline" className="w-fit">
+                    Modifier le mot de passe
+                  </Button>
+                </div>
+              )}
+            </div>
+
+            <Separator />
+
+            {/* Zone de danger */}
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-destructive text-base font-medium">Zone de danger</h3>
+                <p className="text-muted-foreground mt-1 text-sm">
+                  Actions irréversibles sur votre compte
+                </p>
+              </div>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" size="sm">
+                    Supprimer mon compte
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Êtes-vous absolument sûr ?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Cette action est irréversible. Cela supprimera définitivement votre compte et
+                      toutes vos données de nos serveurs.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Annuler</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleDeleteAccount}
+                      disabled={isDeleting}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      {isDeleting ? 'Suppression...' : 'Supprimer mon compte'}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+        </div>
+      </AccountLayout>
+    </>
+  )
+}

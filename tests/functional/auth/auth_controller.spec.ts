@@ -1,3 +1,5 @@
+import { getService } from '#shared/container/container'
+import { TYPES } from '#shared/container/types'
 import { test } from '@japa/runner'
 import testUtils from '@adonisjs/core/services/test_utils'
 import UserService from '#users/services/user_service'
@@ -13,7 +15,8 @@ test.group('AuthController - Login', (group) => {
       email: 'user@example.com',
       password: 'password123',
     }
-    await UserService.create(userData)
+    const userService = getService<UserService>(TYPES.UserService)
+    await userService.create(userData)
 
     // Act - POST /login
     const response = await client.post('/auth/login').json({
@@ -34,7 +37,8 @@ test.group('AuthController - Login', (group) => {
       email: 'user@example.com',
       password: 'password123',
     }
-    await UserService.create(userData)
+    const userService = getService<UserService>(TYPES.UserService)
+    await userService.create(userData)
 
     // Se connecter
     const loginResponse = await client.post('/auth/login').json({
@@ -46,7 +50,7 @@ test.group('AuthController - Login', (group) => {
     loginResponse.assertStatus(200)
 
     // Act - Se déconnecter
-    const logoutResponse = await client.post('/auth/logout')
+    const logoutResponse = await client.post('/auth/logout').json({})
 
     // Assert - Vérifier la réponse de déconnexion
     logoutResponse.assertStatus(200)
@@ -70,7 +74,8 @@ test.group('AuthController - Login', (group) => {
       email: 'user@example.com',
       password: 'password123',
     }
-    await UserService.create(userData)
+    const userService = getService<UserService>(TYPES.UserService)
+    await userService.create(userData)
 
     // Act - Se connecter avec des paramètres UTM et referrer
     const response = await client
@@ -89,7 +94,8 @@ test.group('AuthController - Login', (group) => {
     // Vérifier que la session contient les données UTM/referrer
     const sessionData = response.session()
     const sessionId = sessionData.session_id // Accès direct au lieu de .get()
-    const session = await SessionService.findById(sessionId)
+    const sessionService = getService<SessionService>(TYPES.SessionService)
+    const session = await sessionService.findById(sessionId)
 
     assert.equal(session.utmSource, 'google')
     assert.equal(session.utmMedium, 'cpc')

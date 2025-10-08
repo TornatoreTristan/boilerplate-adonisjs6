@@ -4,7 +4,7 @@ import { TYPES } from '#shared/container/types'
 import UserRepository from '#users/repositories/user_repository'
 import SessionService from '#sessions/services/session_service'
 import type { OAuthUserData, OAuthCallbackResult } from '#shared/types/oauth'
-import type User from '#users/models/user'
+import User from '#users/models/user'
 
 interface SessionContext {
   ipAddress: string
@@ -30,10 +30,20 @@ export default class GoogleAuthService {
     let isNewUser = false
 
     if (!user) {
-      user = await this.userRepository.findOneBy({ email: oauthData.email })
+      // Chercher même les users soft deleted (bypass du scope global)
+      const { default: db } = await import('@adonisjs/lucid/services/db')
+      const existingUser = await db.from('users').where('email', oauthData.email).first()
 
-      if (user) {
-        user = await this.linkGoogleAccount(user, oauthData)
+      if (existingUser) {
+        // Si soft deleted, restaurer le compte
+        if (existingUser.deleted_at) {
+          await db.from('users').where('id', existingUser.id).update({ deleted_at: null })
+        }
+        // Récupérer le user via le repository
+        user = await this.userRepository.findById(existingUser.id)
+        if (user) {
+          user = await this.linkGoogleAccount(user, oauthData)
+        }
       } else {
         user = await this.createUserFromGoogle(oauthData)
         isNewUser = true
@@ -89,6 +99,7 @@ export default class GoogleAuthService {
   }
 
   private async updateUserProfile(user: User, oauthData: OAuthUserData): Promise<User> {
+    // Mettre à jour le profil avec les dernières données de Google
     return this.userRepository.update(user.id, {
       fullName: oauthData.name,
       avatarUrl: oauthData.avatar || user.avatarUrl,

@@ -1,3 +1,5 @@
+import { getService } from '#shared/container/container'
+import { TYPES } from '#shared/container/types'
 import { test } from '@japa/runner'
 import testUtils from '@adonisjs/core/services/test_utils'
 import UserService from '#users/services/user_service'
@@ -12,7 +14,8 @@ test.group('Auth Middleware', (group) => {
       email: 'user@example.com',
       password: 'password123',
     }
-    await UserService.create(userData)
+    const userService = getService<UserService>(TYPES.UserService)
+    await userService.create(userData)
 
     const loginResponse = await client.post('/auth/login').json({
       email: 'user@example.com',

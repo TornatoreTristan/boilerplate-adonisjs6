@@ -1,3 +1,5 @@
+import { getService } from '#shared/container/container'
+import { TYPES } from '#shared/container/types'
 import { test } from '@japa/runner'
 import testUtils from '@adonisjs/core/services/test_utils'
 import UserService from '#users/services/user_service'
@@ -15,7 +17,8 @@ test.group('SuperAdmin Middleware', (group) => {
       password: 'password123',
       fullName: 'Super Admin',
     }
-    const user = await UserService.create(userData)
+    const userService = getService<UserService>(TYPES.UserService)
+    const user = await userService.create(userData)
 
     await db.table('user_roles').insert({
       id: crypto.randomUUID(),
@@ -40,7 +43,8 @@ test.group('SuperAdmin Middleware', (group) => {
       password: 'password123',
       fullName: 'Regular User',
     }
-    await UserService.create(userData)
+    const userService = getService<UserService>(TYPES.UserService)
+    await userService.create(userData)
 
     const loginResponse = await client.post('/auth/login').json({
       email: 'user@example.com',
