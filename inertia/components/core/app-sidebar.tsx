@@ -8,11 +8,13 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
+  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
 import { NavUser } from './nav-user'
+import { OrganizationSwitcher, type Organization } from './organization-switcher'
 
 // Menu items.
 const items = [
@@ -24,7 +26,7 @@ const items = [
 ]
 
 export function AppSidebar() {
-  const { auth } = usePage<{
+  const { auth, organizations } = usePage<{
     auth: {
       user: {
         id: string
@@ -35,6 +37,10 @@ export function AppSidebar() {
         isSuperAdmin: boolean
       } | null
     }
+    organizations: {
+      current: Organization | null
+      list: Organization[]
+    } | null
   }>().props
 
   // Mapper les données user pour NavUser
@@ -48,6 +54,14 @@ export function AppSidebar() {
 
   return (
     <Sidebar>
+      <SidebarHeader>
+        {organizations && organizations.list.length > 0 && (
+          <OrganizationSwitcher
+            organizations={organizations.list}
+            currentOrganization={organizations.current}
+          />
+        )}
+      </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Nom de l'app</SidebarGroupLabel>

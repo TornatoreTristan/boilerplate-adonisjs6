@@ -35,7 +35,7 @@ test.group('EmailVerificationController', (group) => {
   })
 
   test('POST /auth/email/resend - should return 401 if not authenticated', async ({ client }) => {
-    const response = await client.post('/auth/email/resend')
+    const response = await client.post('/auth/email/resend').header('accept', 'application/json')
 
     response.assertStatus(401)
   })
@@ -167,10 +167,13 @@ test.group('EmailVerificationController', (group) => {
   })
 
   test('POST /auth/email/change - should return 401 if not authenticated', async ({ client }) => {
-    const response = await client.post('/auth/email/change').json({
-      newEmail: 'new@example.com',
-      password: 'password123',
-    })
+    const response = await client
+      .post('/auth/email/change')
+      .header('accept', 'application/json')
+      .json({
+        newEmail: 'new@example.com',
+        password: 'password123',
+      })
 
     response.assertStatus(401)
   })

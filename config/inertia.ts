@@ -1,4 +1,7 @@
 import { defineConfig } from '@adonisjs/inertia'
+import { getService } from '#shared/container/container'
+import { TYPES } from '#shared/container/types'
+import type OrganizationRepository from '#organizations/repositories/organization_repository'
 
 const inertiaConfig = defineConfig({
   /**
@@ -23,6 +26,43 @@ const inertiaConfig = defineConfig({
           }
         : null,
     }),
+    organizations: async (ctx) => {
+      if (!ctx.user) {
+        console.log('[INERTIA] No user in context')
+        return null
+      }
+
+      try {
+        const orgRepo = getService<OrganizationRepository>(TYPES.OrganizationRepository)
+        const userOrganizations = await orgRepo.findByUserId(ctx.user.id)
+
+        console.log('[INERTIA] User organizations:', userOrganizations.length)
+        console.log('[INERTIA] ctx.organization:', ctx.organization?.id)
+
+        const result = {
+          current: ctx.organization
+            ? {
+                id: ctx.organization.id,
+                name: ctx.organization.name,
+                slug: ctx.organization.slug,
+                role: userOrganizations.find((org) => org.id === ctx.organization.id)?.pivot_role,
+              }
+            : null,
+          list: userOrganizations.map((org) => ({
+            id: org.id,
+            name: org.name,
+            slug: org.slug,
+            role: org.pivot_role,
+          })),
+        }
+
+        console.log('[INERTIA] Returning organizations:', JSON.stringify(result, null, 2))
+        return result
+      } catch (error) {
+        console.error('[INERTIA] Error loading organizations:', error)
+        return null
+      }
+    },
     flash: (ctx) => ({
       success: ctx.session.flashMessages.get('success'),
       error: ctx.session.flashMessages.get('error'),

@@ -32,8 +32,8 @@ test.group('Auth Middleware', (group) => {
   })
 
   test('should block access to protected route when not authenticated', async ({ client }) => {
-    // Act - Accéder à route protégée sans session
-    const response = await client.get('/auth/me')
+    // Act - Accéder à route protégée sans session avec header JSON
+    const response = await client.get('/auth/me').header('accept', 'application/json')
 
     // Assert
     response.assertStatus(401)

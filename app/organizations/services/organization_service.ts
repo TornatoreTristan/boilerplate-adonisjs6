@@ -1,57 +1,70 @@
+import { injectable, inject } from 'inversify'
+import { TYPES } from '#shared/container/types'
 import Organization from '#organizations/models/organization'
+import OrganizationRepository from '#organizations/repositories/organization_repository'
 import type {
   CreateOrganizationData,
   OrganizationData,
   OrganizationRole,
 } from '#shared/types/organization'
 
+@injectable()
 export default class OrganizationService {
-  static async create(
-    organizationData: CreateOrganizationData,
-    adminUserId: string
-  ): Promise<OrganizationData> {
-    // Créer l'organisation
-    const organization = await Organization.create({
-      name: organizationData.name,
-      slug: organizationData.slug,
-      description: organizationData.description || null,
-      website: organizationData.website || null,
-      isActive: true,
-    })
+  constructor(
+    @inject(TYPES.OrganizationRepository) private organizationRepo: OrganizationRepository
+  ) {}
 
-    // Attacher l'utilisateur comme admin
-    await organization.related('users').attach({
-      [adminUserId]: {
-        role: 'admin',
-        joined_at: new Date(),
+  async create(
+    organizationData: CreateOrganizationData,
+    ownerUserId: string
+  ): Promise<OrganizationData> {
+    // Créer l'organisation via repository
+    const organization = await this.organizationRepo.create(
+      {
+        name: organizationData.name,
+        slug: organizationData.slug || '', // Temporary, will be updated below
+        description: organizationData.description || null,
+        website: organizationData.website || null,
+        isActive: true,
       },
-    })
+      {
+        cache: { tags: ['organizations', 'user_organizations'] },
+      }
+    )
+
+    // Si pas de slug fourni, utiliser l'ID (UUID)
+    if (!organizationData.slug) {
+      await this.organizationRepo.update(
+        organization.id,
+        { slug: organization.id },
+        {
+          cache: { tags: ['organizations', 'org_slug'] },
+        }
+      )
+      organization.slug = organization.id
+    }
+
+    // Attacher l'utilisateur comme owner via repository
+    await this.organizationRepo.addUser(organization.id, ownerUserId, 'owner')
 
     return organization
   }
 
-  static async addUser(
+  async addUser(
     organizationId: string,
     userId: string,
     role: OrganizationRole
   ): Promise<void> {
-    const organization = await Organization.findOrFail(organizationId)
-
-    await organization.related('users').attach({
-      [userId]: {
-        role,
-        joined_at: new Date(),
-      },
-    })
+    await this.organizationRepo.addUser(organizationId, userId, role)
   }
 
-  static async getUsers(organizationId: string) {
-    const organization = await Organization.query()
-      .where('id', organizationId)
-      .preload('users', (query) => {
-        query.pivotColumns(['role', 'joined_at'])
-      })
-      .firstOrFail()
+  async getUsers(organizationId: string) {
+    const organization = await this.organizationRepo.findByIdOrFail(organizationId)
+
+    // Charger la relation users avec les colonnes pivot
+    await organization.load('users', (query) => {
+      query.pivotColumns(['role', 'joined_at'])
+    })
 
     return organization.users.map((user) => ({
       id: user.id,

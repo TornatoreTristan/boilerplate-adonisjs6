@@ -9,10 +9,14 @@ import './routes/notification_routes.js'
 import './routes/upload_routes.js'
 import './routes/admin_routes.js'
 import './routes/account_routes.js'
+import './routes/organization_routes.js'
 import { middleware } from './kernel.js'
 
-// Page d'accueil (protégée par authentification)
-router.on('/').renderInertia('home').use(middleware.auth())
+// Page d'accueil (protégée par authentification et nécessite une organisation)
+router
+  .on('/')
+  .renderInertia('home')
+  .use([middleware.auth(), middleware.requireOrganization(), middleware.organizationContext()])
 
 // Route temporaire pour tester le middleware
 router

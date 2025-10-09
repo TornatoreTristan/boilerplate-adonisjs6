@@ -32,6 +32,7 @@ import UploadService from '#uploads/services/upload_service'
 // Domain Services
 import AuthService from '#auth/services/auth_service'
 import UserService from '#users/services/user_service'
+import OrganizationService from '#organizations/services/organization_service'
 import SessionService from '#sessions/services/session_service'
 import GoogleAuthService from '#auth/services/google_auth_service'
 import EmailVerificationService from '#auth/services/email_verification_service'
@@ -101,6 +102,7 @@ export function configureContainer(): Container {
 
   container.bind<AuthService>(TYPES.AuthService).to(AuthService)
   container.bind<UserService>(TYPES.UserService).to(UserService)
+  container.bind<OrganizationService>(TYPES.OrganizationService).to(OrganizationService)
   container.bind<SessionService>(TYPES.SessionService).to(SessionService)
   container.bind<GoogleAuthService>(TYPES.GoogleAuthService).to(GoogleAuthService)
   container.bind<EmailVerificationService>(TYPES.EmailVerificationService).to(EmailVerificationService)

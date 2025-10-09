@@ -63,7 +63,9 @@ test.group('AuthController - Login', (group) => {
 
     // Vérification avancée - Tenter d'accéder à une route protégée
     // Cette route devrait échouer car la session a été supprimée
-    const protectedResponse = await client.get('/auth/me') // Route qui nécessite d'être connecté
+    const protectedResponse = await client
+      .get('/auth/me')
+      .header('accept', 'application/json') // Route qui nécessite d'être connecté
 
     protectedResponse.assertStatus(401) // Non autorisé car plus de session
   })

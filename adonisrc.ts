@@ -89,7 +89,7 @@ export default defineConfig({
         timeout: 30000,
       },
     ],
-    forceExit: false,
+    forceExit: true,  // Force exit after tests to prevent hanging
   },
 
   /*

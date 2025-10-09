@@ -304,8 +304,8 @@ export abstract class BaseRepository<TModel extends LucidModel> {
       query.where(key, value)
     }
 
-    const count = await query.getCount()
-    return count > 0
+    const result = await query.first()
+    return result !== null
   }
 
   /**

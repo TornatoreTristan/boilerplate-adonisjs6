@@ -47,6 +47,7 @@ router.use([
  */
 export const middleware = router.named({
   organizationContext: () => import('#middleware/organization_context_middleware'),
+  requireOrganization: () => import('#middleware/require_organization_middleware'),
   guest: () => import('#middleware/guest_middleware'),
   auth: () => import('#middleware/auth_middleware'),
   updateSessionActivity: () => import('#sessions/middleware/update_session_activity'),

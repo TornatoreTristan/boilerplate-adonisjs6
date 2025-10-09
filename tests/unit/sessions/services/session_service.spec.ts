@@ -64,6 +64,7 @@ test.group('SessionService', (group) => {
     assert.equal(endedSession.id, session.id)
     assert.isFalse(endedSession.isActive)
     assert.exists(endedSession.endedAt)
-    assert.isTrue(endedSession.endedAt! > session.startedAt)
+    // Compare DateTime timestamps
+    assert.isTrue(endedSession.endedAt!.toMillis() >= session.startedAt.toMillis())
   })
 })

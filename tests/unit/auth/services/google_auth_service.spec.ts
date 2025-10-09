@@ -65,7 +65,9 @@ test.group('GoogleAuthService', (group) => {
     assert.isFalse(result.isNewUser)
     assert.equal(result.user.id, existingUser.id)
     assert.equal(result.user.email, oauthData.email)
-    assert.equal(result.user.fullName, oauthData.name)
+    // fullName is preserved to allow manual user modifications
+    assert.equal(result.user.fullName, 'Existing User')
+    // avatarUrl is updated on each login
     assert.equal(result.user.avatarUrl, oauthData.avatar)
   })
 
@@ -111,7 +113,9 @@ test.group('GoogleAuthService', (group) => {
 
     const result = await googleAuthService.handleGoogleCallback(oauthData)
 
-    assert.equal(result.user.fullName, 'New Name')
+    // fullName is preserved to allow manual user modifications
+    assert.equal(result.user.fullName, 'Old Name')
+    // Only avatarUrl is updated on each login
     assert.equal(result.user.avatarUrl, 'https://example.com/new.jpg')
   })
 

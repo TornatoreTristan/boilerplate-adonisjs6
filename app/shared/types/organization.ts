@@ -2,7 +2,7 @@ import type { DateTime } from 'luxon'
 
 export interface CreateOrganizationData {
   name: string
-  slug: string
+  slug?: string // Optional - will default to organization ID (UUID) if not provided
   description?: string
   website?: string
 }
@@ -21,8 +21,8 @@ export interface OrganizationData {
 export interface UserOrganizationRole {
   organizationId: string
   userId: string
-  role: 'admin' | 'member' | 'viewer'
+  role: 'owner' | 'admin' | 'member' | 'viewer'
   joinedAt: DateTime
 }
 
-export type OrganizationRole = 'admin' | 'member' | 'viewer'
+export type OrganizationRole = 'owner' | 'admin' | 'member' | 'viewer'

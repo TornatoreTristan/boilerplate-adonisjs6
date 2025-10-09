@@ -58,11 +58,43 @@ export default class OrganizationRepository extends BaseRepository<typeof Organi
     const query = this.buildBaseQuery()
 
     const results = await query
-      .join('organization_users', 'organizations.id', 'organization_users.organization_id')
-      .where('organization_users.user_id', userId)
-      .select('organizations.*', 'organization_users.role as pivot_role')
+      .join('user_organizations', 'organizations.id', 'user_organizations.organization_id')
+      .where('user_organizations.user_id', userId)
+      .select('organizations.*', 'user_organizations.role as pivot_role')
 
     return results as Array<Organization & { pivot_role: string }>
+  }
+
+  /**
+   * Compter le nombre d'organisations d'un utilisateur
+   */
+  async countUserOrganizations(userId: string | number): Promise<number> {
+    const { isTestEnvironment } = await import('#shared/container/container')
+
+    // Skip cache in test environment to avoid stale data with database transactions
+    if (!isTestEnvironment()) {
+      const cacheKey = this.buildCacheKey('user_org_count', userId)
+      const cached = await this.cache.get<number>(cacheKey)
+      if (cached !== null) return cached
+    }
+
+    const { default: db } = await import('@adonisjs/lucid/services/db')
+
+    const result = await db
+      .from('user_organizations')
+      .where('user_id', userId)
+      .count('* as total')
+      .first()
+
+    const count = Number(result?.total || 0)
+
+    // Only cache in non-test environments
+    if (!isTestEnvironment()) {
+      const cacheKey = this.buildCacheKey('user_org_count', userId)
+      await this.cache.set(cacheKey, count, { ttl: 300, tags: ['user_organizations'] })
+    }
+
+    return count
   }
 
   /**
@@ -83,7 +115,7 @@ export default class OrganizationRepository extends BaseRepository<typeof Organi
     })
 
     // Invalider les caches
-    await this.cache.invalidateTags(['organizations', 'org_members'])
+    await this.cache.invalidateTags(['organizations', 'org_members', 'user_organizations'])
   }
 
   /**
@@ -95,7 +127,7 @@ export default class OrganizationRepository extends BaseRepository<typeof Organi
     await org.related('users').detach([userId])
 
     // Invalider les caches
-    await this.cache.invalidateTags(['organizations', 'org_members'])
+    await this.cache.invalidateTags(['organizations', 'org_members', 'user_organizations'])
   }
 
   /**

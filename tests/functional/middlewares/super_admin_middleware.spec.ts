@@ -57,7 +57,7 @@ test.group('SuperAdmin Middleware', (group) => {
   })
 
   test('should block access when user is not authenticated', async ({ client }) => {
-    const response = await client.get('/admin')
+    const response = await client.get('/admin').header('accept', 'application/json')
 
     response.assertStatus(401)
   })
