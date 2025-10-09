@@ -35,21 +35,22 @@ export default class AuthMiddleware {
    * - Requêtes API : exception 401
    */
   private handleUnauthenticated(ctx: HttpContext) {
+    // Détecter si c'est une requête Inertia (header x-inertia)
+    if (ctx.request.header('x-inertia')) {
+      return ctx.response.redirect('/login')
+    }
+
     // Détecter si c'est une requête API (attend du JSON)
     const isApiRequest =
       ctx.request.header('accept')?.includes('application/json') ||
-      ctx.request.url().startsWith('/api/') ||
-      ctx.request.url().startsWith('/auth/') ||
-      ctx.request.url().startsWith('/admin/') ||
-      ctx.request.url() === '/admin' ||
-      ctx.request.url().startsWith('/debug/')
+      ctx.request.url().startsWith('/api/')
 
     if (isApiRequest) {
       // Pour les requêtes API, lever une exception
       E.unauthorized('Authentification requise')
     }
 
-    // Pour toutes les autres requêtes (web/Inertia), rediriger vers login
+    // Pour toutes les autres requêtes web, rediriger vers login
     return ctx.response.redirect('/login')
   }
 }

@@ -5,9 +5,10 @@ export interface PageHeaderProps {
   title: string
   description?: string
   actions?: ReactNode
+  separator: boolean
 }
 
-export function PageHeader({ title, description, actions }: PageHeaderProps) {
+export function PageHeader({ title, description, actions, separator }: PageHeaderProps) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -17,7 +18,7 @@ export function PageHeader({ title, description, actions }: PageHeaderProps) {
         </div>
         {actions && <div className="flex items-center gap-2">{actions}</div>}
       </div>
-      <Separator />
+      {separator ? <Separator /> : ''}
     </div>
   )
 }
