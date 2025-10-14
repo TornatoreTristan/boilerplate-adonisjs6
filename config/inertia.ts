@@ -28,16 +28,12 @@ const inertiaConfig = defineConfig({
     }),
     organizations: async (ctx) => {
       if (!ctx.user) {
-        console.log('[INERTIA] No user in context')
         return null
       }
 
       try {
         const orgRepo = getService<OrganizationRepository>(TYPES.OrganizationRepository)
         const userOrganizations = await orgRepo.findByUserId(ctx.user.id)
-
-        console.log('[INERTIA] User organizations:', userOrganizations.length)
-        console.log('[INERTIA] ctx.organization:', ctx.organization?.id)
 
         const result = {
           current: ctx.organization
@@ -56,10 +52,8 @@ const inertiaConfig = defineConfig({
           })),
         }
 
-        console.log('[INERTIA] Returning organizations:', JSON.stringify(result, null, 2))
         return result
       } catch (error) {
-        console.error('[INERTIA] Error loading organizations:', error)
         return null
       }
     },

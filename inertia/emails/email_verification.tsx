@@ -10,38 +10,45 @@ import {
   Hr,
 } from '@react-email/components'
 
-interface WelcomeEmailProps {
+interface EmailVerificationProps {
   userName: string
-  loginUrl: string
+  verificationUrl: string
+  expiresIn: string
 }
 
-export default function WelcomeEmail({ userName, loginUrl }: WelcomeEmailProps) {
+export default function EmailVerification({
+  userName,
+  verificationUrl,
+  expiresIn,
+}: EmailVerificationProps) {
   return (
     <Html>
       <Head />
-      <Preview>Bienvenue sur notre plateforme !</Preview>
+      <Preview>Vérifiez votre adresse email</Preview>
       <Body style={main}>
         <Container style={container}>
-          <Heading style={h1}>Bienvenue {userName} ! 👋</Heading>
+          <Heading style={h1}>✉️ Vérifiez votre email</Heading>
+
+          <Text style={text}>Bonjour {userName},</Text>
 
           <Text style={text}>
-            Nous sommes ravis de vous accueillir sur notre plateforme. Votre compte a été créé avec
-            succès et vous pouvez maintenant profiter de toutes nos fonctionnalités.
+            Merci de vous être inscrit ! Pour finaliser votre inscription et accéder à toutes les
+            fonctionnalités, veuillez vérifier votre adresse email en cliquant sur le bouton
+            ci-dessous.
           </Text>
 
-          <Button style={button} href={loginUrl}>
-            Accéder à mon compte
+          <Button style={button} href={verificationUrl}>
+            Vérifier mon email
           </Button>
 
           <Text style={text}>
-            Vous pouvez vous connecter à tout moment en utilisant l'email avec lequel vous vous êtes
-            inscrit.
+            Ce lien expirera dans <strong>{expiresIn}</strong>.
           </Text>
 
           <Hr style={hr} />
 
           <Text style={footer}>
-            Si vous n'avez pas créé ce compte, vous pouvez ignorer cet email en toute sécurité.
+            Si vous n'avez pas créé de compte, vous pouvez ignorer cet email en toute sécurité.
           </Text>
         </Container>
       </Body>

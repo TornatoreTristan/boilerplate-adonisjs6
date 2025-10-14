@@ -349,11 +349,17 @@ export abstract class BaseRepository<TModel extends LucidModel> {
   // ==========================================
 
   protected async beforeCreate(data: Partial<InstanceType<TModel>>): Promise<void> {
+    // Événement SYNC - peut être utilisé pour validation ou modification de données
     await this.eventBus!.emit(`${this.getModelName().toLowerCase()}.before_create`, { data })
   }
 
   protected async afterCreate(record: InstanceType<TModel>): Promise<void> {
-    await this.eventBus!.emit(`${this.getModelName().toLowerCase()}.created`, { record })
+    // Événement ASYNC via Inngest - déclenche des workflows (emails, notifications, etc.)
+    await this.eventBus!.emit(
+      `${this.getModelName().toLowerCase()}/created`,
+      { record },
+      { async: true }
+    )
   }
 
   protected async beforeUpdate(
@@ -361,19 +367,35 @@ export abstract class BaseRepository<TModel extends LucidModel> {
     data: Partial<InstanceType<TModel>>,
     record: InstanceType<TModel>
   ): Promise<void> {
-    await this.eventBus!.emit(`${this.getModelName().toLowerCase()}.before_update`, { id, data, record })
+    // Événement SYNC - peut être utilisé pour validation ou modification de données
+    await this.eventBus!.emit(`${this.getModelName().toLowerCase()}.before_update`, {
+      id,
+      data,
+      record,
+    })
   }
 
   protected async afterUpdate(record: InstanceType<TModel>): Promise<void> {
-    await this.eventBus!.emit(`${this.getModelName().toLowerCase()}.updated`, { record })
+    // Événement ASYNC via Inngest - déclenche des workflows
+    await this.eventBus!.emit(
+      `${this.getModelName().toLowerCase()}/updated`,
+      { record },
+      { async: true }
+    )
   }
 
   protected async beforeDelete(record: InstanceType<TModel>): Promise<void> {
+    // Événement SYNC - peut être utilisé pour validation
     await this.eventBus!.emit(`${this.getModelName().toLowerCase()}.before_delete`, { record })
   }
 
   protected async afterDelete(record: InstanceType<TModel>): Promise<void> {
-    await this.eventBus!.emit(`${this.getModelName().toLowerCase()}.deleted`, { record })
+    // Événement ASYNC via Inngest - déclenche des workflows (cleanup, notifications, etc.)
+    await this.eventBus!.emit(
+      `${this.getModelName().toLowerCase()}/deleted`,
+      { record },
+      { async: true }
+    )
   }
 
   // ==========================================

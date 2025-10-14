@@ -1,7 +1,6 @@
 import 'reflect-metadata'
 import { Container } from 'inversify'
-import Redis from 'ioredis'
-import Queue from 'bull'
+import { Redis as IoRedis } from 'ioredis'
 import logger from '@adonisjs/core/services/logger'
 import app from '@adonisjs/core/services/app'
 import { TYPES } from './types.js'
@@ -9,7 +8,7 @@ import { TYPES } from './types.js'
 // Services
 import CacheService from '#shared/services/cache_service'
 import EventBusService from '#shared/services/event_bus_service'
-import QueueService from '#shared/services/queue_service'
+import InngestService from '#shared/services/inngest_service'
 import RateLimitService from '#shared/services/rate_limit_service'
 import EmailService from '#mailing/services/email_service'
 
@@ -51,7 +50,7 @@ export function configureContainer(): Container {
   // ==========================================
 
   // Redis client
-  container.bind<Redis>(TYPES.RedisClient).toDynamicValue(() => {
+  container.bind<IoRedis>(TYPES.RedisClient).toDynamicValue(() => {
     const redisConfig = {
       host: process.env.REDIS_HOST || 'localhost',
       port: parseInt(process.env.REDIS_PORT || '6379'),
@@ -62,7 +61,7 @@ export function configureContainer(): Container {
       maxRetriesPerRequest: null,
     }
 
-    return new Redis(redisConfig)
+    return new IoRedis(redisConfig)
   }).inSingletonScope()
 
   // Logger
@@ -71,10 +70,10 @@ export function configureContainer(): Container {
   // Cache Service
   container.bind<CacheService>(TYPES.CacheService).to(CacheService).inSingletonScope()
 
-  // Queue Service
-  container.bind<QueueService>(TYPES.QueueService).to(QueueService).inSingletonScope()
+  // Inngest Service
+  container.bind<InngestService>(TYPES.InngestService).to(InngestService).inSingletonScope()
 
-  // Event Bus
+  // Event Bus (depends on InngestService)
   container.bind<EventBusService>(TYPES.EventBus).to(EventBusService).inSingletonScope()
 
   // Rate Limit Service

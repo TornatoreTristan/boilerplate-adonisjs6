@@ -19,7 +19,7 @@
 - ⚡ **Performance** - Cache Redis avec invalidation par tags
 - 📊 **Audit & Tracking** - Suivi des sessions utilisateur avec UTM/referrer
 - 🔧 **Error Handling** - Système d'exceptions personnalisées robuste
-- 🎪 **Event System** - Bus d'événements avec Bull queues
+- 🎪 **Event System** - Événements asynchrones avec Inngest (workflows, retry, observability)
 - 🛡️ **Rate Limiting** - Protection contre les abus avec Redis sliding window
 - 🔔 **Notifications** - Système complet avec types personnalisables
 - 🧪 **Tests complets** - Unit & functional tests avec Japa
@@ -30,7 +30,7 @@
 - **Base de données:** PostgreSQL avec Lucid ORM
 - **Cache:** Redis avec stratégie de tags
 - **Storage:** Local filesystem + AWS S3
-- **Queues:** Bull pour les événements asynchrones
+- **Events & Workflows:** Inngest (reliable, observable, avec retry automatique)
 - **DI Container:** Inversify pour l'injection de dépendances
 - **Tests:** Japa avec couverture complète
 - **Frontend:** Inertia.js + React (prêt)
@@ -66,6 +66,7 @@ npm run dev
 - [🏢 Organizations & Multi-tenancy](docs/features/organizations.md)
 - [📦 File Upload System](docs/features/uploads.md)
 - [🔔 Notifications](docs/features/notifications.md)
+- [⚡ Inngest Event System](docs/features/inngest-events.md)
 - [⚡ Caching Strategy](docs/architecture/caching.md)
 - [🎯 Error Handling](docs/architecture/error-handling.md)
 - [🛡️ Rate Limiting](docs/features/rate-limiting.md)
@@ -105,6 +106,27 @@ class UserService {
     @inject(TYPES.CacheService) private cache: CacheService
   ) {}
 }
+```
+
+### Inngest Event System
+
+```typescript
+// Événements asynchrones avec retry automatique
+await inngestService.send({
+  name: 'user/registered',
+  data: { userId: user.id, email: user.email }
+})
+
+// Workflows multi-étapes avec observability
+inngest.createFunction(
+  { id: 'onboarding', retries: 3 },
+  { event: 'user/registered' },
+  async ({ event, step }) => {
+    await step.run('send-welcome', () => emailService.send(...))
+    await step.sleep('wait-1-day', '1d')
+    await step.run('send-tips', () => emailService.send(...))
+  }
+)
 ```
 
 ### Cache Redis avec Tags

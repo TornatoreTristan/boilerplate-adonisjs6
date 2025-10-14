@@ -1,5 +1,5 @@
 import { injectable, inject } from 'inversify'
-import type Redis from 'ioredis'
+import type { Redis } from 'ioredis'
 import { TYPES } from '#shared/container/types'
 
 export interface CacheOptions {

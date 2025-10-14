@@ -12,6 +12,9 @@ import './routes/account_routes.js'
 import './routes/organization_routes.js'
 import { middleware } from './kernel.js'
 
+// Import controllers
+const InngestController = () => import('#shared/controllers/inngest_controller')
+
 // Page d'accueil (protégée par authentification et nécessite une organisation)
 router
   .on('/')
@@ -27,3 +30,11 @@ router
     })
   })
   .use([middleware.auth(), middleware.organizationContext()])
+
+// ==========================================
+// INNGEST API
+// ==========================================
+
+// Endpoint Inngest (appelé par Inngest Cloud/self-hosted)
+// Supporte GET (health check) et POST/PUT (event handling)
+router.any('/api/inngest', [InngestController, 'handle'])

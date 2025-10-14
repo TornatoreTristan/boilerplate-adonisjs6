@@ -7,7 +7,7 @@ import { createOrganizationValidator } from '#organizations/validators/create_or
 import { E } from '#shared/exceptions/index'
 
 export default class OrganizationsController {
-  async store({ request, response, user }: HttpContext) {
+  async store({ request, response, session, user }: HttpContext) {
     // Ensure user is authenticated
     E.assertUserExists(user)
 
@@ -21,7 +21,7 @@ export default class OrganizationsController {
     const organization = await orgService.create(data, user.id)
 
     // Set as current organization in session
-    request.session.put('current_organization_id', organization.id)
+    session.put('current_organization_id', organization.id)
 
     // Redirect to home page (onboarding can be added later)
     return response.redirect('/')
