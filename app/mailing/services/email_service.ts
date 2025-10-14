@@ -3,7 +3,7 @@ import { Resend } from 'resend'
 import { render } from '@react-email/render'
 import env from '#start/env'
 import { TYPES } from '#shared/container/types'
-import type InngestService from '#shared/services/inngest_service'
+import type QueueService from '#shared/services/queue_service'
 import type {
   SendEmailData,
   EmailResult,
@@ -16,7 +16,7 @@ import type {
 export default class EmailService {
   private resend: Resend
 
-  constructor(@inject(TYPES.InngestService) private inngestService: InngestService) {
+  constructor(@inject(TYPES.QueueService) private queueService: QueueService) {
     this.resend = new Resend(env.get('RESEND_API_KEY'))
   }
 
@@ -59,22 +59,21 @@ export default class EmailService {
   }
 
   /**
-   * Queue email via Inngest (async, reliable, with retries)
-   * Note: The actual sending is done by Inngest function
+   * Queue email via Bull (async, reliable, with retries)
    */
   async queue(
     emailData: QueueEmailData,
-    options?: { priority?: string; delay?: number }
+    options?: { priority?: number; delay?: number }
   ): Promise<void> {
-    // Dispatch vers Inngest au lieu de Bull
-    // L'envoi réel sera géré par une Inngest function
-    await this.inngestService.send({
-      name: 'email/send-queued' as any,
-      data: {
-        emailData,
-        options,
-      },
-    })
+    await this.queueService.add(
+      'emails',
+      'send-email',
+      { emailData },
+      {
+        priority: options?.priority,
+        delay: options?.delay,
+      }
+    )
   }
 
   async sendWelcomeEmail(to: string, data: WelcomeEmailData): Promise<EmailResult> {
@@ -105,29 +104,33 @@ export default class EmailService {
 
   async queueWelcomeEmail(to: string, data: WelcomeEmailData): Promise<void> {
     const { default: WelcomeEmail } = await import('../../../inertia/emails/welcome_email.js')
-    await this.queue({
-      to,
-      subject: 'Bienvenue sur notre plateforme !',
-      react: WelcomeEmail(data),
-      tags: {
-        category: 'welcome',
+    await this.queue(
+      {
+        to,
+        subject: 'Bienvenue sur notre plateforme !',
+        react: WelcomeEmail(data),
+        tags: {
+          category: 'welcome',
+        },
       },
-      priority: 'normal',
-    })
+      { priority: 0 }
+    )
   }
 
   async queuePasswordResetEmail(to: string, data: PasswordResetEmailData): Promise<void> {
     const { default: PasswordResetEmail } = await import(
       '../../../inertia/emails/password_reset_email.js'
     )
-    await this.queue({
-      to,
-      subject: 'Réinitialisation de votre mot de passe',
-      react: PasswordResetEmail(data),
-      tags: {
-        category: 'password-reset',
+    await this.queue(
+      {
+        to,
+        subject: 'Réinitialisation de votre mot de passe',
+        react: PasswordResetEmail(data),
+        tags: {
+          category: 'password-reset',
+        },
       },
-      priority: 'high',
-    })
+      { priority: 1 }
+    )
   }
 }

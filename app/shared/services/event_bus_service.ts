@@ -1,14 +1,16 @@
 import { injectable, inject } from 'inversify'
 import { EventEmitter } from 'events'
 import { TYPES } from '#shared/container/types'
-import type InngestService from './inngest_service.js'
+import type QueueService from './queue_service.js'
 
 export interface EventData {
   [key: string]: any
 }
 
 export interface EventOptions {
-  async?: boolean // Si true, utilise Inngest (reliable, retryable, observable)
+  async?: boolean // Si true, utilise Bull Queue
+  priority?: number
+  delay?: number
 }
 
 export type EventHandler<T = EventData> = (data: T) => Promise<void> | void
@@ -17,40 +19,37 @@ export type EventHandler<T = EventData> = (data: T) => Promise<void> | void
  * EventBusService - Système hybride d'événements
  *
  * - **Sync** : EventEmitter (immediate, in-process) pour hooks et validations
- * - **Async** : Inngest (reliable, retryable, observable) pour workflows
+ * - **Async** : Bull Queue (reliable, retryable) pour workflows
  *
  * @example
  * ```typescript
  * // Événement synchrone (immédiat)
  * eventBus.emit('user.validating', { data })
  *
- * // Événement asynchrone (via Inngest)
- * eventBus.emit('user/created', { record: user }, { async: true })
+ * // Événement asynchrone (via Bull)
+ * eventBus.emit('user.created', { record: user }, { async: true })
  * ```
  */
 @injectable()
 export default class EventBusService extends EventEmitter {
-  constructor(@inject(TYPES.InngestService) private inngestService: InngestService) {
+  constructor(@inject(TYPES.QueueService) private queueService: QueueService) {
     super()
-    this.setMaxListeners(100) // Augmenter la limite pour éviter les warnings
+    this.setMaxListeners(100)
   }
 
   /**
    * Émettre un événement
    * - Sync (default) : EventEmitter natif (immediate, in-process)
-   * - Async : Inngest (reliable, retryable, observable)
+   * - Async : Bull Queue (reliable, retryable)
    */
   async emit(eventName: string, data: EventData = {}, options: EventOptions = {}): Promise<boolean> {
-    const { async = false } = options
+    const { async = false, priority, delay } = options
 
     if (async) {
-      // Événements async → Inngest
-      // Conversion du format "model.event" → "model/event" pour Inngest
-      const inngestEventName = eventName.replace('.', '/') as any
-
-      await this.inngestService.send({
-        name: inngestEventName,
-        data,
+      // Événements async → Bull Queue
+      await this.queueService.add('events', eventName, data, {
+        priority,
+        delay,
       })
 
       return true
@@ -94,7 +93,6 @@ export default class EventBusService extends EventEmitter {
   getEventListeners(): Record<string, { sync: number }> {
     const result: Record<string, { sync: number }> = {}
 
-    // Listeners synchrones
     for (const eventName of this.eventNames()) {
       const syncCount = this.listenerCount(eventName as string)
       result[eventName as string] = {
@@ -103,12 +101,5 @@ export default class EventBusService extends EventEmitter {
     }
 
     return result
-  }
-
-  /**
-   * Helper : Vérifier si Inngest est configuré
-   */
-  isInngestConfigured(): boolean {
-    return this.inngestService.isConfigured()
   }
 }

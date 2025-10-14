@@ -8,7 +8,7 @@ import { TYPES } from './types.js'
 // Services
 import CacheService from '#shared/services/cache_service'
 import EventBusService from '#shared/services/event_bus_service'
-import InngestService from '#shared/services/inngest_service'
+import QueueService from '#shared/services/queue_service'
 import RateLimitService from '#shared/services/rate_limit_service'
 import EmailService from '#mailing/services/email_service'
 
@@ -70,10 +70,10 @@ export function configureContainer(): Container {
   // Cache Service
   container.bind<CacheService>(TYPES.CacheService).to(CacheService).inSingletonScope()
 
-  // Inngest Service
-  container.bind<InngestService>(TYPES.InngestService).to(InngestService).inSingletonScope()
+  // Queue Service
+  container.bind<QueueService>(TYPES.QueueService).to(QueueService).inSingletonScope()
 
-  // Event Bus (depends on InngestService)
+  // Event Bus (depends on QueueService)
   container.bind<EventBusService>(TYPES.EventBus).to(EventBusService).inSingletonScope()
 
   // Rate Limit Service

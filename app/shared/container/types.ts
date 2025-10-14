@@ -32,7 +32,7 @@ export const TYPES = {
   // Infrastructure
   CacheService: Symbol.for('CacheService'),
   EventBus: Symbol.for('EventBus'),
-  InngestService: Symbol.for('InngestService'),
+  QueueService: Symbol.for('QueueService'),
   Logger: Symbol.for('Logger'),
   RateLimitService: Symbol.for('RateLimitService'),
   EmailService: Symbol.for('EmailService'),

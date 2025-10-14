@@ -354,9 +354,9 @@ export abstract class BaseRepository<TModel extends LucidModel> {
   }
 
   protected async afterCreate(record: InstanceType<TModel>): Promise<void> {
-    // Événement ASYNC via Inngest - déclenche des workflows (emails, notifications, etc.)
+    // Événement ASYNC via Bull Queue - déclenche des workflows (emails, notifications, etc.)
     await this.eventBus!.emit(
-      `${this.getModelName().toLowerCase()}/created`,
+      `${this.getModelName().toLowerCase()}.created`,
       { record },
       { async: true }
     )
@@ -376,9 +376,9 @@ export abstract class BaseRepository<TModel extends LucidModel> {
   }
 
   protected async afterUpdate(record: InstanceType<TModel>): Promise<void> {
-    // Événement ASYNC via Inngest - déclenche des workflows
+    // Événement ASYNC via Bull Queue - déclenche des workflows
     await this.eventBus!.emit(
-      `${this.getModelName().toLowerCase()}/updated`,
+      `${this.getModelName().toLowerCase()}.updated`,
       { record },
       { async: true }
     )
@@ -390,9 +390,9 @@ export abstract class BaseRepository<TModel extends LucidModel> {
   }
 
   protected async afterDelete(record: InstanceType<TModel>): Promise<void> {
-    // Événement ASYNC via Inngest - déclenche des workflows (cleanup, notifications, etc.)
+    // Événement ASYNC via Bull Queue - déclenche des workflows (cleanup, notifications, etc.)
     await this.eventBus!.emit(
-      `${this.getModelName().toLowerCase()}/deleted`,
+      `${this.getModelName().toLowerCase()}.deleted`,
       { record },
       { async: true }
     )
