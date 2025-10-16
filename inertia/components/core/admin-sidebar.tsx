@@ -1,4 +1,4 @@
-import { Home, Users, Shield, Settings, Building2, ArrowLeft } from 'lucide-react'
+import { Home, Users, Shield, Settings, Building2, ArrowLeft, Mail } from 'lucide-react'
 import { usePage } from '@inertiajs/react'
 
 import {
@@ -25,6 +25,11 @@ const items = [
     title: 'Utilisateurs',
     url: '/admin/users',
     icon: Users,
+  },
+  {
+    title: 'Emails',
+    url: '/admin/mails',
+    icon: Mail,
   },
   {
     title: 'Rôles',

@@ -10,6 +10,10 @@
       "#shared/*": ["./app/shared/*"],
       "#auth/*": ["./app/auth/*"],
       "#roles/*": ["./app/roles/*"],
+      "#sessions/*": ["./app/sessions/*"],
+      "#notifications/*": ["./app/notifications/*"],
+      "#uploads/*": ["./app/uploads/*"],
+      "#mailing/*": ["./app/mailing/*"],
       "@/*": ["./inertia/*"]
     }
   },

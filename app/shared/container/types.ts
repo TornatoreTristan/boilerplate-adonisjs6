@@ -13,6 +13,7 @@ export const TYPES = {
   UploadRepository: Symbol.for('UploadRepository'),
   RoleRepository: Symbol.for('RoleRepository'),
   PermissionRepository: Symbol.for('PermissionRepository'),
+  EmailLogRepository: Symbol.for('EmailLogRepository'),
 
   // Services
   AuthService: Symbol.for('AuthService'),
@@ -28,6 +29,7 @@ export const TYPES = {
   LocalStorageDriver: Symbol.for('LocalStorageDriver'),
   S3StorageDriver: Symbol.for('S3StorageDriver'),
   AuthorizationService: Symbol.for('AuthorizationService'),
+  AdminService: Symbol.for('AdminService'),
 
   // Infrastructure
   CacheService: Symbol.for('CacheService'),

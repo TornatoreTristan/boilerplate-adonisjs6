@@ -21,6 +21,7 @@ import NotificationRepository from '#notifications/repositories/notification_rep
 import UploadRepository from '#uploads/repositories/upload_repository'
 import RoleRepository from '#roles/repositories/role_repository'
 import PermissionRepository from '#roles/repositories/permission_repository'
+import EmailLogRepository from '#mailing/repositories/email_log_repository'
 
 // Upload Services
 import StorageService from '#uploads/services/storage_service'
@@ -37,6 +38,7 @@ import GoogleAuthService from '#auth/services/google_auth_service'
 import EmailVerificationService from '#auth/services/email_verification_service'
 import NotificationService from '#notifications/services/notification_service'
 import AuthorizationService from '#roles/services/authorization_service'
+import AdminService from '#admin/services/admin_service'
 
 // Create container
 const container = new Container()
@@ -94,6 +96,7 @@ export function configureContainer(): Container {
   container.bind(TYPES.UploadRepository).to(UploadRepository)
   container.bind(TYPES.RoleRepository).to(RoleRepository)
   container.bind(TYPES.PermissionRepository).to(PermissionRepository)
+  container.bind(TYPES.EmailLogRepository).to(EmailLogRepository)
 
   // ==========================================
   // DOMAIN SERVICES
@@ -107,6 +110,7 @@ export function configureContainer(): Container {
   container.bind<EmailVerificationService>(TYPES.EmailVerificationService).to(EmailVerificationService)
   container.bind<NotificationService>(TYPES.NotificationService).to(NotificationService)
   container.bind<AuthorizationService>(TYPES.AuthorizationService).to(AuthorizationService)
+  container.bind<AdminService>(TYPES.AdminService).to(AdminService)
 
   // ==========================================
   // UPLOAD SERVICES
