@@ -17,12 +17,14 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
 export interface Organization {
   id: string
   name: string
   slug: string
   role: string
+  logoUrl?: string | null
 }
 
 export function OrganizationSwitcher({
@@ -66,9 +68,12 @@ export function OrganizationSwitcher({
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                <Building2 className="size-4" />
-              </div>
+              <Avatar className="size-8 rounded-lg">
+                <AvatarImage src={currentOrganization.logoUrl || ''} alt={currentOrganization.name} />
+                <AvatarFallback className="rounded-lg">
+                  <Building2 className="size-4" />
+                </AvatarFallback>
+              </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold">{currentOrganization.name}</span>
                 <span className="text-muted-foreground truncate text-xs capitalize">
@@ -94,9 +99,12 @@ export function OrganizationSwitcher({
                 className="gap-2 p-2"
                 disabled={switching}
               >
-                <div className="bg-border flex size-6 items-center justify-center rounded-sm">
-                  <Building2 className="size-4 shrink-0" />
-                </div>
+                <Avatar className="size-6 rounded-sm">
+                  <AvatarImage src={org.logoUrl || ''} alt={org.name} />
+                  <AvatarFallback className="rounded-sm">
+                    <Building2 className="size-4 shrink-0" />
+                  </AvatarFallback>
+                </Avatar>
                 <div className="line-clamp-1 flex-1 font-medium">{org.name}</div>
                 {org.id === currentOrganization.id && <Check className="size-4" />}
               </DropdownMenuItem>

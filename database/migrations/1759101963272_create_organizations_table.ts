@@ -11,6 +11,12 @@ export default class extends BaseSchema {
       table.string('slug').unique().notNullable()
       table.text('description').nullable()
       table.string('website').nullable()
+      table.string('logo_url').nullable()
+      table.string('email').nullable()
+      table.string('phone').nullable()
+      table.string('siret').nullable()
+      table.string('vat_number').nullable()
+      table.text('address').nullable()
       table.boolean('is_active').defaultTo(true)
 
       table.timestamp('created_at').notNullable()

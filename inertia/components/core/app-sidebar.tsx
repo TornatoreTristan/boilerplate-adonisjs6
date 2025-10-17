@@ -1,4 +1,4 @@
-import { Home } from 'lucide-react'
+import { Home, Settings } from 'lucide-react'
 import { usePage } from '@inertiajs/react'
 
 import {
@@ -22,6 +22,14 @@ const items = [
     title: 'Home',
     url: '/',
     icon: Home,
+  },
+]
+
+const organizationItems = [
+  {
+    title: 'Paramètres',
+    url: '/organizations/settings',
+    icon: Settings,
   },
 ]
 
@@ -80,6 +88,25 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+        {organizations && organizations.current && (
+          <SidebarGroup>
+            <SidebarGroupLabel>Organisation</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {organizationItems.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild>
+                      <a href={item.url}>
+                        <item.icon />
+                        <span>{item.title}</span>
+                      </a>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
       </SidebarContent>
       <SidebarFooter>
         {userData && <NavUser user={userData} isSuperAdmin={auth.user?.isSuperAdmin} />}

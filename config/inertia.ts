@@ -41,6 +41,7 @@ const inertiaConfig = defineConfig({
                 id: ctx.organization.id,
                 name: ctx.organization.name,
                 slug: ctx.organization.slug,
+                logoUrl: ctx.organization.logoUrl,
                 role: userOrganizations.find((org) => org.id === ctx.organization.id)?.pivot_role,
               }
             : null,
@@ -48,6 +49,7 @@ const inertiaConfig = defineConfig({
             id: org.id,
             name: org.name,
             slug: org.slug,
+            logoUrl: org.logoUrl,
             role: org.pivot_role,
           })),
         }

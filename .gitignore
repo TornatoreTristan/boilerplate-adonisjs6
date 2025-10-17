@@ -26,3 +26,7 @@ yarn-error.log
 
 # Uploads
 storage/uploads
+
+# Uploaded logos
+public/uploads/logos/*
+!public/uploads/logos/.gitkeep

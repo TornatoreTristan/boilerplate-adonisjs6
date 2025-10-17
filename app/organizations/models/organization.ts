@@ -21,6 +21,24 @@ export default class Organization extends BaseModel {
   declare website: string | null
 
   @column()
+  declare logoUrl: string | null
+
+  @column()
+  declare email: string | null
+
+  @column()
+  declare phone: string | null
+
+  @column()
+  declare siret: string | null
+
+  @column()
+  declare vatNumber: string | null
+
+  @column()
+  declare address: string | null
+
+  @column()
   declare isActive: boolean
 
   @column.dateTime({ autoCreate: true })
