@@ -6,6 +6,7 @@ const OrganizationSettingsController = () =>
   import('#organizations/controllers/organization_settings_controller')
 const OrganizationInvitationsController = () =>
   import('#organizations/controllers/organization_invitations_controller')
+const SubscriptionsController = () => import('#billing/controllers/subscriptions_controller')
 
 // Organization creation route - accessible even without existing organization
 router
@@ -42,6 +43,10 @@ router
     router.put('/settings/users/:userId/role', [OrganizationSettingsController, 'updateMemberRole'])
     router.delete('/settings/users/:userId', [OrganizationSettingsController, 'removeMember'])
     router.get('/settings/subscriptions', [OrganizationSettingsController, 'subscriptions'])
+    router.get('/pricing', [OrganizationSettingsController, 'pricing'])
+    router.post('/subscriptions/checkout', [SubscriptionsController, 'createCheckoutSession'])
+    router.get('/subscriptions/success', [SubscriptionsController, 'success'])
+    router.get('/subscriptions/cancel', [SubscriptionsController, 'cancel'])
   })
   .prefix('/organizations')
   .use([middleware.auth(), middleware.requireOrganization(), middleware.organizationContext()])

@@ -75,6 +75,93 @@ export default class SubscriptionService {
   }
 
   /**
+   * Récupérer les factures d'une organisation depuis Stripe
+   */
+  async getOrganizationInvoices(
+    organizationId: string,
+    limit: number = 10
+  ): Promise<Stripe.Invoice[]> {
+    const subscription = await this.subscriptionRepository.findActiveByOrganizationId(organizationId)
+
+    if (!subscription || !subscription.stripeCustomerId) {
+      return []
+    }
+
+    const stripe = await this.getStripeClient()
+
+    const invoices = await stripe.invoices.list({
+      customer: subscription.stripeCustomerId,
+      limit,
+    })
+
+    return invoices.data
+  }
+
+  /**
+   * Créer une session Stripe Checkout pour souscrire à un plan
+   */
+  async createCheckoutSession(
+    organizationId: string,
+    planId: string,
+    billingInterval: 'month' | 'year',
+    successUrl: string,
+    cancelUrl: string
+  ): Promise<string> {
+    const plan = await this.planRepository.findByIdOrFail(planId)
+    const stripe = await this.getStripeClient()
+
+    // Déterminer le bon price ID selon l'interval
+    const stripePriceId =
+      billingInterval === 'month' ? plan.stripePriceIdMonthly : plan.stripePriceIdYearly
+
+    if (!stripePriceId) {
+      throw new Error(
+        `Le plan n'a pas de prix configuré pour l'interval ${billingInterval}`
+      )
+    }
+
+    // Vérifier si l'organisation a déjà un customer Stripe
+    let stripeCustomerId: string | undefined
+    const existingSubscription = await this.subscriptionRepository.findActiveByOrganizationId(organizationId)
+
+    if (existingSubscription?.stripeCustomerId) {
+      stripeCustomerId = existingSubscription.stripeCustomerId
+    }
+
+    // Créer la session Checkout
+    const session = await stripe.checkout.sessions.create({
+      mode: 'subscription',
+      customer: stripeCustomerId,
+      line_items: [
+        {
+          price: stripePriceId,
+          quantity: 1,
+        },
+      ],
+      success_url: successUrl,
+      cancel_url: cancelUrl,
+      metadata: {
+        organizationId,
+        planId,
+        billingInterval,
+      },
+      subscription_data: {
+        metadata: {
+          organizationId,
+          planId,
+        },
+        trial_period_days: plan.trialDays || undefined,
+      },
+    })
+
+    if (!session.url) {
+      throw new Error('Impossible de créer la session Stripe Checkout')
+    }
+
+    return session.url
+  }
+
+  /**
    * Obtenir le client Stripe
    */
   private async getStripeClient(): Promise<Stripe> {

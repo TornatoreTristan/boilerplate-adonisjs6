@@ -12,6 +12,9 @@ import app from '@adonisjs/core/services/app'
 import { cuid } from '@adonisjs/core/helpers'
 import type UserRepository from '#users/repositories/user_repository'
 import type OrganizationInvitationRepository from '#organizations/repositories/organization_invitation_repository'
+import type SubscriptionRepository from '#billing/repositories/subscription_repository'
+import type PlanRepository from '#billing/repositories/plan_repository'
+import type SubscriptionService from '#billing/services/subscription_service'
 import { DateTime } from 'luxon'
 import { randomBytes } from 'node:crypto'
 
@@ -136,8 +139,117 @@ export default class OrganizationSettingsController {
     })
   }
 
-  async subscriptions({ inertia }: HttpContext) {
-    return inertia.render('organizations/settings-subscriptions')
+  async pricing({ inertia, user, organization }: HttpContext) {
+    E.assertUserExists(user)
+    E.assertOrganizationExists(organization)
+
+    const orgRepo = getService<OrganizationRepository>(TYPES.OrganizationRepository)
+    const subscriptionRepo = getService<SubscriptionRepository>(TYPES.SubscriptionRepository)
+    const planRepo = getService<PlanRepository>(TYPES.PlanRepository)
+
+    const userRole = await orgRepo.getUserRole(organization.id, user.id)
+    const currentSubscription = await subscriptionRepo.findActiveByOrganizationId(organization.id)
+    const allPlans = await planRepo.findActiveAndVisible()
+
+    return inertia.render('organizations/pricing', {
+      organization: {
+        id: organization.id,
+        name: organization.name,
+      },
+      userRole,
+      currentSubscription: currentSubscription
+        ? {
+            plan: {
+              id: currentSubscription.plan.id,
+            },
+          }
+        : null,
+      availablePlans: allPlans.map((plan) => ({
+        id: plan.id,
+        name: plan.name,
+        slug: plan.slug,
+        description: plan.description,
+        priceMonthly: plan.priceMonthly,
+        priceYearly: plan.priceYearly,
+        currency: plan.currency,
+        pricingModel: plan.pricingModel,
+        features: plan.features,
+        trialDays: plan.trialDays,
+        sortOrder: plan.sortOrder,
+      })),
+    })
+  }
+
+  async subscriptions({ inertia, user, organization }: HttpContext) {
+    E.assertUserExists(user)
+    E.assertOrganizationExists(organization)
+
+    const orgRepo = getService<OrganizationRepository>(TYPES.OrganizationRepository)
+    const subscriptionRepo = getService<SubscriptionRepository>(TYPES.SubscriptionRepository)
+    const planRepo = getService<PlanRepository>(TYPES.PlanRepository)
+    const subscriptionService = getService<SubscriptionService>(TYPES.SubscriptionService)
+
+    const userRole = await orgRepo.getUserRole(organization.id, user.id)
+
+    const currentSubscription = await subscriptionRepo.findActiveByOrganizationId(organization.id)
+    const allPlans = await planRepo.findActiveAndVisible()
+    const stripeInvoices = await subscriptionService.getOrganizationInvoices(organization.id, 10)
+
+    return inertia.render('organizations/settings-subscriptions', {
+      organization: {
+        id: organization.id,
+        name: organization.name,
+      },
+      userRole,
+      currentSubscription: currentSubscription
+        ? {
+            id: currentSubscription.id,
+            status: currentSubscription.status,
+            billingInterval: currentSubscription.billingInterval,
+            quantity: currentSubscription.quantity,
+            userCount: currentSubscription.userCount,
+            currentPeriodStart: currentSubscription.currentPeriodStart?.toISO() || null,
+            currentPeriodEnd: currentSubscription.currentPeriodEnd?.toISO() || null,
+            trialEndsAt: currentSubscription.trialEndsAt?.toISO() || null,
+            canceledAt: currentSubscription.canceledAt?.toISO() || null,
+            plan: {
+              id: currentSubscription.plan.id,
+              name: currentSubscription.plan.name,
+              slug: currentSubscription.plan.slug,
+              description: currentSubscription.plan.description,
+              priceMonthly: currentSubscription.plan.priceMonthly,
+              priceYearly: currentSubscription.plan.priceYearly,
+              currency: currentSubscription.plan.currency,
+              features: currentSubscription.plan.features,
+            },
+          }
+        : null,
+      availablePlans: allPlans.map((plan) => ({
+        id: plan.id,
+        name: plan.name,
+        slug: plan.slug,
+        description: plan.description,
+        priceMonthly: plan.priceMonthly,
+        priceYearly: plan.priceYearly,
+        currency: plan.currency,
+        pricingModel: plan.pricingModel,
+        features: plan.features,
+        trialDays: plan.trialDays,
+        sortOrder: plan.sortOrder,
+      })),
+      invoices: stripeInvoices.map((invoice) => ({
+        id: invoice.id,
+        number: invoice.number,
+        status: invoice.status,
+        amountDue: invoice.amount_due,
+        amountPaid: invoice.amount_paid,
+        currency: invoice.currency,
+        created: invoice.created,
+        dueDate: invoice.due_date,
+        invoicePdf: invoice.invoice_pdf,
+        hostedInvoiceUrl: invoice.hosted_invoice_url,
+      })),
+    })
   }
 
   async uploadLogo({ request, response, user, organization, session }: HttpContext) {

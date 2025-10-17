@@ -15,7 +15,7 @@ export default class PlanRepository extends BaseRepository<typeof Plan> {
       .where('is_active', true)
       .where('is_visible', true)
       .orderBy('sort_order', 'asc')
-      .orderBy('price', 'asc')
+      .orderBy('price_monthly', 'asc')
   }
 
   async findByStripeProductId(stripeProductId: string): Promise<Plan | null> {
