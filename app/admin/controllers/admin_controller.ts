@@ -3,8 +3,11 @@ import { getService } from '#shared/container/container'
 import { TYPES } from '#shared/container/types'
 import type UserRepository from '#users/repositories/user_repository'
 import type AdminService from '#admin/services/admin_service'
+import type StripeConnectService from '#integrations/services/stripe_connect_service'
 import { updateUserValidator } from '#admin/validators/update_user_validator'
 import { addUserToOrganizationValidator } from '#admin/validators/add_user_to_organization_validator'
+import { configureStripeValidator } from '#admin/validators/configure_stripe_validator'
+import { randomBytes } from 'node:crypto'
 
 export default class AdminController {
   async index({ inertia, session }: HttpContext) {
@@ -177,5 +180,108 @@ export default class AdminController {
       role: detail.role,
       permissions: detail.permissions,
     })
+  }
+
+  async integrations({ inertia }: HttpContext) {
+    const adminService = getService<AdminService>(TYPES.AdminService)
+    const stripeIntegration = await adminService.getIntegration('stripe')
+
+    return inertia.render('admin/integrations', {
+      stripe: stripeIntegration
+        ? {
+            isActive: stripeIntegration.isActive,
+            publicKey: stripeIntegration.config.publicKey || '',
+            hasSecretKey: !!stripeIntegration.config.secretKey,
+            hasWebhookSecret: !!stripeIntegration.config.webhookSecret,
+          }
+        : null,
+    })
+  }
+
+  async configureStripe({ request, response, session }: HttpContext) {
+    const adminService = getService<AdminService>(TYPES.AdminService)
+    const data = await request.validateUsing(configureStripeValidator)
+
+    const existingIntegration = await adminService.getIntegration('stripe')
+
+    const config: Record<string, any> = {
+      publicKey: data.publicKey,
+      secretKey: data.secretKey || existingIntegration?.config.secretKey || '',
+      webhookSecret: data.webhookSecret || existingIntegration?.config.webhookSecret || '',
+    }
+
+    await adminService.configureIntegration('stripe', config, data.isActive)
+
+    session.flash('success', 'Configuration Stripe mise à jour avec succès')
+    return response.redirect().back()
+  }
+
+  async stripeConnectAuthorize({ response, session }: HttpContext) {
+    const stripeConnectService = getService<StripeConnectService>(TYPES.StripeConnectService)
+
+    const state = randomBytes(32).toString('hex')
+    session.put('stripe_oauth_state', state)
+
+    const authUrl = stripeConnectService.getAuthorizationUrl(state)
+    return response.redirect(authUrl)
+  }
+
+  async stripeConnectCallback({ request, response, session }: HttpContext) {
+    const adminService = getService<AdminService>(TYPES.AdminService)
+    const stripeConnectService = getService<StripeConnectService>(TYPES.StripeConnectService)
+
+    const { code, state, error } = request.qs()
+
+    if (error) {
+      session.flash('error', `Erreur Stripe: ${error}`)
+      return response.redirect('/admin/integrations')
+    }
+
+    const savedState = session.get('stripe_oauth_state')
+    if (!savedState || savedState !== state) {
+      session.flash('error', 'État de sécurité invalide')
+      return response.redirect('/admin/integrations')
+    }
+
+    session.forget('stripe_oauth_state')
+
+    try {
+      const tokens = await stripeConnectService.exchangeCodeForToken(code)
+
+      await adminService.configureIntegration('stripe', {
+        accessToken: tokens.access_token,
+        refreshToken: tokens.refresh_token,
+        publicKey: tokens.stripe_publishable_key,
+        stripeUserId: tokens.stripe_user_id,
+        scope: tokens.scope,
+      }, true)
+
+      session.flash('success', 'Compte Stripe connecté avec succès !')
+    } catch (err) {
+      session.flash('error', `Erreur lors de la connexion: ${err.message}`)
+    }
+
+    return response.redirect('/admin/integrations')
+  }
+
+  async stripeDisconnect({ response, session }: HttpContext) {
+    const adminService = getService<AdminService>(TYPES.AdminService)
+    const stripeConnectService = getService<StripeConnectService>(TYPES.StripeConnectService)
+
+    try {
+      const integration = await adminService.getIntegration('stripe')
+
+      if (integration?.config.stripeUserId) {
+        await stripeConnectService.disconnectAccount(integration.config.stripeUserId)
+      }
+
+      await adminService.configureIntegration('stripe', {}, false)
+
+      session.flash('success', 'Compte Stripe déconnecté avec succès')
+    } catch (err) {
+      session.flash('error', `Erreur lors de la déconnexion: ${err.message}`)
+    }
+
+    return response.redirect('/admin/integrations')
   }
 }

@@ -1,7 +1,8 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column, manyToMany } from '@adonisjs/lucid/orm'
-import type { ManyToMany } from '@adonisjs/lucid/types/relations'
+import { BaseModel, column, manyToMany, hasMany, hasOne } from '@adonisjs/lucid/orm'
+import type { ManyToMany, HasMany, HasOne } from '@adonisjs/lucid/types/relations'
 import User from '#users/models/user'
+import Subscription from '#billing/models/subscription'
 
 export default class Organization extends BaseModel {
   @column({ isPrimary: true })
@@ -34,4 +35,14 @@ export default class Organization extends BaseModel {
     pivotTimestamps: true,
   })
   declare users: ManyToMany<typeof User>
+
+  @hasMany(() => Subscription)
+  declare subscriptions: HasMany<typeof Subscription>
+
+  @hasOne(() => Subscription, {
+    onQuery: (query) => {
+      query.where('status', 'active').orderBy('created_at', 'desc')
+    },
+  })
+  declare currentSubscription: HasOne<typeof Subscription>
 }

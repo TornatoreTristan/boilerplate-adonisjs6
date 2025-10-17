@@ -14,6 +14,9 @@ export const TYPES = {
   RoleRepository: Symbol.for('RoleRepository'),
   PermissionRepository: Symbol.for('PermissionRepository'),
   EmailLogRepository: Symbol.for('EmailLogRepository'),
+  IntegrationRepository: Symbol.for('IntegrationRepository'),
+  PlanRepository: Symbol.for('PlanRepository'),
+  SubscriptionRepository: Symbol.for('SubscriptionRepository'),
 
   // Services
   AuthService: Symbol.for('AuthService'),
@@ -30,6 +33,10 @@ export const TYPES = {
   S3StorageDriver: Symbol.for('S3StorageDriver'),
   AuthorizationService: Symbol.for('AuthorizationService'),
   AdminService: Symbol.for('AdminService'),
+  StripeConnectService: Symbol.for('StripeConnectService'),
+  PlanService: Symbol.for('PlanService'),
+  SubscriptionService: Symbol.for('SubscriptionService'),
+  PricingCalculatorService: Symbol.for('PricingCalculatorService'),
 
   // Infrastructure
   CacheService: Symbol.for('CacheService'),

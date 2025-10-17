@@ -14,6 +14,8 @@
       "#notifications/*": ["./app/notifications/*"],
       "#uploads/*": ["./app/uploads/*"],
       "#mailing/*": ["./app/mailing/*"],
+      "#integrations/*": ["./app/integrations/*"],
+      "#billing/*": ["./app/billing/*"],
       "@/*": ["./inertia/*"]
     }
   },

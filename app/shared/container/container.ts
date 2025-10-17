@@ -22,6 +22,9 @@ import UploadRepository from '#uploads/repositories/upload_repository'
 import RoleRepository from '#roles/repositories/role_repository'
 import PermissionRepository from '#roles/repositories/permission_repository'
 import EmailLogRepository from '#mailing/repositories/email_log_repository'
+import IntegrationRepository from '#integrations/repositories/integration_repository'
+import PlanRepository from '#billing/repositories/plan_repository'
+import SubscriptionRepository from '#billing/repositories/subscription_repository'
 
 // Upload Services
 import StorageService from '#uploads/services/storage_service'
@@ -39,6 +42,10 @@ import EmailVerificationService from '#auth/services/email_verification_service'
 import NotificationService from '#notifications/services/notification_service'
 import AuthorizationService from '#roles/services/authorization_service'
 import AdminService from '#admin/services/admin_service'
+import StripeConnectService from '#integrations/services/stripe_connect_service'
+import PlanService from '#billing/services/plan_service'
+import SubscriptionService from '#billing/services/subscription_service'
+import PricingCalculatorService from '#billing/services/pricing_calculator_service'
 
 // Create container
 const container = new Container()
@@ -97,6 +104,9 @@ export function configureContainer(): Container {
   container.bind(TYPES.RoleRepository).to(RoleRepository)
   container.bind(TYPES.PermissionRepository).to(PermissionRepository)
   container.bind(TYPES.EmailLogRepository).to(EmailLogRepository)
+  container.bind(TYPES.IntegrationRepository).to(IntegrationRepository)
+  container.bind(TYPES.PlanRepository).to(PlanRepository)
+  container.bind(TYPES.SubscriptionRepository).to(SubscriptionRepository)
 
   // ==========================================
   // DOMAIN SERVICES
@@ -111,6 +121,10 @@ export function configureContainer(): Container {
   container.bind<NotificationService>(TYPES.NotificationService).to(NotificationService)
   container.bind<AuthorizationService>(TYPES.AuthorizationService).to(AuthorizationService)
   container.bind<AdminService>(TYPES.AdminService).to(AdminService)
+  container.bind<StripeConnectService>(TYPES.StripeConnectService).to(StripeConnectService)
+  container.bind<PlanService>(TYPES.PlanService).to(PlanService)
+  container.bind<SubscriptionService>(TYPES.SubscriptionService).to(SubscriptionService)
+  container.bind<PricingCalculatorService>(TYPES.PricingCalculatorService).to(PricingCalculatorService)
 
   // ==========================================
   // UPLOAD SERVICES

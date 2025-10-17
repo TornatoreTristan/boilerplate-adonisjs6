@@ -84,4 +84,22 @@ export default await Env.create(new URL('../', import.meta.url), {
   AWS_REGION: Env.schema.string.optional(),
   AWS_BUCKET: Env.schema.string.optional(),
   AWS_ENDPOINT: Env.schema.string.optional(),
+
+  /*
+  |----------------------------------------------------------
+  | Variables for configuring Stripe Connect
+  |----------------------------------------------------------
+  */
+  STRIPE_CONNECT_CLIENT_ID: Env.schema.string(),
+  STRIPE_CONNECT_CLIENT_SECRET: Env.schema.string(),
+  STRIPE_CONNECT_REDIRECT_URI: Env.schema.string(),
+
+  /*
+  |----------------------------------------------------------
+  | Variables for Stripe Application (Niveau A)
+  |----------------------------------------------------------
+  */
+  STRIPE_SECRET_KEY: Env.schema.string(),
+  STRIPE_PUBLIC_KEY: Env.schema.string(),
+  STRIPE_WEBHOOK_SECRET: Env.schema.string.optional(),
 })

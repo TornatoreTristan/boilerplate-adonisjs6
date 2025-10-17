@@ -5,7 +5,9 @@ import type SessionRepository from '#sessions/repositories/session_repository'
 import type EmailLogRepository from '#mailing/repositories/email_log_repository'
 import type OrganizationRepository from '#organizations/repositories/organization_repository'
 import type RoleRepository from '#roles/repositories/role_repository'
+import type IntegrationRepository from '#integrations/repositories/integration_repository'
 import type { EmailLogStatus } from '#mailing/models/email_log'
+import type Integration from '#integrations/models/integration'
 import { DateTime } from 'luxon'
 
 interface GrowthData {
@@ -140,7 +142,8 @@ export default class AdminService {
     @inject(TYPES.SessionRepository) private sessionRepository: SessionRepository,
     @inject(TYPES.EmailLogRepository) private emailLogRepository: EmailLogRepository,
     @inject(TYPES.OrganizationRepository) private organizationRepository: OrganizationRepository,
-    @inject(TYPES.RoleRepository) private roleRepository: RoleRepository
+    @inject(TYPES.RoleRepository) private roleRepository: RoleRepository,
+    @inject(TYPES.IntegrationRepository) private integrationRepository: IntegrationRepository
   ) {}
 
   async getDashboardStats(days: number = 30): Promise<DashboardStats> {
@@ -504,5 +507,21 @@ export default class AdminService {
         action: permission.action,
       })),
     }
+  }
+
+  async getIntegrations(): Promise<Integration[]> {
+    return this.integrationRepository.findAll()
+  }
+
+  async getIntegration(provider: string): Promise<Integration | null> {
+    return this.integrationRepository.findByProvider(provider)
+  }
+
+  async configureIntegration(
+    provider: string,
+    config: Record<string, any>,
+    isActive: boolean
+  ): Promise<Integration> {
+    return this.integrationRepository.upsertIntegration(provider, config, isActive)
   }
 }
