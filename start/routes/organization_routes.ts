@@ -4,6 +4,8 @@ import { middleware } from '#start/kernel'
 const OrganizationsController = () => import('#organizations/controllers/organizations_controller')
 const OrganizationSettingsController = () =>
   import('#organizations/controllers/organization_settings_controller')
+const OrganizationInvitationsController = () =>
+  import('#organizations/controllers/organization_invitations_controller')
 
 // Organization creation route - accessible even without existing organization
 router
@@ -15,6 +17,18 @@ router
 // Organization form submission
 router.post('/organizations', [OrganizationsController, 'store']).use([middleware.auth()])
 
+// Organization invitations - public route (with auth check inside)
+router.get('/organizations/invitations/:token/accept', [
+  OrganizationInvitationsController,
+  'accept',
+])
+
+// Post-auth invitation handler
+router.get('/organizations/invitations/post-auth', [
+  OrganizationInvitationsController,
+  'handlePostAuth',
+]).use([middleware.auth()])
+
 // Organization settings pages - requires authentication and organization context
 router
   .group(() => {
@@ -23,6 +37,10 @@ router
     router.post('/settings/logo', [OrganizationSettingsController, 'uploadLogo'])
     router.get('/settings/integrations', [OrganizationSettingsController, 'integrations'])
     router.get('/settings/users', [OrganizationSettingsController, 'users'])
+    router.post('/settings/users/invite', [OrganizationSettingsController, 'inviteMember'])
+    router.delete('/settings/users/invitations/:invitationId', [OrganizationSettingsController, 'cancelInvitation'])
+    router.put('/settings/users/:userId/role', [OrganizationSettingsController, 'updateMemberRole'])
+    router.delete('/settings/users/:userId', [OrganizationSettingsController, 'removeMember'])
     router.get('/settings/subscriptions', [OrganizationSettingsController, 'subscriptions'])
   })
   .prefix('/organizations')

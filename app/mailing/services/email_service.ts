@@ -175,4 +175,5 @@ export default class EmailService {
       { priority: 1 }
     )
   }
+
 }

@@ -17,6 +17,7 @@ export const TYPES = {
   IntegrationRepository: Symbol.for('IntegrationRepository'),
   PlanRepository: Symbol.for('PlanRepository'),
   SubscriptionRepository: Symbol.for('SubscriptionRepository'),
+  OrganizationInvitationRepository: Symbol.for('OrganizationInvitationRepository'),
 
   // Services
   AuthService: Symbol.for('AuthService'),

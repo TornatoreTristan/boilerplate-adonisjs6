@@ -51,10 +51,11 @@ export interface PasswordResetEmailData {
 }
 
 export interface OrganizationInviteEmailData {
-  userName: string
   organizationName: string
   inviterName: string
-  acceptUrl: string
+  role: string
+  invitationUrl: string
+  expiresAt: string
 }
 
 export interface SessionAlertEmailData {

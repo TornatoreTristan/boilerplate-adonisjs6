@@ -25,6 +25,7 @@ import EmailLogRepository from '#mailing/repositories/email_log_repository'
 import IntegrationRepository from '#integrations/repositories/integration_repository'
 import PlanRepository from '#billing/repositories/plan_repository'
 import SubscriptionRepository from '#billing/repositories/subscription_repository'
+import OrganizationInvitationRepository from '#organizations/repositories/organization_invitation_repository'
 
 // Upload Services
 import StorageService from '#uploads/services/storage_service'
@@ -107,6 +108,7 @@ export function configureContainer(): Container {
   container.bind(TYPES.IntegrationRepository).to(IntegrationRepository)
   container.bind(TYPES.PlanRepository).to(PlanRepository)
   container.bind(TYPES.SubscriptionRepository).to(SubscriptionRepository)
+  container.bind(TYPES.OrganizationInvitationRepository).to(OrganizationInvitationRepository)
 
   // ==========================================
   // DOMAIN SERVICES
