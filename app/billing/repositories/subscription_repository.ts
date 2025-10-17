@@ -17,7 +17,7 @@ export default class SubscriptionRepository extends BaseRepository<typeof Subscr
   async findActiveByOrganizationId(organizationId: string): Promise<Subscription | null> {
     const subscriptions = await this.buildBaseQuery()
       .where('organization_id', organizationId)
-      .where('status', 'active')
+      .whereIn('status', ['active', 'trialing', 'past_due'])
       .preload('plan')
       .orderBy('created_at', 'desc')
       .limit(1)

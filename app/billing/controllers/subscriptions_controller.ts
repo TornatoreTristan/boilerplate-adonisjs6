@@ -24,7 +24,10 @@ export default class SubscriptionsController {
 
     const subscriptionService = getService<SubscriptionService>(TYPES.SubscriptionService)
 
-    const baseUrl = request.completeUrl(true)
+    // Construire les URLs de retour
+    const protocol = request.protocol()
+    const host = request.host()
+    const baseUrl = `${protocol}://${host}`
     const successUrl = `${baseUrl}/organizations/subscriptions/success?session_id={CHECKOUT_SESSION_ID}`
     const cancelUrl = `${baseUrl}/organizations/pricing`
 
@@ -46,7 +49,7 @@ export default class SubscriptionsController {
   async success({ inertia, request }: HttpContext) {
     const sessionId = request.qs().session_id
 
-    return inertia.render('billing/subscription-success', {
+    return inertia.render('organizations/subscription-success', {
       sessionId,
     })
   }

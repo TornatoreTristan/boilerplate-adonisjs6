@@ -30,6 +30,10 @@ router.get('/organizations/invitations/post-auth', [
   'handlePostAuth',
 ]).use([middleware.auth()])
 
+// Routes de retour Stripe - publiques (Stripe redirige ici) - AVANT les autres routes
+router.get('/organizations/subscriptions/success', [SubscriptionsController, 'success'])
+router.get('/organizations/subscriptions/cancel', [SubscriptionsController, 'cancel'])
+
 // Organization settings pages - requires authentication and organization context
 router
   .group(() => {
@@ -45,8 +49,6 @@ router
     router.get('/settings/subscriptions', [OrganizationSettingsController, 'subscriptions'])
     router.get('/pricing', [OrganizationSettingsController, 'pricing'])
     router.post('/subscriptions/checkout', [SubscriptionsController, 'createCheckoutSession'])
-    router.get('/subscriptions/success', [SubscriptionsController, 'success'])
-    router.get('/subscriptions/cancel', [SubscriptionsController, 'cancel'])
   })
   .prefix('/organizations')
   .use([middleware.auth(), middleware.requireOrganization(), middleware.organizationContext()])
