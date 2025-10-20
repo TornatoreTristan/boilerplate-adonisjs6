@@ -17,6 +17,7 @@
 - 🗄️ **Repository Pattern** - CRUD avancé avec soft deletes et cache Redis
 - 🎯 **DDD Architecture** - Domain-Driven Design avec IoC Container (Inversify)
 - ⚡ **Performance** - Cache Redis avec invalidation par tags
+- 🔍 **Full-Text Search** - Recherche PostgreSQL avec tsvector, GIN indexes et ranking
 - 📊 **Audit & Tracking** - Suivi des sessions utilisateur avec UTM/referrer
 - 🔧 **Error Handling** - Système d'exceptions personnalisées robuste
 - 🎪 **Event System** - Événements asynchrones avec Inngest (workflows, retry, observability)
@@ -68,6 +69,7 @@ npm run dev
 - [🔔 Notifications](docs/features/notifications.md)
 - [⚡ Inngest Event System](docs/features/inngest-events.md)
 - [⚡ Caching Strategy](docs/architecture/caching.md)
+- [🔍 Full-Text Search](docs/features/full-text-search.md)
 - [🎯 Error Handling](docs/architecture/error-handling.md)
 - [🛡️ Rate Limiting](docs/features/rate-limiting.md)
 
@@ -177,6 +179,7 @@ tests/                   # Tests complets
 - [x] Google OAuth Integration
 - [x] File Upload System (Local + S3)
 - [x] Notifications System
+- [x] Full-Text Search (PostgreSQL)
 - [ ] Multi-provider OAuth (GitHub, Facebook)
 - [ ] Super-admin Dashboard
 - [ ] WebSocket Real-time

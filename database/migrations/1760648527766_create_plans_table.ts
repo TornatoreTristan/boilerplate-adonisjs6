@@ -37,9 +37,43 @@ export default class extends BaseSchema {
       table.timestamp('created_at').notNullable()
       table.timestamp('updated_at').nullable()
     })
+
+    // Add Full-Text Search support
+    this.schema.raw(`
+      ALTER TABLE ${this.tableName} ADD COLUMN search_vector tsvector;
+
+      CREATE INDEX ${this.tableName}_search_idx ON ${this.tableName} USING GIN(search_vector);
+
+      CREATE OR REPLACE FUNCTION ${this.tableName}_search_trigger() RETURNS trigger AS $$
+      BEGIN
+        NEW.search_vector :=
+          setweight(to_tsvector('french', COALESCE(NEW.name, '')), 'A') ||
+          setweight(to_tsvector('french', COALESCE(NEW.slug, '')), 'B') ||
+          setweight(to_tsvector('french', COALESCE(NEW.description, '')), 'C') ||
+          setweight(to_tsvector('french', COALESCE(NEW.features::text, '')), 'D');
+        RETURN NEW;
+      END
+      $$ LANGUAGE plpgsql;
+
+      CREATE TRIGGER ${this.tableName}_search_update
+      BEFORE INSERT OR UPDATE ON ${this.tableName}
+      FOR EACH ROW EXECUTE FUNCTION ${this.tableName}_search_trigger();
+
+      -- Populate existing data
+      UPDATE ${this.tableName} SET search_vector =
+        setweight(to_tsvector('french', COALESCE(name, '')), 'A') ||
+        setweight(to_tsvector('french', COALESCE(slug, '')), 'B') ||
+        setweight(to_tsvector('french', COALESCE(description, '')), 'C') ||
+        setweight(to_tsvector('french', COALESCE(features::text, '')), 'D');
+    `)
   }
 
   async down() {
+    this.schema.raw(`
+      DROP TRIGGER IF EXISTS ${this.tableName}_search_update ON ${this.tableName};
+      DROP FUNCTION IF EXISTS ${this.tableName}_search_trigger();
+      DROP INDEX IF EXISTS ${this.tableName}_search_idx;
+    `)
     this.schema.dropTable(this.tableName)
   }
 }

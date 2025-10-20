@@ -97,6 +97,77 @@ await userRepo.delete(userId)
 await userRepo.delete(userId, { soft: false })
 ```
 
+### Full-Text Search (PostgreSQL)
+- **TOUJOURS** ajouter `search_vector` tsvector lors de la création d'une table
+- **TOUJOURS** créer un index GIN sur `search_vector`
+- **TOUJOURS** créer un trigger auto-update pour maintenir `search_vector`
+- **TOUJOURS** utiliser la configuration `french` pour le français
+- **TOUJOURS** définir des poids (A=le plus important, D=le moins important)
+
+```typescript
+// ✅ Template pour nouvelle table avec Full-Text Search
+async up() {
+  this.schema.createTable(this.tableName, (table) => {
+    table.uuid('id').primary().defaultTo(this.raw('gen_random_uuid()'))
+    // ... autres colonnes ...
+  })
+
+  // Add Full-Text Search support
+  this.schema.raw(`
+    ALTER TABLE ${this.tableName} ADD COLUMN search_vector tsvector;
+
+    CREATE INDEX ${this.tableName}_search_idx ON ${this.tableName} USING GIN(search_vector);
+
+    CREATE OR REPLACE FUNCTION ${this.tableName}_search_trigger() RETURNS trigger AS $$
+    BEGIN
+      NEW.search_vector :=
+        setweight(to_tsvector('french', COALESCE(NEW.column_important, '')), 'A') ||
+        setweight(to_tsvector('french', COALESCE(NEW.column_medium, '')), 'B') ||
+        setweight(to_tsvector('french', COALESCE(NEW.column_low, '')), 'C');
+      RETURN NEW;
+    END
+    $$ LANGUAGE plpgsql;
+
+    CREATE TRIGGER ${this.tableName}_search_update
+    BEFORE INSERT OR UPDATE ON ${this.tableName}
+    FOR EACH ROW EXECUTE FUNCTION ${this.tableName}_search_trigger();
+
+    -- Populate existing data
+    UPDATE ${this.tableName} SET search_vector =
+      setweight(to_tsvector('french', COALESCE(column_important, '')), 'A') ||
+      setweight(to_tsvector('french', COALESCE(column_medium, '')), 'B') ||
+      setweight(to_tsvector('french', COALESCE(column_low, '')), 'C');
+  `)
+}
+
+async down() {
+  this.schema.raw(`
+    DROP TRIGGER IF EXISTS ${this.tableName}_search_update ON ${this.tableName};
+    DROP FUNCTION IF EXISTS ${this.tableName}_search_trigger();
+    DROP INDEX IF EXISTS ${this.tableName}_search_idx;
+  `)
+  this.schema.dropTable(this.tableName)
+}
+```
+
+#### Utilisation dans les Repositories
+```typescript
+// ✅ Recherche Full-Text dans un repository
+async search(query: string, limit: number = 20): Promise<User[]> {
+  const result = await this.db
+    .from(this.tableName)
+    .select('*')
+    .select(
+      this.db.raw(`ts_rank(search_vector, plainto_tsquery('french', ?)) as rank`, [query])
+    )
+    .whereRaw(`search_vector @@ plainto_tsquery('french', ?)`, [query])
+    .orderBy('rank', 'desc')
+    .limit(limit)
+
+  return result as User[]
+}
+```
+
 ## ⚡ Cache & Performance
 
 ### Cache Redis
@@ -387,19 +458,25 @@ async createUser(data: any): Promise<any>
 5. ❌ Hard delete par défaut
 6. ❌ Oublier le cache sur les read operations
 
+### Base de Données
+7. ❌ Créer une table sans `search_vector` tsvector
+8. ❌ Oublier le GIN index sur `search_vector`
+9. ❌ Oublier le trigger auto-update pour `search_vector`
+10. ❌ Utiliser autre chose que 'french' pour la langue
+
 ### TDD & Tests
-7. ❌ Implémenter sans écrire le test d'abord
-8. ❌ Tester après implémentation (faire TDD inverse)
-9. ❌ Commit sans que tous les tests passent
-10. ❌ Ignorer un test qui échoue
+11. ❌ Implémenter sans écrire le test d'abord
+12. ❌ Tester après implémentation (faire TDD inverse)
+13. ❌ Commit sans que tous les tests passent
+14. ❌ Ignorer un test qui échoue
 
 ### Clean Code
-11. ❌ Utiliser `any` sans justification
-12. ❌ Fonctions > 20 lignes sans refactoring
-13. ❌ Noms non explicites (`d`, `u`, `calc`, `mgr`)
-14. ❌ Plus de 4 paramètres dans une fonction
-15. ❌ Mélanger les responsabilités dans une classe
-16. ❌ Commentaires pour expliquer du code illisible
+15. ❌ Utiliser `any` sans justification
+16. ❌ Fonctions > 20 lignes sans refactoring
+17. ❌ Noms non explicites (`d`, `u`, `calc`, `mgr`)
+18. ❌ Plus de 4 paramètres dans une fonction
+19. ❌ Mélanger les responsabilités dans une classe
+20. ❌ Commentaires pour expliquer du code illisible
 
 ## 📚 Documentation de Référence
 
