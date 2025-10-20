@@ -7,9 +7,9 @@ export default class extends BaseSchema {
     this.schema.createTable(this.tableName, (table) => {
       table.uuid('id').primary().defaultTo(this.raw('gen_random_uuid()'))
 
-      table.string('name').notNullable()
+      table.jsonb('name_i18n').notNullable()
       table.string('slug').notNullable().unique()
-      table.text('description').nullable()
+      table.jsonb('description_i18n').nullable()
 
       table.string('stripe_product_id').nullable().unique()
       table.string('stripe_price_id_monthly').nullable()
@@ -27,7 +27,7 @@ export default class extends BaseSchema {
 
       table.integer('trial_days').nullable()
 
-      table.jsonb('features').nullable()
+      table.jsonb('features_i18n').nullable()
       table.jsonb('limits').nullable()
 
       table.boolean('is_active').notNullable().defaultTo(true)
@@ -47,10 +47,13 @@ export default class extends BaseSchema {
       CREATE OR REPLACE FUNCTION ${this.tableName}_search_trigger() RETURNS trigger AS $$
       BEGIN
         NEW.search_vector :=
-          setweight(to_tsvector('french', COALESCE(NEW.name, '')), 'A') ||
+          setweight(to_tsvector('french', COALESCE(NEW.name_i18n->>'fr', '')), 'A') ||
+          setweight(to_tsvector('english', COALESCE(NEW.name_i18n->>'en', '')), 'A') ||
           setweight(to_tsvector('french', COALESCE(NEW.slug, '')), 'B') ||
-          setweight(to_tsvector('french', COALESCE(NEW.description, '')), 'C') ||
-          setweight(to_tsvector('french', COALESCE(NEW.features::text, '')), 'D');
+          setweight(to_tsvector('french', COALESCE(NEW.description_i18n->>'fr', '')), 'C') ||
+          setweight(to_tsvector('english', COALESCE(NEW.description_i18n->>'en', '')), 'C') ||
+          setweight(to_tsvector('french', COALESCE(NEW.features_i18n->>'fr', '')), 'D') ||
+          setweight(to_tsvector('english', COALESCE(NEW.features_i18n->>'en', '')), 'D');
         RETURN NEW;
       END
       $$ LANGUAGE plpgsql;
@@ -61,10 +64,13 @@ export default class extends BaseSchema {
 
       -- Populate existing data
       UPDATE ${this.tableName} SET search_vector =
-        setweight(to_tsvector('french', COALESCE(name, '')), 'A') ||
+        setweight(to_tsvector('french', COALESCE(name_i18n->>'fr', '')), 'A') ||
+        setweight(to_tsvector('english', COALESCE(name_i18n->>'en', '')), 'A') ||
         setweight(to_tsvector('french', COALESCE(slug, '')), 'B') ||
-        setweight(to_tsvector('french', COALESCE(description, '')), 'C') ||
-        setweight(to_tsvector('french', COALESCE(features::text, '')), 'D');
+        setweight(to_tsvector('french', COALESCE(description_i18n->>'fr', '')), 'C') ||
+        setweight(to_tsvector('english', COALESCE(description_i18n->>'en', '')), 'C') ||
+        setweight(to_tsvector('french', COALESCE(features_i18n->>'fr', '')), 'D') ||
+        setweight(to_tsvector('english', COALESCE(features_i18n->>'en', '')), 'D');
     `)
   }
 

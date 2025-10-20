@@ -18,6 +18,7 @@
 - 🎯 **DDD Architecture** - Domain-Driven Design avec IoC Container (Inversify)
 - ⚡ **Performance** - Cache Redis avec invalidation par tags
 - 🔍 **Full-Text Search** - Recherche PostgreSQL avec tsvector, GIN indexes et ranking
+- 🌍 **Internationalization** - Multi-langue FR/EN avec AdonisJS I18n + React i18next
 - 📊 **Audit & Tracking** - Suivi des sessions utilisateur avec UTM/referrer
 - 🔧 **Error Handling** - Système d'exceptions personnalisées robuste
 - 🎪 **Event System** - Événements asynchrones avec Inngest (workflows, retry, observability)
@@ -70,6 +71,7 @@ npm run dev
 - [⚡ Inngest Event System](docs/features/inngest-events.md)
 - [⚡ Caching Strategy](docs/architecture/caching.md)
 - [🔍 Full-Text Search](docs/features/full-text-search.md)
+- [🌍 Internationalization (i18n)](docs/features/i18n.md)
 - [🎯 Error Handling](docs/architecture/error-handling.md)
 - [🛡️ Rate Limiting](docs/features/rate-limiting.md)
 
@@ -180,6 +182,7 @@ tests/                   # Tests complets
 - [x] File Upload System (Local + S3)
 - [x] Notifications System
 - [x] Full-Text Search (PostgreSQL)
+- [x] Internationalization (FR/EN)
 - [ ] Multi-provider OAuth (GitHub, Facebook)
 - [ ] Super-admin Dashboard
 - [ ] WebSocket Real-time

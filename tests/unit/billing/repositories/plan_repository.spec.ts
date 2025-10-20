@@ -11,16 +11,16 @@ test.group('PlanRepository', (group) => {
     const planRepository = getService<PlanRepository>(TYPES.PlanRepository)
 
     const plan = await planRepository.create({
-      name: 'Starter',
+      nameI18n: { fr: 'Starter', en: 'Starter' },
       slug: 'starter',
-      description: 'Plan de démarrage',
+      descriptionI18n: { fr: 'Plan de démarrage', en: 'Starter plan' },
       priceMonthly: 0,
       priceYearly: 0,
       currency: 'EUR',
       pricingModel: 'flat',
       pricingTiers: null,
       trialDays: 14,
-      features: ['1 utilisateur', 'Support email'],
+      featuresI18n: { fr: '1 utilisateur, Support email', en: '1 user, Email support' },
       limits: { maxUsers: 1 },
       isActive: true,
       isVisible: true,
@@ -30,14 +30,13 @@ test.group('PlanRepository', (group) => {
     })
 
     assert.exists(plan.id)
-    assert.equal(plan.name, 'Starter')
+    assert.deepEqual(plan.nameI18n, { fr: 'Starter', en: 'Starter' })
     assert.equal(plan.slug, 'starter')
     assert.equal(plan.priceMonthly, 0)
     assert.equal(plan.currency, 'EUR')
-    // assert.equal(plan.interval, 'month')
     assert.equal(plan.pricingModel, 'flat')
     assert.equal(plan.trialDays, 14)
-    assert.deepEqual(plan.features, ['1 utilisateur', 'Support email'])
+    assert.deepEqual(plan.featuresI18n, { fr: '1 utilisateur, Support email', en: '1 user, Email support' })
     assert.deepEqual(plan.limits, { maxUsers: 1 })
     assert.isTrue(plan.isActive)
     assert.isTrue(plan.isVisible)
@@ -47,15 +46,15 @@ test.group('PlanRepository', (group) => {
     const planRepository = getService<PlanRepository>(TYPES.PlanRepository)
 
     const plan = await planRepository.create({
-      name: 'Pro',
+      nameI18n: { fr: 'Pro', en: 'Pro' },
       slug: 'pro',
-      description: 'Plan pro',
+      descriptionI18n: { fr: 'Plan pro', en: 'Pro plan' },
       priceMonthly: 29, priceYearly: 290,
       currency: 'EUR',
       pricingModel: 'per_seat',
       pricingTiers: null,
       trialDays: null,
-      features: null,
+      featuresI18n: null,
       limits: null,
       isActive: true,
       isVisible: true,
@@ -65,17 +64,15 @@ test.group('PlanRepository', (group) => {
     })
 
     assert.equal(plan.pricingModel, 'per_seat')
-    // assert.equal(plan.baseUsers, 5)
-    // assert.equal(plan.pricePerUser, 5)
   })
 
   test('should create a plan with tiered pricing', async ({ assert }) => {
     const planRepository = getService<PlanRepository>(TYPES.PlanRepository)
 
     const plan = await planRepository.create({
-      name: 'Enterprise',
+      nameI18n: { fr: 'Enterprise', en: 'Enterprise' },
       slug: 'enterprise',
-      description: 'Plan entreprise',
+      descriptionI18n: { fr: 'Plan entreprise', en: 'Enterprise plan' },
       priceMonthly: 0, priceYearly: 0,
       currency: 'EUR',
       pricingModel: 'tiered',
@@ -85,7 +82,7 @@ test.group('PlanRepository', (group) => {
         { minUsers: 51, maxUsers: null, price: 499 },
       ],
       trialDays: null,
-      features: null,
+      featuresI18n: null,
       limits: null,
       isActive: true,
       isVisible: true,
@@ -103,9 +100,9 @@ test.group('PlanRepository', (group) => {
     const planRepository = getService<PlanRepository>(TYPES.PlanRepository)
 
     const plan = await planRepository.create({
-      name: 'Volume',
+      nameI18n: { fr: 'Volume', en: 'Volume' },
       slug: 'volume',
-      description: 'Plan volume',
+      descriptionI18n: { fr: 'Plan volume', en: 'Volume plan' },
       priceMonthly: 0, priceYearly: 0,
       currency: 'EUR',
       pricingModel: 'volume',
@@ -115,7 +112,7 @@ test.group('PlanRepository', (group) => {
         { minUsers: 51, maxUsers: null, pricePerUser: 5 },
       ],
       trialDays: null,
-      features: null,
+      featuresI18n: null,
       limits: null,
       isActive: true,
       isVisible: true,
@@ -133,15 +130,15 @@ test.group('PlanRepository', (group) => {
     const planRepository = getService<PlanRepository>(TYPES.PlanRepository)
 
     await planRepository.create({
-      name: 'Pro',
+      nameI18n: { fr: 'Pro', en: 'Pro' },
       slug: 'pro',
-      description: 'Plan pro',
+      descriptionI18n: { fr: 'Plan pro', en: 'Pro plan' },
       priceMonthly: 49, priceYearly: 490,
       currency: 'EUR',
       pricingModel: 'flat',
       pricingTiers: null,
       trialDays: null,
-      features: null,
+      featuresI18n: null,
       limits: null,
       isActive: true,
       isVisible: true,
@@ -153,7 +150,7 @@ test.group('PlanRepository', (group) => {
     const plan = await planRepository.findBySlug('pro')
 
     assert.exists(plan)
-    assert.equal(plan!.name, 'Pro')
+    assert.deepEqual(plan!.nameI18n, { fr: 'Pro', en: 'Pro' })
     assert.equal(plan!.slug, 'pro')
   })
 
@@ -161,7 +158,7 @@ test.group('PlanRepository', (group) => {
     const planRepository = getService<PlanRepository>(TYPES.PlanRepository)
 
     await planRepository.create({
-      name: 'Visible Active',
+      nameI18n: { fr: 'Visible Active', en: 'Visible Active' },
       slug: 'visible-active',
       priceMonthly: 10, priceYearly: 100,
       currency: 'EUR',
@@ -170,16 +167,16 @@ test.group('PlanRepository', (group) => {
       isActive: true,
       isVisible: true,
       sortOrder: 1,
-      description: null,
+      descriptionI18n: null,
       trialDays: null,
-      features: null,
+      featuresI18n: null,
       limits: null,
       stripeProductId: null,
       stripePriceIdMonthly: null,
     })
 
     await planRepository.create({
-      name: 'Hidden Active',
+      nameI18n: { fr: 'Hidden Active', en: 'Hidden Active' },
       slug: 'hidden-active',
       priceMonthly: 20, priceYearly: 200,
       currency: 'EUR',
@@ -188,16 +185,16 @@ test.group('PlanRepository', (group) => {
       isActive: true,
       isVisible: false,
       sortOrder: 2,
-      description: null,
+      descriptionI18n: null,
       trialDays: null,
-      features: null,
+      featuresI18n: null,
       limits: null,
       stripeProductId: null,
       stripePriceIdMonthly: null,
     })
 
     await planRepository.create({
-      name: 'Visible Inactive',
+      nameI18n: { fr: 'Visible Inactive', en: 'Visible Inactive' },
       slug: 'visible-inactive',
       priceMonthly: 30, priceYearly: 300,
       currency: 'EUR',
@@ -206,9 +203,9 @@ test.group('PlanRepository', (group) => {
       isActive: false,
       isVisible: true,
       sortOrder: 3,
-      description: null,
+      descriptionI18n: null,
       trialDays: null,
-      features: null,
+      featuresI18n: null,
       limits: null,
       stripeProductId: null,
       stripePriceIdMonthly: null,
@@ -217,22 +214,22 @@ test.group('PlanRepository', (group) => {
     const plans = await planRepository.findActiveAndVisible()
 
     assert.equal(plans.length, 1)
-    assert.equal(plans[0].name, 'Visible Active')
+    assert.deepEqual(plans[0].nameI18n, { fr: 'Visible Active', en: 'Visible Active' })
   })
 
   test('should update plan', async ({ assert }) => {
     const planRepository = getService<PlanRepository>(TYPES.PlanRepository)
 
     const plan = await planRepository.create({
-      name: 'Original',
+      nameI18n: { fr: 'Original', en: 'Original' },
       slug: 'original',
       priceMonthly: 10, priceYearly: 100,
       currency: 'EUR',
       pricingModel: 'flat',
       pricingTiers: null,
-      description: null,
+      descriptionI18n: null,
       trialDays: null,
-      features: null,
+      featuresI18n: null,
       limits: null,
       isActive: true,
       isVisible: true,
@@ -242,11 +239,11 @@ test.group('PlanRepository', (group) => {
     })
 
     const updated = await planRepository.update(plan.id, {
-      name: 'Updated',
+      nameI18n: { fr: 'Updated', en: 'Updated' },
       priceMonthly: 20, priceYearly: 200,
     })
 
-    assert.equal(updated.name, 'Updated')
+    assert.deepEqual(updated.nameI18n, { fr: 'Updated', en: 'Updated' })
     assert.equal(updated.priceMonthly, 20)
     assert.equal(updated.slug, 'original')
   })
@@ -255,15 +252,15 @@ test.group('PlanRepository', (group) => {
     const planRepository = getService<PlanRepository>(TYPES.PlanRepository)
 
     const plan = await planRepository.create({
-      name: 'To Delete',
+      nameI18n: { fr: 'To Delete', en: 'To Delete' },
       slug: 'to-delete',
       priceMonthly: 10, priceYearly: 100,
       currency: 'EUR',
       pricingModel: 'flat',
       pricingTiers: null,
-      description: null,
+      descriptionI18n: null,
       trialDays: null,
-      features: null,
+      featuresI18n: null,
       limits: null,
       isActive: true,
       isVisible: true,

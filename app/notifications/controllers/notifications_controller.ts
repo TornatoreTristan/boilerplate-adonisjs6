@@ -22,7 +22,19 @@ export default class NotificationsController {
       type,
     })
 
-    return response.json({ notifications })
+    return response.json({
+      notifications: notifications.map((n) => ({
+        id: n.id,
+        userId: n.userId,
+        organizationId: n.organizationId,
+        type: n.type,
+        titleI18n: n.titleI18n,
+        messageI18n: n.messageI18n,
+        data: n.data,
+        readAt: n.readAt?.toISO() || null,
+        createdAt: n.createdAt.toISO(),
+      })),
+    })
   }
 
   async unreadCount({ response, session }: HttpContext) {

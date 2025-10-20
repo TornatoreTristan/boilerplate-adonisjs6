@@ -335,7 +335,7 @@ const SubscriptionsPage = ({ subscriptions, stats, plans, filters }: Props) => {
                     <SelectItem value="all">Tous les plans</SelectItem>
                     {plans.map((plan) => (
                       <SelectItem key={plan.id} value={plan.id}>
-                        {plan.name}
+                        {getTranslation(plan.nameI18n)}
                       </SelectItem>
                     ))}
                   </SelectContent>

@@ -19,8 +19,10 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Info } from 'lucide-react'
 import { useState } from 'react'
+import { useI18n } from '@/hooks/use-i18n'
 
 export default function Profile() {
+  const { t } = useI18n()
   const { auth } = usePage<{
     auth: {
       user: {
@@ -58,12 +60,12 @@ export default function Profile() {
 
   return (
     <>
-      <Head title="Mes informations" />
+      <Head title={t('account.profile.title')} />
       <AccountLayout>
         <div className="max-w-2xl space-y-10">
           {/* Photo de profil */}
           <div className="space-y-4">
-              <h3 className="text-base font-medium">Photo de profil</h3>
+              <h3 className="text-base font-medium">{t('account.profile.profile_picture')}</h3>
               <div className="flex items-center gap-4">
                 <Avatar className="h-20 w-20">
                   <AvatarImage src={user.avatarUrl || ''} alt={user.fullName || 'Avatar'} />
@@ -78,7 +80,7 @@ export default function Profile() {
                   </AvatarFallback>
                 </Avatar>
                 <Button variant="outline" size="sm">
-                  Changer
+                  {t('account.profile.change')}
                 </Button>
               </div>
             </div>
@@ -87,15 +89,15 @@ export default function Profile() {
 
             {/* Informations personnelles */}
             <div className="space-y-4">
-              <h3 className="text-base font-medium">Informations personnelles</h3>
+              <h3 className="text-base font-medium">{t('account.profile.personal_info')}</h3>
               <form onSubmit={handleSubmit} className="grid gap-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="fullName">Nom complet</Label>
+                  <Label htmlFor="fullName">{t('account.profile.full_name')}</Label>
                   <Input
                     id="fullName"
                     value={data.fullName}
                     onChange={(e) => setData('fullName', e.target.value)}
-                    placeholder="Votre nom complet"
+                    placeholder={t('account.profile.full_name_placeholder')}
                   />
                   {errors.fullName && (
                     <p className="text-destructive text-xs">{errors.fullName}</p>
@@ -103,17 +105,17 @@ export default function Profile() {
                 </div>
 
                 <div className="grid gap-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email">{t('account.profile.email')}</Label>
                   <Input id="email" type="email" defaultValue={user.email} disabled />
                   {!user.isEmailVerified && (
                     <p className="text-destructive text-xs">
-                      Email non vérifié - <button className="underline">Renvoyer l'email</button>
+                      {t('account.profile.email_not_verified')} - <button className="underline">{t('account.profile.resend_email')}</button>
                     </p>
                   )}
                 </div>
 
                 <Button type="submit" className="w-fit" disabled={processing}>
-                  {processing ? 'Enregistrement...' : 'Enregistrer'}
+                  {processing ? t('account.profile.saving') : t('account.profile.save')}
                 </Button>
               </form>
             </div>
@@ -122,34 +124,33 @@ export default function Profile() {
 
             {/* Mot de passe */}
             <div className="space-y-4">
-              <h3 className="text-base font-medium">Mot de passe</h3>
+              <h3 className="text-base font-medium">{t('account.profile.password')}</h3>
               {user.googleId ? (
                 <Alert>
                   <Info className="h-4 w-4" />
                   <AlertDescription>
-                    Vous êtes connecté via Google. La gestion du mot de passe n'est pas
-                    nécessaire pour votre compte.
+                    {t('account.profile.google_password_notice')}
                   </AlertDescription>
                 </Alert>
               ) : (
                 <div className="grid gap-4">
                   <div className="grid gap-2">
-                    <Label htmlFor="current-password">Mot de passe actuel</Label>
+                    <Label htmlFor="current-password">{t('account.profile.current_password')}</Label>
                     <Input id="current-password" type="password" />
                   </div>
 
                   <div className="grid gap-2">
-                    <Label htmlFor="new-password">Nouveau mot de passe</Label>
+                    <Label htmlFor="new-password">{t('account.profile.new_password')}</Label>
                     <Input id="new-password" type="password" />
                   </div>
 
                   <div className="grid gap-2">
-                    <Label htmlFor="confirm-password">Confirmer le mot de passe</Label>
+                    <Label htmlFor="confirm-password">{t('account.profile.confirm_password')}</Label>
                     <Input id="confirm-password" type="password" />
                   </div>
 
                   <Button variant="outline" className="w-fit">
-                    Modifier le mot de passe
+                    {t('account.profile.change_password')}
                   </Button>
                 </div>
               )}
@@ -160,33 +161,32 @@ export default function Profile() {
             {/* Zone de danger */}
             <div className="space-y-4">
               <div>
-                <h3 className="text-destructive text-base font-medium">Zone de danger</h3>
+                <h3 className="text-destructive text-base font-medium">{t('account.profile.danger_zone')}</h3>
                 <p className="text-muted-foreground mt-1 text-sm">
-                  Actions irréversibles sur votre compte
+                  {t('account.profile.danger_zone_description')}
                 </p>
               </div>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button variant="destructive" size="sm">
-                    Supprimer mon compte
+                    {t('account.profile.delete_account')}
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
-                    <AlertDialogTitle>Êtes-vous absolument sûr ?</AlertDialogTitle>
+                    <AlertDialogTitle>{t('account.profile.delete_account_confirm_title')}</AlertDialogTitle>
                     <AlertDialogDescription>
-                      Cette action est irréversible. Cela supprimera définitivement votre compte et
-                      toutes vos données de nos serveurs.
+                      {t('account.profile.delete_account_confirm_description')}
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
-                    <AlertDialogCancel>Annuler</AlertDialogCancel>
+                    <AlertDialogCancel>{t('account.profile.cancel')}</AlertDialogCancel>
                     <AlertDialogAction
                       onClick={handleDeleteAccount}
                       disabled={isDeleting}
                       className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                     >
-                      {isDeleting ? 'Suppression...' : 'Supprimer mon compte'}
+                      {isDeleting ? t('account.profile.deleting') : t('account.profile.delete_account')}
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>

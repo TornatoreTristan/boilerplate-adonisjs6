@@ -478,11 +478,165 @@ async createUser(data: any): Promise<any>
 19. ❌ Mélanger les responsabilités dans une classe
 20. ❌ Commentaires pour expliquer du code illisible
 
+## 🌍 Internationalization (i18n)
+
+### ⚠️ RÈGLE ABSOLUE : TOUT DOIT ÊTRE MULTILINGUE
+
+**JAMAIS** de texte hardcodé dans les composants React, layouts ou templates !
+**TOUJOURS** utiliser `useI18n()` et les clés de traduction pour TOUT texte affiché.
+
+### Langues supportées
+- Français (défaut)
+- Anglais
+
+### Deux systèmes complémentaires
+1. **AdonisJS I18n** : Textes statiques (labels, messages d'erreur)
+2. **Champs JSON `_i18n`** : Contenu dynamique (créé par utilisateurs)
+
+### Champs traduisibles en base
+
+- **TOUJOURS** utiliser `TranslatableField` pour contenu dynamique
+- **TOUJOURS** fournir FR et EN lors de la création
+- **TOUJOURS** adapter les triggers Full-Text Search pour FR + EN
+
+```typescript
+// ✅ CORRECT - Création de plan
+await planRepository.create({
+  nameI18n: { fr: 'Pro', en: 'Pro' },
+  descriptionI18n: { fr: 'Plan professionnel', en: 'Professional plan' },
+  // ...
+})
+
+// ✅ CORRECT - Récupération traduction
+import { getTranslation } from '#shared/helpers/translatable'
+
+const locale = localeService.getCurrentLocale()
+const name = getTranslation(plan.nameI18n, locale)
+```
+
+### Nouvelle table avec champs traduisibles
+
+1. **Migration** : Colonnes `_i18n` en JSONB
+
+```typescript
+table.jsonb('name_i18n').notNullable()
+table.jsonb('description_i18n').nullable()
+
+// Trigger Full-Text Search multi-langue
+this.schema.raw(`
+  CREATE OR REPLACE FUNCTION ${this.tableName}_search_trigger() RETURNS trigger AS $$
+  BEGIN
+    NEW.search_vector :=
+      setweight(to_tsvector('french', COALESCE(NEW.name_i18n->>'fr', '')), 'A') ||
+      setweight(to_tsvector('english', COALESCE(NEW.name_i18n->>'en', '')), 'A');
+    RETURN NEW;
+  END
+  $$ LANGUAGE plpgsql;
+`)
+```
+
+2. **Modèle** : Utiliser `TranslatableField`
+
+```typescript
+import type { TranslatableField, TranslatableFieldNullable } from '#shared/helpers/translatable'
+
+@column({
+  prepare: (value: TranslatableField) => JSON.stringify(value),
+  consume: (value: string | TranslatableField) =>
+    typeof value === 'string' ? JSON.parse(value) : value,
+})
+declare nameI18n: TranslatableField
+
+@column({
+  prepare: (value: TranslatableFieldNullable | null) =>
+    value ? JSON.stringify(value) : null,
+  consume: (value: string | TranslatableFieldNullable | null) => {
+    if (value === null) return null
+    return typeof value === 'string' ? JSON.parse(value) : value
+  },
+})
+declare descriptionI18n: TranslatableFieldNullable | null
+```
+
+3. **Tests** : Fournir les deux traductions
+
+```typescript
+const plan = await planRepository.create({
+  nameI18n: { fr: 'Starter', en: 'Starter' },
+  descriptionI18n: { fr: 'Plan de démarrage', en: 'Starter plan' },
+  // ...
+})
+
+assert.deepEqual(plan.nameI18n, { fr: 'Starter', en: 'Starter' })
+```
+
+### Frontend (React i18next)
+
+```tsx
+import { useTranslation } from 'react-i18next'
+import { getTranslation } from '@/lib/translatable'
+
+export function PlanCard({ plan }) {
+  const { t, i18n } = useTranslation()
+
+  return (
+    <div>
+      {/* Texte statique */}
+      <h2>{t('common.welcome')}</h2>
+
+      {/* Champ traduisible */}
+      <h3>{getTranslation(plan.nameI18n, i18n.language as 'fr' | 'en')}</h3>
+    </div>
+  )
+}
+```
+
+### Ajouter nouvelles traductions statiques
+
+1. **Backend** : `resources/lang/{locale}/{namespace}.json`
+2. **Frontend** : `inertia/lib/i18n.ts`
+
+### Frontend (React) - OBLIGATOIRE
+
+**TOUJOURS** importer et utiliser `useI18n()` dans TOUS les composants qui affichent du texte :
+
+```tsx
+// ✅ CORRECT - Texte traduit
+import { useI18n } from '@/hooks/use-i18n'
+
+export function MyComponent() {
+  const { t } = useI18n()
+
+  return <h1>{t('common.my_title')}</h1>
+}
+
+// ❌ INCORRECT - Texte hardcodé
+export function MyComponent() {
+  return <h1>Mon titre</h1>
+}
+```
+
+**Checklist nouveau composant React :**
+1. ✅ Importer `useI18n` en haut du fichier
+2. ✅ Appeler `const { t } = useI18n()` dans le composant
+3. ✅ Remplacer TOUS les textes par `t('namespace.key')`
+4. ✅ Vérifier que les clés existent dans `/resources/lang/fr/*.json` ET `/resources/lang/en/*.json`
+
+### À NE PAS FAIRE
+
+21. ❌ Créer champs traduisibles sans fournir FR et EN
+22. ❌ **Hardcoder les textes affichables (titre, label, bouton, etc.)**
+23. ❌ Oublier d'adapter les triggers Full-Text Search pour multi-langue
+24. ❌ Utiliser string simple au lieu de `TranslatableField`
+25. ❌ **Créer un composant React sans `useI18n()` si il affiche du texte**
+
 ## 📚 Documentation de Référence
 
 - [Architecture Overview](docs/architecture/overview.md)
 - [Repository Pattern](docs/architecture/repository-pattern.md)
 - [Authentication System](docs/features/authentication.md)
+- [Internationalization (i18n)](docs/features/i18n.md)
+- [Full-Text Search](docs/features/full-text-search.md)
 
 ---
 

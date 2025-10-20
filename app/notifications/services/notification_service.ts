@@ -17,9 +17,19 @@ export default class NotificationService {
   ) {}
 
   async createNotification(data: CreateNotificationData): Promise<Notification> {
-    return this.notificationRepo.create(data, {
-      cache: { tags: ['notifications', `user_${data.userId}_notifications`] },
-    })
+    return this.notificationRepo.create(
+      {
+        userId: data.userId,
+        organizationId: data.organizationId || null,
+        type: data.type,
+        titleI18n: { fr: data.title, en: data.title },
+        messageI18n: { fr: data.message, en: data.message },
+        data: data.data || null,
+      } as any,
+      {
+        cache: { tags: ['notifications', `user_${data.userId}_notifications`] },
+      }
+    )
   }
 
   async markAsRead(notificationId: string): Promise<void> {

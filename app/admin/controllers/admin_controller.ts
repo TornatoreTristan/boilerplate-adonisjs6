@@ -352,7 +352,7 @@ export default class AdminController {
       },
       plans: plans.map((plan: any) => ({
         id: plan.id,
-        name: plan.name,
+        nameI18n: plan.nameI18n,
       })),
       filters: { status, planId, search },
     })

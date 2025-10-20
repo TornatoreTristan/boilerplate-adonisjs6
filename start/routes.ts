@@ -13,6 +13,10 @@ import './routes/organization_routes.js'
 import './routes/webhook_routes.js'
 import { middleware } from './kernel.js'
 
+// Locale switching route (accessible to everyone)
+const LocaleController = () => import('#shared/controllers/locale_controller')
+router.post('/locale', [LocaleController, 'update'])
+
 // Page d'accueil (protégée par authentification et nécessite une organisation)
 router
   .on('/')

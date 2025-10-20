@@ -9,7 +9,7 @@ export default class extends BaseSchema {
       table.uuid('id').primary().defaultTo(this.raw('gen_random_uuid()'))
       table.string('name').notNullable()
       table.string('slug').unique().notNullable()
-      table.text('description').nullable()
+      table.jsonb('description_i18n').nullable()
       table.string('website').nullable()
       table.string('logo_url').nullable()
       table.string('email').nullable()
@@ -34,7 +34,8 @@ export default class extends BaseSchema {
         NEW.search_vector :=
           setweight(to_tsvector('french', COALESCE(NEW.name, '')), 'A') ||
           setweight(to_tsvector('french', COALESCE(NEW.slug, '')), 'B') ||
-          setweight(to_tsvector('french', COALESCE(NEW.description, '')), 'C') ||
+          setweight(to_tsvector('french', COALESCE(NEW.description_i18n->>'fr', '')), 'C') ||
+          setweight(to_tsvector('english', COALESCE(NEW.description_i18n->>'en', '')), 'C') ||
           setweight(to_tsvector('french', COALESCE(NEW.email, '')), 'C') ||
           setweight(to_tsvector('french', COALESCE(NEW.address, '')), 'D');
         RETURN NEW;
@@ -49,7 +50,8 @@ export default class extends BaseSchema {
       UPDATE ${this.tableName} SET search_vector =
         setweight(to_tsvector('french', COALESCE(name, '')), 'A') ||
         setweight(to_tsvector('french', COALESCE(slug, '')), 'B') ||
-        setweight(to_tsvector('french', COALESCE(description, '')), 'C') ||
+        setweight(to_tsvector('french', COALESCE(description_i18n->>'fr', '')), 'C') ||
+        setweight(to_tsvector('english', COALESCE(description_i18n->>'en', '')), 'C') ||
         setweight(to_tsvector('french', COALESCE(email, '')), 'C') ||
         setweight(to_tsvector('french', COALESCE(address, '')), 'D');
     `)

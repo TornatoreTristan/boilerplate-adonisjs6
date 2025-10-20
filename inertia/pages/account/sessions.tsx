@@ -16,6 +16,7 @@ import {
 import { Monitor, Smartphone, Tablet } from 'lucide-react'
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
+import { useI18n } from '@/hooks/use-i18n'
 
 interface Session {
   id: string
@@ -32,6 +33,7 @@ interface Session {
 type TabType = 'active' | 'history'
 
 export default function Sessions() {
+  const { t, locale } = useI18n()
   const { activeSessions, inactiveSessions } = usePage<{
     activeSessions: Session[]
     inactiveSessions: Session[]
@@ -55,7 +57,7 @@ export default function Sessions() {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
-    return new Intl.DateTimeFormat('fr-FR', {
+    return new Intl.DateTimeFormat(locale === 'fr' ? 'fr-FR' : 'en-US', {
       dateStyle: 'medium',
       timeStyle: 'short',
     }).format(date)
@@ -89,7 +91,7 @@ export default function Sessions() {
 
   return (
     <>
-      <Head title="Mes sessions" />
+      <Head title={t('account.sessions.title')} />
       <AccountLayout>
         <div className="max-w-2xl space-y-6">
           {/* Onglets */}
@@ -104,7 +106,7 @@ export default function Sessions() {
                     : 'border-transparent text-muted-foreground hover:border-border hover:text-foreground'
                 )}
               >
-                Sessions actives
+                {t('account.sessions.active_sessions')}
                 {activeSessions.length > 0 && (
                   <span className="bg-secondary text-secondary-foreground ml-2 rounded-full px-2 py-0.5 text-xs">
                     {activeSessions.length}
@@ -120,7 +122,7 @@ export default function Sessions() {
                     : 'border-transparent text-muted-foreground hover:border-border hover:text-foreground'
                 )}
               >
-                Historique
+                {t('account.sessions.history')}
                 {inactiveSessions.length > 0 && (
                   <span className="bg-secondary text-secondary-foreground ml-2 rounded-full px-2 py-0.5 text-xs">
                     {inactiveSessions.length}
@@ -133,15 +135,15 @@ export default function Sessions() {
           <div>
             <p className="text-muted-foreground text-sm">
               {activeTab === 'active'
-                ? 'Gérez vos sessions actives sur différents appareils'
-                : 'Historique de vos 20 dernières sessions fermées'}
+                ? t('account.sessions.active_description')
+                : t('account.sessions.history_description')}
             </p>
           </div>
 
           <div className="space-y-4">
             {sessions.length === 0 ? (
               <div className="text-muted-foreground rounded-lg border border-dashed p-8 text-center text-sm">
-                {activeTab === 'active' ? 'Aucune session active' : 'Aucun historique'}
+                {activeTab === 'active' ? t('account.sessions.no_active_sessions') : t('account.sessions.no_history')}
               </div>
             ) : (
               sessions.map((session) => {
@@ -158,7 +160,7 @@ export default function Sessions() {
                             <p className="text-sm font-medium">{session.userAgent}</p>
                             {session.isCurrent && (
                               <span className="bg-primary/10 text-primary rounded-full px-2 py-0.5 text-xs font-medium">
-                                Session actuelle
+                                {t('account.sessions.current_session')}
                               </span>
                             )}
                           </div>
@@ -168,8 +170,8 @@ export default function Sessions() {
                           </p>
                           <p className="text-muted-foreground text-xs">
                             {session.isActive
-                              ? `Dernière activité : ${formatDate(session.lastActiveAt)}`
-                              : `Fermée le : ${formatDate(session.endedAt || session.lastActiveAt)}`}
+                              ? `${t('account.sessions.last_activity')} : ${formatDate(session.lastActiveAt)}`
+                              : `${t('account.sessions.closed_on')} : ${formatDate(session.endedAt || session.lastActiveAt)}`}
                           </p>
                         </div>
                       </div>
@@ -186,25 +188,24 @@ export default function Sessions() {
                               size="sm"
                               onClick={() => setSessionToDisconnect(session.id)}
                             >
-                              Déconnecter
+                              {t('account.sessions.disconnect')}
                             </Button>
                           </AlertDialogTrigger>
                           <AlertDialogContent>
                             <AlertDialogHeader>
-                              <AlertDialogTitle>Déconnecter cette session ?</AlertDialogTitle>
+                              <AlertDialogTitle>{t('account.sessions.disconnect_session_title')}</AlertDialogTitle>
                               <AlertDialogDescription>
-                                Cette session sera immédiatement déconnectée. L'appareil devra se
-                                reconnecter pour accéder à nouveau à votre compte.
+                                {t('account.sessions.disconnect_session_description')}
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                              <AlertDialogCancel disabled={isProcessing}>Annuler</AlertDialogCancel>
+                              <AlertDialogCancel disabled={isProcessing}>{t('account.profile.cancel')}</AlertDialogCancel>
                               <AlertDialogAction
                                 onClick={handleDisconnectSession}
                                 disabled={isProcessing}
                                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                               >
-                                {isProcessing ? 'Déconnexion...' : 'Déconnecter'}
+                                {isProcessing ? t('account.sessions.disconnecting') : t('account.sessions.disconnect')}
                               </AlertDialogAction>
                             </AlertDialogFooter>
                           </AlertDialogContent>
@@ -221,33 +222,32 @@ export default function Sessions() {
           {activeTab === 'active' && activeSessions.length > 1 && (
             <div className="border-destructive/50 space-y-4 rounded-lg border p-4">
               <div>
-                <h4 className="text-sm font-medium">Déconnecter toutes les sessions</h4>
+                <h4 className="text-sm font-medium">{t('account.sessions.disconnect_all_title')}</h4>
                 <p className="text-muted-foreground mt-1 text-xs">
-                  Cela vous déconnectera de tous les appareils sauf celui-ci
+                  {t('account.sessions.disconnect_all_description')}
                 </p>
               </div>
               <AlertDialog open={isDisconnectingAll} onOpenChange={setIsDisconnectingAll}>
                 <AlertDialogTrigger asChild>
                   <Button variant="destructive" size="sm">
-                    Déconnecter tout
+                    {t('account.sessions.disconnect_all')}
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
-                    <AlertDialogTitle>Déconnecter toutes les sessions ?</AlertDialogTitle>
+                    <AlertDialogTitle>{t('account.sessions.disconnect_all_confirm_title')}</AlertDialogTitle>
                     <AlertDialogDescription>
-                      Toutes vos sessions actives seront déconnectées, sauf celle-ci. Les autres
-                      appareils devront se reconnecter pour accéder à votre compte.
+                      {t('account.sessions.disconnect_all_confirm_description')}
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
-                    <AlertDialogCancel disabled={isProcessing}>Annuler</AlertDialogCancel>
+                    <AlertDialogCancel disabled={isProcessing}>{t('account.profile.cancel')}</AlertDialogCancel>
                     <AlertDialogAction
                       onClick={handleDisconnectAll}
                       disabled={isProcessing}
                       className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                     >
-                      {isProcessing ? 'Déconnexion...' : 'Tout déconnecter'}
+                      {isProcessing ? t('account.sessions.disconnecting') : t('account.sessions.disconnect_all')}
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>

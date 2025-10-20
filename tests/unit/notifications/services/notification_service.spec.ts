@@ -61,7 +61,7 @@ test.group('NotificationService', (group) => {
   })
 
   test('devrait marquer une notification comme lue', async ({ assert }) => {
-    const notification = await repository.create({
+    const notification = await service.createNotification({
       userId: user.id,
       type: 'user.mentioned',
       title: 'Test',
@@ -75,14 +75,14 @@ test.group('NotificationService', (group) => {
   })
 
   test('devrait marquer plusieurs notifications comme lues', async ({ assert }) => {
-    const notif1 = await repository.create({
+    const notif1 = await service.createNotification({
       userId: user.id,
       type: 'user.mentioned',
       title: 'Test 1',
       message: 'Message 1',
     })
 
-    const notif2 = await repository.create({
+    const notif2 = await service.createNotification({
       userId: user.id,
       type: 'user.mentioned',
       title: 'Test 2',
@@ -101,14 +101,14 @@ test.group('NotificationService', (group) => {
   })
 
   test('devrait marquer toutes les notifications d\'un utilisateur comme lues', async ({ assert }) => {
-    await repository.create({
+    await service.createNotification({
       userId: user.id,
       type: 'user.mentioned',
       title: 'Test 1',
       message: 'Message 1',
     })
 
-    await repository.create({
+    await service.createNotification({
       userId: user.id,
       type: 'user.mentioned',
       title: 'Test 2',
@@ -124,14 +124,14 @@ test.group('NotificationService', (group) => {
   })
 
   test('devrait récupérer le nombre de notifications non lues', async ({ assert }) => {
-    await repository.create({
+    await service.createNotification({
       userId: user.id,
       type: 'user.mentioned',
       title: 'Unread 1',
       message: 'Message 1',
     })
 
-    await repository.create({
+    await service.createNotification({
       userId: user.id,
       type: 'user.mentioned',
       title: 'Unread 2',
@@ -144,14 +144,14 @@ test.group('NotificationService', (group) => {
   })
 
   test('devrait récupérer les notifications d\'un utilisateur', async ({ assert }) => {
-    await repository.create({
+    await service.createNotification({
       userId: user.id,
       type: 'user.mentioned',
       title: 'Notification 1',
       message: 'Message 1',
     })
 
-    await repository.create({
+    await service.createNotification({
       userId: user.id,
       type: 'org.invitation',
       title: 'Notification 2',
@@ -163,7 +163,7 @@ test.group('NotificationService', (group) => {
       password: 'password',
     })
 
-    await repository.create({
+    await service.createNotification({
       userId: otherUser.id,
       type: 'user.mentioned',
       title: 'Other notification',
@@ -178,14 +178,14 @@ test.group('NotificationService', (group) => {
   })
 
   test('devrait récupérer uniquement les notifications non lues', async ({ assert }) => {
-    await repository.create({
+    await service.createNotification({
       userId: user.id,
       type: 'user.mentioned',
       title: 'Unread',
       message: 'Unread message',
     })
 
-    const readNotif = await repository.create({
+    const readNotif = await service.createNotification({
       userId: user.id,
       type: 'user.mentioned',
       title: 'Read',
@@ -202,14 +202,14 @@ test.group('NotificationService', (group) => {
   })
 
   test('devrait filtrer les notifications par type', async ({ assert }) => {
-    await repository.create({
+    await service.createNotification({
       userId: user.id,
       type: 'user.mentioned',
       title: 'Mention',
       message: 'You were mentioned',
     })
 
-    await repository.create({
+    await service.createNotification({
       userId: user.id,
       type: 'org.invitation',
       title: 'Invitation',
@@ -226,7 +226,7 @@ test.group('NotificationService', (group) => {
   })
 
   test('devrait supprimer une notification', async ({ assert }) => {
-    const notification = await repository.create({
+    const notification = await service.createNotification({
       userId: user.id,
       type: 'user.mentioned',
       title: 'Test',

@@ -46,6 +46,7 @@ export const TYPES = {
   Logger: Symbol.for('Logger'),
   RateLimitService: Symbol.for('RateLimitService'),
   EmailService: Symbol.for('EmailService'),
+  LocaleService: Symbol.for('LocaleService'),
 
   // External services
   RedisClient: Symbol.for('RedisClient'),

@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/sidebar'
 import { Bell, CreditCard, EllipsisVertical, LogOutIcon, Shield, User } from 'lucide-react'
 import { router } from '@inertiajs/react'
+import { useI18n } from '@/hooks/use-i18n'
 
 export function NavUser({
   user,
@@ -28,6 +29,7 @@ export function NavUser({
   }
   isSuperAdmin?: boolean
 }) {
+  const { t } = useI18n()
   const { isMobile } = useSidebar()
 
   const handleLogout = () => {
@@ -76,15 +78,15 @@ export function NavUser({
             <DropdownMenuGroup>
               <DropdownMenuItem onClick={() => router.visit('/account/profile')}>
                 <User />
-                Compte
+                {t('common.account')}
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <CreditCard />
-                Facturation
+                {t('common.billing')}
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <Bell />
-                Notifications
+                {t('common.notifications')}
               </DropdownMenuItem>
             </DropdownMenuGroup>
             {isSuperAdmin && (
@@ -93,7 +95,7 @@ export function NavUser({
                 <DropdownMenuGroup>
                   <DropdownMenuItem onClick={() => router.visit('/admin')}>
                     <Shield />
-                    Administration
+                    {t('common.administration')}
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
               </>
@@ -101,7 +103,7 @@ export function NavUser({
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout}>
               <LogOutIcon />
-              Déconnexion
+              {t('auth.logout')}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

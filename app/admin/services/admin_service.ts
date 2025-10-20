@@ -76,7 +76,7 @@ interface OrganizationWithMembersCount {
   id: string
   name: string
   slug: string
-  description: string | null
+  descriptionI18n: { fr?: string | null; en?: string | null } | null
   website: string | null
   isActive: boolean
   createdAt: string
@@ -97,7 +97,7 @@ interface OrganizationDetail {
     id: string
     name: string
     slug: string
-    description: string | null
+    descriptionI18n: { fr?: string | null; en?: string | null } | null
     website: string | null
     isActive: boolean
     createdAt: string
@@ -522,7 +522,7 @@ export default class AdminService {
       id: org.id,
       name: org.name,
       slug: org.slug,
-      description: org.description,
+      descriptionI18n: org.descriptionI18n,
       website: org.website,
       isActive: org.isActive,
       createdAt: org.createdAt.toISO()!,
@@ -553,7 +553,7 @@ export default class AdminService {
         id: organization.id,
         name: organization.name,
         slug: organization.slug,
-        description: organization.description,
+        descriptionI18n: organization.descriptionI18n,
         website: organization.website,
         isActive: organization.isActive,
         createdAt: organization.createdAt.toISO()!,

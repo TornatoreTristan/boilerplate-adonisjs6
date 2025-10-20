@@ -6,26 +6,28 @@ import { Separator } from '@/components/ui/separator'
 import { Moon, Sun, Monitor } from 'lucide-react'
 import { useTheme } from '@/components/theme-provider'
 import { cn } from '@/lib/utils'
+import { useI18n } from '@/hooks/use-i18n'
 
 export default function Preferences() {
+  const { t } = useI18n()
   const { theme, setTheme } = useTheme()
 
   return (
     <>
-      <Head title="Mes préférences" />
+      <Head title={t('account.preferences.title')} />
       <AccountLayout>
         <div className="max-w-2xl space-y-10">
           {/* Thème */}
           <div className="space-y-4">
             <div>
-              <h3 className="text-base font-medium">Apparence</h3>
+              <h3 className="text-base font-medium">{t('account.preferences.appearance')}</h3>
               <p className="text-muted-foreground mt-1 text-sm">
-                Personnalisez l'apparence de l'interface
+                {t('account.preferences.appearance_description')}
               </p>
             </div>
 
             <div className="grid gap-3">
-              <Label>Thème</Label>
+              <Label>{t('account.preferences.theme')}</Label>
               <div className="grid grid-cols-3 gap-3">
                 <button
                   onClick={() => setTheme('light')}
@@ -37,7 +39,7 @@ export default function Preferences() {
                   )}
                 >
                   <Sun className="h-5 w-5" />
-                  <span className="text-sm font-medium">Clair</span>
+                  <span className="text-sm font-medium">{t('account.preferences.light')}</span>
                 </button>
                 <button
                   onClick={() => setTheme('dark')}
@@ -49,7 +51,7 @@ export default function Preferences() {
                   )}
                 >
                   <Moon className="h-5 w-5" />
-                  <span className="text-sm font-medium">Sombre</span>
+                  <span className="text-sm font-medium">{t('account.preferences.dark')}</span>
                 </button>
                 <button
                   onClick={() => setTheme('system')}
@@ -61,7 +63,7 @@ export default function Preferences() {
                   )}
                 >
                   <Monitor className="h-5 w-5" />
-                  <span className="text-sm font-medium">Système</span>
+                  <span className="text-sm font-medium">{t('account.preferences.system')}</span>
                 </button>
               </div>
             </div>
@@ -72,22 +74,22 @@ export default function Preferences() {
           {/* Notifications */}
           <div className="space-y-4">
             <div>
-              <h3 className="text-base font-medium">Notifications</h3>
+              <h3 className="text-base font-medium">{t('account.preferences.notifications')}</h3>
               <p className="text-muted-foreground mt-1 text-sm">
-                Gérez vos préférences de notifications
+                {t('account.preferences.notifications_description')}
               </p>
             </div>
 
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label>Notifications par email</Label>
+                  <Label>{t('account.preferences.email_notifications')}</Label>
                   <p className="text-muted-foreground text-xs">
-                    Recevoir des emails pour les mises à jour importantes
+                    {t('account.preferences.email_notifications_description')}
                   </p>
                 </div>
                 <Button variant="outline" size="sm">
-                  Activé
+                  {t('account.preferences.enabled')}
                 </Button>
               </div>
 
@@ -95,13 +97,13 @@ export default function Preferences() {
 
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label>Notifications push</Label>
+                  <Label>{t('account.preferences.push_notifications')}</Label>
                   <p className="text-muted-foreground text-xs">
-                    Recevoir des notifications dans le navigateur
+                    {t('account.preferences.push_notifications_description')}
                   </p>
                 </div>
                 <Button variant="outline" size="sm">
-                  Désactivé
+                  {t('account.preferences.disabled')}
                 </Button>
               </div>
 
@@ -109,13 +111,13 @@ export default function Preferences() {
 
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label>Nouvelles fonctionnalités</Label>
+                  <Label>{t('account.preferences.new_features')}</Label>
                   <p className="text-muted-foreground text-xs">
-                    Être notifié des nouvelles fonctionnalités
+                    {t('account.preferences.new_features_description')}
                   </p>
                 </div>
                 <Button variant="outline" size="sm">
-                  Activé
+                  {t('account.preferences.enabled')}
                 </Button>
               </div>
             </div>
@@ -126,22 +128,22 @@ export default function Preferences() {
           {/* Communication */}
           <div className="space-y-4">
             <div>
-              <h3 className="text-base font-medium">Communication</h3>
+              <h3 className="text-base font-medium">{t('account.preferences.communication')}</h3>
               <p className="text-muted-foreground mt-1 text-sm">
-                Gérez vos préférences de communication
+                {t('account.preferences.communication_description')}
               </p>
             </div>
 
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label>Newsletter</Label>
+                  <Label>{t('account.preferences.newsletter')}</Label>
                   <p className="text-muted-foreground text-xs">
-                    Recevoir la newsletter hebdomadaire
+                    {t('account.preferences.newsletter_description')}
                   </p>
                 </div>
                 <Button variant="outline" size="sm">
-                  Activé
+                  {t('account.preferences.enabled')}
                 </Button>
               </div>
 
@@ -149,13 +151,13 @@ export default function Preferences() {
 
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label>Conseils et astuces</Label>
+                  <Label>{t('account.preferences.tips_and_tricks')}</Label>
                   <p className="text-muted-foreground text-xs">
-                    Recevoir des conseils pour mieux utiliser l'application
+                    {t('account.preferences.tips_and_tricks_description')}
                   </p>
                 </div>
                 <Button variant="outline" size="sm">
-                  Désactivé
+                  {t('account.preferences.disabled')}
                 </Button>
               </div>
 
@@ -163,13 +165,13 @@ export default function Preferences() {
 
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label>Offres promotionnelles</Label>
+                  <Label>{t('account.preferences.promotional_offers')}</Label>
                   <p className="text-muted-foreground text-xs">
-                    Recevoir des offres et promotions exclusives
+                    {t('account.preferences.promotional_offers_description')}
                   </p>
                 </div>
                 <Button variant="outline" size="sm">
-                  Désactivé
+                  {t('account.preferences.disabled')}
                 </Button>
               </div>
             </div>
@@ -180,12 +182,12 @@ export default function Preferences() {
           {/* Langue */}
           <div className="space-y-4">
             <div>
-              <h3 className="text-base font-medium">Langue et région</h3>
-              <p className="text-muted-foreground mt-1 text-sm">Personnalisez votre langue</p>
+              <h3 className="text-base font-medium">{t('account.preferences.language_region')}</h3>
+              <p className="text-muted-foreground mt-1 text-sm">{t('account.preferences.language_region_description')}</p>
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="language">Langue</Label>
+              <Label htmlFor="language">{t('account.preferences.language')}</Label>
               <select
                 id="language"
                 className="border-input bg-background ring-offset-background flex h-10 w-full rounded-md border px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
@@ -197,7 +199,7 @@ export default function Preferences() {
               </select>
             </div>
 
-            <Button className="w-fit">Enregistrer</Button>
+            <Button className="w-fit">{t('account.preferences.save')}</Button>
           </div>
         </div>
       </AccountLayout>

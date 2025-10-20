@@ -7,17 +7,18 @@ import { Button } from '@/components/ui/button'
 import { CheckCircle2, ArrowLeft } from 'lucide-react'
 import { PageHeader } from '@/components/core/page-header'
 import { cn } from '@/lib/utils'
+import { getTranslation, type TranslatableField, type TranslatableFieldNullable } from '@/lib/translatable'
 
 interface Plan {
   id: string
-  name: string
+  nameI18n: TranslatableField
   slug: string
-  description: string | null
+  descriptionI18n: TranslatableFieldNullable | null
   priceMonthly: number
   priceYearly: number
   currency: string
   pricingModel: string
-  features: string[] | null
+  featuresI18n: TranslatableFieldNullable | null
   trialDays: number | null
   sortOrder: number
 }
@@ -152,7 +153,7 @@ const OrganizationPricingPage = ({
                   <CardHeader>
                     <div className="flex items-start justify-between">
                       <CardTitle className="flex items-center gap-2">
-                        {plan.name}
+                        {getTranslation(plan.nameI18n)}
                         {isCurrentPlan && (
                           <Badge variant="default" className="bg-primary">
                             Actuel
@@ -160,7 +161,7 @@ const OrganizationPricingPage = ({
                         )}
                       </CardTitle>
                     </div>
-                    <CardDescription>{plan.description}</CardDescription>
+                    <CardDescription>{getTranslation(plan.descriptionI18n)}</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-6">
                     <div>
@@ -192,11 +193,11 @@ const OrganizationPricingPage = ({
                       )}
                     </div>
 
-                    {plan.features && plan.features.length > 0 && (
+                    {plan.featuresI18n && getTranslation(plan.featuresI18n) > 0 && (
                       <div>
                         <p className="text-sm font-semibold mb-3">Fonctionnalités incluses</p>
                         <ul className="space-y-2">
-                          {plan.features.map((feature, index) => (
+                          {getTranslation(plan.featuresI18n).split(", ").map((feature, index) => (
                             <li key={index} className="flex items-start gap-2 text-sm">
                               <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400 mt-0.5 shrink-0" />
                               <span>{feature}</span>

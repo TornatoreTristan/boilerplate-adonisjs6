@@ -13,8 +13,10 @@ import { Separator } from '@/components/ui/separator'
 import { ThemeToggle } from '@/components/core/theme-toggle'
 import { useFlashMessages } from '@/hooks/use-flash-messages'
 import { SearchCommand } from '@/components/core/search-command'
+import { LanguageSelector } from '@/components/core/language-selector'
 import { Button } from '@/components/ui/button'
 import { Search } from 'lucide-react'
+import { useI18n } from '@/hooks/use-i18n'
 
 export interface BreadcrumbItemType {
   label: string
@@ -27,6 +29,7 @@ interface AppLayoutProps {
 }
 
 const AppLayout = ({ children, breadcrumbs = [] }: AppLayoutProps) => {
+  const { t } = useI18n()
   useFlashMessages()
   const [searchOpen, setSearchOpen] = useState(false)
 
@@ -41,7 +44,7 @@ const AppLayout = ({ children, breadcrumbs = [] }: AppLayoutProps) => {
             <Breadcrumb className="font-medium">
               <BreadcrumbList>
                 <BreadcrumbItem>
-                  <BreadcrumbLink href="/">Accueil</BreadcrumbLink>
+                  <BreadcrumbLink href="/">{t('common.home')}</BreadcrumbLink>
                 </BreadcrumbItem>
                 {breadcrumbs.map((item, index) => (
                   <div key={index} className="flex items-center gap-1.5">
@@ -65,11 +68,12 @@ const AppLayout = ({ children, breadcrumbs = [] }: AppLayoutProps) => {
               onClick={() => setSearchOpen(true)}
             >
               <Search className="h-4 w-4 xl:mr-2" />
-              <span className="hidden xl:inline-flex">Rechercher...</span>
+              <span className="hidden xl:inline-flex">{t('common.search')}...</span>
               <kbd className="pointer-events-none absolute right-1.5 top-2 hidden h-6 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 xl:flex">
                 <span className="text-xs">⌘</span>K
               </kbd>
             </Button>
+            <LanguageSelector />
             <ThemeToggle />
           </div>
         </header>

@@ -114,7 +114,7 @@ const PlansIndexPage = ({ plans }: PlansIndexProps) => {
                       <TableRow key={plan.id}>
                         <TableCell>
                           <div>
-                            <div className="font-medium">{plan.name}</div>
+                            <div className="font-medium">{getTranslation(plan.nameI18n)}</div>
                             <div className="text-xs text-muted-foreground">{plan.slug}</div>
                           </div>
                         </TableCell>

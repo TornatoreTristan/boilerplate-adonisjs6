@@ -18,14 +18,14 @@ test.group('AdminService - Organizations', (group) => {
     const org1 = await organizationRepository.create({
       name: 'Organization 1',
       slug: 'org-1',
-      description: 'First organization',
+      descriptionI18n: { fr: 'Première organisation', en: 'First organization' },
       isActive: true,
     })
 
     const org2 = await organizationRepository.create({
       name: 'Organization 2',
       slug: 'org-2',
-      description: 'Second organization',
+      descriptionI18n: { fr: 'Deuxième organisation', en: 'Second organization' },
       isActive: false,
     })
 
@@ -42,7 +42,7 @@ test.group('AdminService - Organizations', (group) => {
 
     assert.equal(foundOrg1!.name, 'Organization 1')
     assert.equal(foundOrg1!.slug, 'org-1')
-    assert.equal(foundOrg1!.description, 'First organization')
+    assert.deepEqual(foundOrg1!.descriptionI18n, { fr: 'Première organisation', en: 'First organization' })
     assert.equal(foundOrg1!.isActive, true)
     assert.exists(foundOrg1!.createdAt)
     assert.property(foundOrg1!, 'membersCount')
@@ -145,7 +145,7 @@ test.group('AdminService - Organizations', (group) => {
     const org = await organizationRepository.create({
       name: 'Test Organization',
       slug: 'test-org',
-      description: 'A test organization',
+      descriptionI18n: { fr: 'Une organisation de test', en: 'A test organization' },
       website: 'https://test.com',
       isActive: true,
     })
@@ -198,7 +198,7 @@ test.group('AdminService - Organizations', (group) => {
     assert.equal(detail.organization.id, org.id)
     assert.equal(detail.organization.name, 'Test Organization')
     assert.equal(detail.organization.slug, 'test-org')
-    assert.equal(detail.organization.description, 'A test organization')
+    assert.deepEqual(detail.organization.descriptionI18n, { fr: 'Une organisation de test', en: 'A test organization' })
     assert.equal(detail.organization.website, 'https://test.com')
     assert.equal(detail.organization.isActive, true)
     assert.exists(detail.organization.createdAt)

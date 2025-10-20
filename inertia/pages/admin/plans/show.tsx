@@ -156,7 +156,7 @@ const ShowPlanPage = ({ plan, subscriptions }: Props) => {
 
   return (
     <>
-      <Head title={`Plan ${plan.name}`} />
+      <Head title={`Plan ${getTranslation(plan.nameI18n)}`} />
       <AdminLayout
         breadcrumbs={[
           { label: 'Plans', href: '/admin/plans' },
@@ -165,8 +165,8 @@ const ShowPlanPage = ({ plan, subscriptions }: Props) => {
       >
         <div className="flex flex-col gap-6 p-6 max-w-7xl mx-auto">
           <PageHeader
-            title={plan.name}
-            description={plan.description || `Détails du plan ${plan.name}`}
+            title={getTranslation(plan.nameI18n)}
+            description={plan.description || `Détails du plan ${getTranslation(plan.nameI18n)}`}
             icon={CreditCard}
             actions={
               <div className="flex gap-2">

@@ -1,4 +1,4 @@
-import { Head, Link, router } from '@inertiajs/react'
+import { Head, Link, router, usePage } from '@inertiajs/react'
 import OrganizationSettingsLayout from '@/components/layouts/organization-settings-layout'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -135,6 +135,26 @@ const OrganizationSettingsSubscriptionsPage = ({
   availablePlans,
   invoices,
 }: Props) => {
+  const { props } = usePage()
+  const locale = (props.locale as 'fr' | 'en') || 'fr'
+
+  // Traductions simples basées sur la locale
+  const translations = {
+    fr: {
+      subscription_management: 'Gestion des abonnements',
+      manage_subscription: 'Gérez votre abonnement et consultez les plans disponibles',
+      no_active_subscription: 'Aucun abonnement actif',
+      choose_plan: 'Choisissez un plan pour commencer à utiliser toutes les fonctionnalités',
+    },
+    en: {
+      subscription_management: 'Subscription Management',
+      manage_subscription: 'Manage your subscription and view available plans',
+      no_active_subscription: 'No Active Subscription',
+      choose_plan: 'Choose a plan to start using all features',
+    },
+  }
+  const t = (key: string) => translations[locale][key as keyof typeof translations['fr']] || key
+
   const canManageSubscription = ['owner', 'admin'].includes(userRole)
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
@@ -170,9 +190,9 @@ const OrganizationSettingsSubscriptionsPage = ({
       <OrganizationSettingsLayout>
         <div className="space-y-6">
           <div>
-            <h2 className="text-lg font-semibold">Gestion des abonnements</h2>
+            <h2 className="text-lg font-semibold">{t('common.subscription_management')}</h2>
             <p className="text-sm text-muted-foreground">
-              Gérez votre abonnement et consultez les plans disponibles
+              {t('common.manage_subscription')}
             </p>
           </div>
 
@@ -182,12 +202,12 @@ const OrganizationSettingsSubscriptionsPage = ({
                 <div className="flex items-start justify-between">
                   <div>
                     <CardTitle className="flex items-center gap-2">
-                      {currentSubscription.plan.name}
+                      {getTranslation(currentSubscription.plan.nameI18n)}
                       <Badge className={statusColors[currentSubscription.status]}>
                         {statusLabels[currentSubscription.status] || currentSubscription.status}
                       </Badge>
                     </CardTitle>
-                    <CardDescription>{currentSubscription.plan.description}</CardDescription>
+                    <CardDescription>{getTranslation(currentSubscription.plan.descriptionI18n)}</CardDescription>
                   </div>
                   <div className="text-right">
                     <div className="text-2xl font-bold">
@@ -311,7 +331,7 @@ const OrganizationSettingsSubscriptionsPage = ({
                           <AlertDialogHeader>
                             <AlertDialogTitle>Annuler votre abonnement ?</AlertDialogTitle>
                             <AlertDialogDescription>
-                              Votre abonnement {currentSubscription.plan.name} sera annulé à la fin de la période de facturation.
+                              Votre abonnement {getTranslation(currentSubscription.plan.nameI18n)} sera annulé à la fin de la période de facturation.
                               {currentSubscription.currentPeriodEnd && (
                                 <>
                                   {' '}
@@ -344,9 +364,9 @@ const OrganizationSettingsSubscriptionsPage = ({
           ) : (
             <Card>
               <CardHeader>
-                <CardTitle>Aucun abonnement actif</CardTitle>
+                <CardTitle>{t('common.no_active_subscription')}</CardTitle>
                 <CardDescription>
-                  Choisissez un plan pour commencer à utiliser toutes les fonctionnalités
+                  {t('common.choose_plan')}
                 </CardDescription>
               </CardHeader>
               <CardContent>

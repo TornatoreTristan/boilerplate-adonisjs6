@@ -1,5 +1,6 @@
 import { Home, Users, Shield, Settings, Building2, ArrowLeft, Mail, Plug, CreditCard, Receipt } from 'lucide-react'
 import { usePage } from '@inertiajs/react'
+import { useI18n } from '@/hooks/use-i18n'
 
 import {
   Sidebar,
@@ -14,56 +15,8 @@ import {
 } from '@/components/ui/sidebar'
 import { NavUser } from './nav-user'
 
-// Menu items admin
-const items = [
-  {
-    title: 'Dashboard',
-    url: '/admin',
-    icon: Home,
-  },
-  {
-    title: 'Utilisateurs',
-    url: '/admin/users',
-    icon: Users,
-  },
-  {
-    title: 'Emails',
-    url: '/admin/mails',
-    icon: Mail,
-  },
-  {
-    title: 'Rôles',
-    url: '/admin/roles',
-    icon: Shield,
-  },
-  {
-    title: 'Organisations',
-    url: '/admin/organizations',
-    icon: Building2,
-  },
-  {
-    title: 'Abonnements',
-    url: '/admin/subscriptions',
-    icon: Receipt,
-  },
-  {
-    title: 'Intégrations',
-    url: '/admin/integrations',
-    icon: Plug,
-  },
-  {
-    title: 'Plans',
-    url: '/admin/plans',
-    icon: CreditCard,
-  },
-  {
-    title: 'Paramètres',
-    url: '/admin/settings',
-    icon: Settings,
-  },
-]
-
 export function AdminSidebar() {
+  const { t } = useI18n()
   const { auth } = usePage<{
     auth: {
       user: {
@@ -77,10 +30,59 @@ export function AdminSidebar() {
     }
   }>().props
 
+  // Menu items admin
+  const items = [
+    {
+      title: t('admin.dashboard'),
+      url: '/admin',
+      icon: Home,
+    },
+    {
+      title: t('common.users'),
+      url: '/admin/users',
+      icon: Users,
+    },
+    {
+      title: t('admin.emails'),
+      url: '/admin/mails',
+      icon: Mail,
+    },
+    {
+      title: t('admin.roles'),
+      url: '/admin/roles',
+      icon: Shield,
+    },
+    {
+      title: t('admin.organizations'),
+      url: '/admin/organizations',
+      icon: Building2,
+    },
+    {
+      title: t('common.subscriptions'),
+      url: '/admin/subscriptions',
+      icon: Receipt,
+    },
+    {
+      title: t('common.integrations'),
+      url: '/admin/integrations',
+      icon: Plug,
+    },
+    {
+      title: t('admin.plans'),
+      url: '/admin/plans',
+      icon: CreditCard,
+    },
+    {
+      title: t('common.settings'),
+      url: '/admin/settings',
+      icon: Settings,
+    },
+  ]
+
   // Mapper les données user pour NavUser
   const userData = auth.user
     ? {
-        name: auth.user.fullName || 'Utilisateur',
+        name: auth.user.fullName || t('common.user'),
         email: auth.user.email,
         avatar: auth.user.avatarUrl || '',
       }
@@ -90,10 +92,10 @@ export function AdminSidebar() {
     <Sidebar>
       <SidebarContent>
         <div>
-          <h1 className="p-4 text-sm font-bold">Nom de l'application</h1>
+          <h1 className="p-4 text-sm font-bold">{t('common.app_name')}</h1>
         </div>
         <SidebarGroup>
-          <SidebarGroupLabel>Administration</SidebarGroupLabel>
+          <SidebarGroupLabel>{t('common.administration')}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (
@@ -119,7 +121,7 @@ export function AdminSidebar() {
                 <SidebarMenuButton asChild>
                   <a href="/">
                     <ArrowLeft />
-                    <span>Retour à l'app</span>
+                    <span>{t('admin.back_to_app')}</span>
                   </a>
                 </SidebarMenuButton>
               </SidebarMenuItem>

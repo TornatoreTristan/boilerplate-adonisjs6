@@ -31,8 +31,8 @@ test.group('NotificationRepository', (group) => {
       userId: user.id,
       organizationId: organization.id,
       type: 'user.mentioned' as const,
-      title: 'Vous avez été mentionné',
-      message: 'John Doe vous a mentionné dans un commentaire',
+      titleI18n: { fr: 'Vous avez été mentionné', en: 'You were mentioned' },
+      messageI18n: { fr: 'John Doe vous a mentionné dans un commentaire', en: 'John Doe mentioned you in a comment' },
       data: { commentId: '123', userId: 'abc' },
     }
 
@@ -42,8 +42,8 @@ test.group('NotificationRepository', (group) => {
     assert.equal(result.userId, notificationData.userId)
     assert.equal(result.organizationId, notificationData.organizationId)
     assert.equal(result.type, notificationData.type)
-    assert.equal(result.title, notificationData.title)
-    assert.equal(result.message, notificationData.message)
+    assert.equal(result.title, 'Vous avez été mentionné')
+    assert.equal(result.message, 'John Doe vous a mentionné dans un commentaire')
     assert.deepEqual(result.data, notificationData.data)
     assert.isTrue(result.readAt === null || result.readAt === undefined)
     assert.isString(result.id)
@@ -55,8 +55,8 @@ test.group('NotificationRepository', (group) => {
       userId: user.id,
       organizationId: null,
       type: 'system.announcement' as const,
-      title: 'Annonce système',
-      message: 'Maintenance programmée demain',
+      titleI18n: { fr: 'Annonce système', en: 'System announcement' },
+      messageI18n: { fr: 'Maintenance programmée demain', en: 'Maintenance scheduled tomorrow' },
     }
 
     const result = await repository.create(notificationData)
@@ -72,8 +72,8 @@ test.group('NotificationRepository', (group) => {
       userId: user.id,
       organizationId: organization.id,
       type: 'user.mentioned',
-      title: 'Test',
-      message: 'Test message',
+      titleI18n: { fr: 'Test', en: 'Test' },
+      messageI18n: { fr: 'Test message', en: 'Test message' },
     })
 
     const result = await repository.findById(notification.id)
@@ -96,15 +96,15 @@ test.group('NotificationRepository', (group) => {
     await Notification.create({
       userId: user.id,
       type: 'user.mentioned',
-      title: 'Notification 1',
-      message: 'Message 1',
+      titleI18n: { fr: 'Notification 1', en: 'Notification 1' },
+      messageI18n: { fr: 'Message 1', en: 'Message 1' },
     })
 
     await Notification.create({
       userId: user.id,
       type: 'org.invitation',
-      title: 'Notification 2',
-      message: 'Message 2',
+      titleI18n: { fr: 'Notification 2', en: 'Notification 2' },
+      messageI18n: { fr: 'Message 2', en: 'Message 2' },
     })
 
     const otherUser = await User.create({
@@ -115,8 +115,8 @@ test.group('NotificationRepository', (group) => {
     await Notification.create({
       userId: otherUser.id,
       type: 'user.mentioned',
-      title: 'Other notification',
-      message: 'Other message',
+      titleI18n: { fr: 'Other notification', en: 'Other notification' },
+      messageI18n: { fr: 'Other message', en: 'Other message' },
     })
 
     const result = await repository.findByUserId(user.id)
@@ -131,8 +131,8 @@ test.group('NotificationRepository', (group) => {
     const notification = await Notification.create({
       userId: user.id,
       type: 'user.mentioned',
-      title: 'Test',
-      message: 'Test message',
+      titleI18n: { fr: 'Test', en: 'Test' },
+      messageI18n: { fr: 'Test message', en: 'Test message' },
     })
 
     assert.isTrue(notification.readAt === null || notification.readAt === undefined)
@@ -150,15 +150,15 @@ test.group('NotificationRepository', (group) => {
     const notification1 = await Notification.create({
       userId: user.id,
       type: 'user.mentioned',
-      title: 'Test 1',
-      message: 'Message 1',
+      titleI18n: { fr: 'Test 1', en: 'Test 1' },
+      messageI18n: { fr: 'Message 1', en: 'Message 1' },
     })
 
     const notification2 = await Notification.create({
       userId: user.id,
       type: 'user.mentioned',
-      title: 'Test 2',
-      message: 'Message 2',
+      titleI18n: { fr: 'Test 2', en: 'Test 2' },
+      messageI18n: { fr: 'Message 2', en: 'Message 2' },
     })
 
     const count = await repository.markAsReadBulk([notification1.id, notification2.id])
@@ -178,22 +178,22 @@ test.group('NotificationRepository', (group) => {
     await Notification.create({
       userId: user.id,
       type: 'user.mentioned',
-      title: 'Unread 1',
-      message: 'Message 1',
+      titleI18n: { fr: 'Unread 1', en: 'Unread 1' },
+      messageI18n: { fr: 'Message 1', en: 'Message 1' },
     })
 
     await Notification.create({
       userId: user.id,
       type: 'user.mentioned',
-      title: 'Unread 2',
-      message: 'Message 2',
+      titleI18n: { fr: 'Unread 2', en: 'Unread 2' },
+      messageI18n: { fr: 'Message 2', en: 'Message 2' },
     })
 
     await Notification.create({
       userId: user.id,
       type: 'user.mentioned',
-      title: 'Read',
-      message: 'Message read',
+      titleI18n: { fr: 'Read', en: 'Read' },
+      messageI18n: { fr: 'Message read', en: 'Message read' },
       readAt: DateTime.now(),
     })
 
@@ -207,8 +207,8 @@ test.group('NotificationRepository', (group) => {
     const notification = await Notification.create({
       userId: user.id,
       type: 'user.mentioned',
-      title: 'Test',
-      message: 'Test message',
+      titleI18n: { fr: 'Test', en: 'Test' },
+      messageI18n: { fr: 'Test message', en: 'Test message' },
     })
 
     await repository.delete(notification.id, { soft: true })
@@ -222,8 +222,8 @@ test.group('NotificationRepository', (group) => {
     const notification = await Notification.create({
       userId: user.id,
       type: 'user.mentioned',
-      title: 'Test',
-      message: 'Test message',
+      titleI18n: { fr: 'Test', en: 'Test' },
+      messageI18n: { fr: 'Test message', en: 'Test message' },
       deleted_at: DateTime.now(),
     })
 
@@ -240,15 +240,15 @@ test.group('NotificationRepository', (group) => {
     await Notification.create({
       userId: user.id,
       type: 'user.mentioned',
-      title: 'Mention',
-      message: 'You were mentioned',
+      titleI18n: { fr: 'Mention', en: 'Mention' },
+      messageI18n: { fr: 'You were mentioned', en: 'You were mentioned' },
     })
 
     await Notification.create({
       userId: user.id,
       type: 'org.invitation',
-      title: 'Invitation',
-      message: 'You were invited',
+      titleI18n: { fr: 'Invitation', en: 'Invitation' },
+      messageI18n: { fr: 'You were invited', en: 'You were invited' },
     })
 
     const result = await repository.findBy({ type: 'user.mentioned' })
@@ -264,15 +264,15 @@ test.group('NotificationRepository', (group) => {
     await Notification.create({
       userId: user.id,
       type: 'user.mentioned',
-      title: 'Unread',
-      message: 'Unread message',
+      titleI18n: { fr: 'Unread', en: 'Unread' },
+      messageI18n: { fr: 'Unread message', en: 'Unread message' },
     })
 
     await Notification.create({
       userId: user.id,
       type: 'user.mentioned',
-      title: 'Read',
-      message: 'Read message',
+      titleI18n: { fr: 'Read', en: 'Read' },
+      messageI18n: { fr: 'Read message', en: 'Read message' },
       readAt: DateTime.now(),
     })
 

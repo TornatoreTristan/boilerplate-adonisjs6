@@ -4,6 +4,7 @@ import User from '#users/models/user'
 import Organization from '#organizations/models/organization'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import type { NotificationType } from '#notifications/types/notification'
+import type { TranslatableField } from '#shared/helpers/translatable'
 
 export default class Notification extends BaseModel {
   @column({ isPrimary: true })
@@ -18,11 +19,21 @@ export default class Notification extends BaseModel {
   @column()
   declare type: NotificationType
 
-  @column()
-  declare title: string
+  @column({
+    columnName: 'title_i18n',
+    prepare: (value: TranslatableField) => JSON.stringify(value),
+    consume: (value: string | TranslatableField) =>
+      typeof value === 'string' ? JSON.parse(value) : value,
+  })
+  declare titleI18n: TranslatableField
 
-  @column()
-  declare message: string
+  @column({
+    columnName: 'message_i18n',
+    prepare: (value: TranslatableField) => JSON.stringify(value),
+    consume: (value: string | TranslatableField) =>
+      typeof value === 'string' ? JSON.parse(value) : value,
+  })
+  declare messageI18n: TranslatableField
 
   @column({
     prepare: (value: Record<string, any> | null) => JSON.stringify(value),
@@ -54,5 +65,14 @@ export default class Notification extends BaseModel {
 
   get isUnread(): boolean {
     return this.readAt === null
+  }
+
+  // Getters for backward compatibility
+  get title(): string {
+    return this.titleI18n?.fr || this.titleI18n?.en || ''
+  }
+
+  get message(): string {
+    return this.messageI18n?.fr || this.messageI18n?.en || ''
   }
 }

@@ -23,7 +23,12 @@ export default class OrganizationService {
       {
         name: organizationData.name,
         slug: organizationData.slug || '', // Temporary, will be updated below
-        description: organizationData.description || null,
+        descriptionI18n: organizationData.description
+          ? {
+              fr: organizationData.description,
+              en: (organizationData as any).descriptionEn || organizationData.description,
+            }
+          : null,
         website: organizationData.website || null,
         isActive: true,
       },

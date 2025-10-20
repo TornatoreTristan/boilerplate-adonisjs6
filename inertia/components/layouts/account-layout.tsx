@@ -4,37 +4,39 @@ import AppLayout from '@/components/layouts/app-layout'
 import { PageHeader } from '@/components/core/page-header'
 import { User, Monitor, Settings } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useI18n } from '@/hooks/use-i18n'
 
 interface AccountLayoutProps {
   children: ReactNode
 }
 
-const menuItems = [
-  {
-    title: 'Mes informations',
-    href: '/account/profile',
-    icon: User,
-  },
-  {
-    title: 'Mes sessions',
-    href: '/account/sessions',
-    icon: Monitor,
-  },
-  {
-    title: 'Mes préférences',
-    href: '/account/preferences',
-    icon: Settings,
-  },
-]
-
 export default function AccountLayout({ children }: AccountLayoutProps) {
   const { url } = usePage()
+  const { t } = useI18n()
   const currentPath = url
+
+  const menuItems = [
+    {
+      title: t('account.layout.profile'),
+      href: '/account/profile',
+      icon: User,
+    },
+    {
+      title: t('account.layout.sessions'),
+      href: '/account/sessions',
+      icon: Monitor,
+    },
+    {
+      title: t('account.layout.preferences'),
+      href: '/account/preferences',
+      icon: Settings,
+    },
+  ]
 
   return (
     <AppLayout>
       <div className="flex flex-col gap-6 p-6">
-        <PageHeader title="Mon compte" description="Gérez vos informations et vos préférences" />
+        <PageHeader title={t('account.layout.title')} description={t('account.layout.description')} />
 
         <div className="flex gap-6">
           {/* Menu de navigation */}

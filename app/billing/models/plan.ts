@@ -2,6 +2,7 @@ import { DateTime } from 'luxon'
 import { BaseModel, column, hasMany } from '@adonisjs/lucid/orm'
 import type { HasMany } from '@adonisjs/lucid/types/relations'
 import Subscription from './subscription.js'
+import type { TranslatableField, TranslatableFieldNullable } from '#shared/helpers/translatable'
 
 export type PlanInterval = 'month' | 'year'
 export type PricingModel = 'flat' | 'per_seat' | 'tiered' | 'volume'
@@ -17,14 +18,27 @@ export default class Plan extends BaseModel {
   @column({ isPrimary: true })
   declare id: string
 
-  @column()
-  declare name: string
+  @column({
+    columnName: 'name_i18n',
+    prepare: (value: TranslatableField) => JSON.stringify(value),
+    consume: (value: string | TranslatableField) =>
+      typeof value === 'string' ? JSON.parse(value) : value,
+  })
+  declare nameI18n: TranslatableField
 
   @column()
   declare slug: string
 
-  @column()
-  declare description: string | null
+  @column({
+    columnName: 'description_i18n',
+    prepare: (value: TranslatableFieldNullable | null) =>
+      value ? JSON.stringify(value) : null,
+    consume: (value: string | TranslatableFieldNullable | null) => {
+      if (value === null) return null
+      return typeof value === 'string' ? JSON.parse(value) : value
+    },
+  })
+  declare descriptionI18n: TranslatableFieldNullable | null
 
   @column()
   declare stripeProductId: string | null
@@ -63,16 +77,15 @@ export default class Plan extends BaseModel {
   declare trialDays: number | null
 
   @column({
-    prepare: (value: string[] | null) => (value ? JSON.stringify(value) : null),
-    consume: (value: string | string[] | null) => {
+    columnName: 'features_i18n',
+    prepare: (value: TranslatableFieldNullable | null) =>
+      value ? JSON.stringify(value) : null,
+    consume: (value: string | TranslatableFieldNullable | null) => {
       if (value === null) return null
-      if (typeof value === 'string') {
-        return value ? JSON.parse(value) : null
-      }
-      return value || null
+      return typeof value === 'string' ? JSON.parse(value) : value
     },
   })
-  declare features: string[] | null
+  declare featuresI18n: TranslatableFieldNullable | null
 
   @column({
     prepare: (value: Record<string, any> | null) =>
@@ -104,4 +117,20 @@ export default class Plan extends BaseModel {
 
   @hasMany(() => Subscription)
   declare subscriptions: HasMany<typeof Subscription>
+
+  // Getters for backward compatibility
+  get name(): string {
+    return this.nameI18n?.fr || this.nameI18n?.en || ''
+  }
+
+  get description(): string | null {
+    return this.descriptionI18n?.fr || this.descriptionI18n?.en || null
+  }
+
+  get features(): string[] | null {
+    if (!this.featuresI18n) return null
+    const featuresStr = this.featuresI18n.fr || this.featuresI18n.en
+    if (!featuresStr) return null
+    return featuresStr.split(', ').filter((f) => f.trim() !== '')
+  }
 }

@@ -67,16 +67,16 @@ export default class PlanService {
     }
 
     return this.planRepository.create({
-      name: data.name,
+      nameI18n: { fr: data.name, en: data.name },
       slug: data.slug,
-      description: data.description || null,
+      descriptionI18n: data.description ? { fr: data.description, en: data.description } : null,
       priceMonthly: data.priceMonthly,
       priceYearly: data.priceYearly,
       currency: data.currency,
       pricingModel: data.pricingModel,
       pricingTiers: data.pricingTiers || null,
       trialDays: data.trialDays || null,
-      features: data.features || null,
+      featuresI18n: data.features ? { fr: data.features.join(', '), en: data.features.join(', ') } : null,
       limits: data.limits || null,
       isActive: data.isActive ?? true,
       isVisible: data.isVisible ?? true,
@@ -167,15 +167,23 @@ export default class PlanService {
 
     // Mettre à jour la base de données
     return this.planRepository.update(planId, {
-      name: data.name,
-      description: data.description,
+      nameI18n: data.name ? { fr: data.name, en: data.name } : undefined,
+      descriptionI18n: data.description !== undefined
+        ? data.description
+          ? { fr: data.description, en: data.description }
+          : null
+        : undefined,
       priceMonthly: data.priceMonthly,
       priceYearly: data.priceYearly,
       currency: data.currency,
       pricingModel: data.pricingModel,
       pricingTiers: data.pricingTiers,
       trialDays: data.trialDays,
-      features: data.features,
+      featuresI18n: data.features !== undefined
+        ? data.features
+          ? { fr: data.features.join(', '), en: data.features.join(', ') }
+          : null
+        : undefined,
       limits: data.limits,
       isActive: data.isActive,
       isVisible: data.isVisible,

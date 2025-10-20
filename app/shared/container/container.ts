@@ -11,6 +11,7 @@ import EventBusService from '#shared/services/event_bus_service'
 import QueueService from '#shared/services/queue_service'
 import RateLimitService from '#shared/services/rate_limit_service'
 import EmailService from '#mailing/services/email_service'
+import LocaleService from '#shared/services/locale_service'
 
 // Repositories
 import UserRepository from '#users/repositories/user_repository'
@@ -93,6 +94,9 @@ export function configureContainer(): Container {
 
   // Email Service
   container.bind<EmailService>(TYPES.EmailService).to(EmailService).inSingletonScope()
+
+  // Locale Service
+  container.bind<LocaleService>(TYPES.LocaleService).to(LocaleService).inSingletonScope()
 
   // ==========================================
   // REPOSITORIES

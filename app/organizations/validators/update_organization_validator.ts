@@ -10,5 +10,6 @@ export const updateOrganizationValidator = vine.compile(
     address: vine.string().trim().maxLength(500).optional(),
     website: vine.string().trim().url().optional(),
     description: vine.string().trim().maxLength(1000).optional(),
+    descriptionEn: vine.string().trim().maxLength(1000).optional(),
   })
 )

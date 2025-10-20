@@ -2,6 +2,7 @@ import { defineConfig } from '@adonisjs/inertia'
 import { getService } from '#shared/container/container'
 import { TYPES } from '#shared/container/types'
 import type OrganizationRepository from '#organizations/repositories/organization_repository'
+import type LocaleService from '#shared/services/locale_service'
 
 const inertiaConfig = defineConfig({
   /**
@@ -66,6 +67,16 @@ const inertiaConfig = defineConfig({
       warning: ctx.session.flashMessages.get('warning'),
     }),
     csrfToken: (ctx) => ctx.request.csrfToken,
+    i18n: async (ctx) => {
+      const localeService = getService<LocaleService>(TYPES.LocaleService)
+      const locale = ctx.i18n?.locale || 'fr'
+      const messages = await localeService.getMessages(locale)
+
+      return {
+        locale,
+        messages,
+      }
+    },
   },
 
   /**

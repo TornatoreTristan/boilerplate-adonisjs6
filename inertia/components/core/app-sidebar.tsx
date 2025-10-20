@@ -1,5 +1,6 @@
 import { Home, Settings } from 'lucide-react'
 import { usePage } from '@inertiajs/react'
+import { useI18n } from '@/hooks/use-i18n'
 
 import {
   Sidebar,
@@ -16,24 +17,8 @@ import {
 import { NavUser } from './nav-user'
 import { OrganizationSwitcher, type Organization } from './organization-switcher'
 
-// Menu items.
-const items = [
-  {
-    title: 'Home',
-    url: '/',
-    icon: Home,
-  },
-]
-
-const organizationItems = [
-  {
-    title: 'Paramètres',
-    url: '/organizations/settings',
-    icon: Settings,
-  },
-]
-
 export function AppSidebar() {
+  const { t } = useI18n()
   const { auth, organizations } = usePage<{
     auth: {
       user: {
@@ -51,10 +36,27 @@ export function AppSidebar() {
     } | null
   }>().props
 
+  // Menu items
+  const items = [
+    {
+      title: t('common.home'),
+      url: '/',
+      icon: Home,
+    },
+  ]
+
+  const organizationItems = [
+    {
+      title: t('common.settings'),
+      url: '/organizations/settings',
+      icon: Settings,
+    },
+  ]
+
   // Mapper les données user pour NavUser
   const userData = auth.user
     ? {
-        name: auth.user.fullName || 'Utilisateur',
+        name: auth.user.fullName || t('common.user'),
         email: auth.user.email,
         avatar: auth.user.avatarUrl || '',
       }
@@ -72,7 +74,7 @@ export function AppSidebar() {
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Nom de l'app</SidebarGroupLabel>
+          <SidebarGroupLabel>{t('common.application')}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (
@@ -90,7 +92,7 @@ export function AppSidebar() {
         </SidebarGroup>
         {organizations && organizations.current && (
           <SidebarGroup>
-            <SidebarGroupLabel>Organisation</SidebarGroupLabel>
+            <SidebarGroupLabel>{t('common.organization')}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {organizationItems.map((item) => (

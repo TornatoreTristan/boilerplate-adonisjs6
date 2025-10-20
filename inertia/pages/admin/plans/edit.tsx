@@ -1,3 +1,4 @@
+import { getTranslation, type TranslatableField, type TranslatableFieldNullable } from '@/lib/translatable'
 import AdminLayout from '@/components/layouts/admin-layout'
 import { PageHeader } from '@/components/core/page-header'
 import { Head, router, useForm } from '@inertiajs/react'

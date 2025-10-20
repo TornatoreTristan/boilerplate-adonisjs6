@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { router } from '@inertiajs/react'
+import { useI18n } from '@/hooks/use-i18n'
 import {
   CommandDialog,
   CommandEmpty,
@@ -28,6 +29,7 @@ interface SearchCommandProps {
 }
 
 export function SearchCommand({ open, onOpenChange }: SearchCommandProps) {
+  const { t } = useI18n()
   const [search, setSearch] = useState('')
 
   useEffect(() => {
@@ -50,65 +52,65 @@ export function SearchCommand({ open, onOpenChange }: SearchCommandProps) {
   return (
     <CommandDialog open={open} onOpenChange={onOpenChange}>
       <CommandInput
-        placeholder="Rechercher dans l'application..."
+        placeholder={t('common.search_placeholder')}
         value={search}
         onValueChange={setSearch}
       />
       <CommandList>
-        <CommandEmpty>Aucun résultat trouvé.</CommandEmpty>
+        <CommandEmpty>{t('common.no_results')}</CommandEmpty>
 
-        <CommandGroup heading="Navigation">
+        <CommandGroup heading={t('common.navigation')}>
           <CommandItem onSelect={() => handleSelect('/')}>
             <Home className="mr-2 h-4 w-4" />
-            <span>Accueil</span>
+            <span>{t('common.home')}</span>
           </CommandItem>
           <CommandItem onSelect={() => handleSelect('/organizations')}>
             <Building2 className="mr-2 h-4 w-4" />
-            <span>Organisations</span>
+            <span>{t('admin.organizations')}</span>
           </CommandItem>
           <CommandItem onSelect={() => handleSelect('/notifications')}>
             <Bell className="mr-2 h-4 w-4" />
-            <span>Notifications</span>
+            <span>{t('common.notifications')}</span>
           </CommandItem>
         </CommandGroup>
 
         <CommandSeparator />
 
-        <CommandGroup heading="Paramètres">
+        <CommandGroup heading={t('common.settings')}>
           <CommandItem onSelect={() => handleSelect('/account')}>
             <User className="mr-2 h-4 w-4" />
-            <span>Mon compte</span>
+            <span>{t('common.my_account')}</span>
           </CommandItem>
           <CommandItem onSelect={() => handleSelect('/account/security')}>
             <Settings className="mr-2 h-4 w-4" />
-            <span>Sécurité</span>
+            <span>{t('common.security')}</span>
           </CommandItem>
           <CommandItem onSelect={() => handleSelect('/account/sessions')}>
             <FileText className="mr-2 h-4 w-4" />
-            <span>Sessions actives</span>
+            <span>{t('common.active_sessions')}</span>
           </CommandItem>
         </CommandGroup>
 
         <CommandSeparator />
 
-        <CommandGroup heading="Organisation">
+        <CommandGroup heading={t('common.organization')}>
           <CommandItem onSelect={() => handleSelect('/organizations/settings')}>
             <Settings className="mr-2 h-4 w-4" />
-            <span>Paramètres de l'organisation</span>
+            <span>{t('common.organization_settings')}</span>
           </CommandItem>
           <CommandItem onSelect={() => handleSelect('/organizations/settings/users')}>
             <Users className="mr-2 h-4 w-4" />
-            <span>Gestion des utilisateurs</span>
+            <span>{t('common.user_management')}</span>
           </CommandItem>
           <CommandItem onSelect={() => handleSelect('/organizations/settings/subscriptions')}>
             <CreditCard className="mr-2 h-4 w-4" />
-            <span>Abonnements</span>
+            <span>{t('common.subscriptions')}</span>
           </CommandItem>
         </CommandGroup>
 
         <CommandSeparator />
 
-        <CommandGroup heading="Actions">
+        <CommandGroup heading={t('common.actions')}>
           <CommandItem
             onSelect={() => {
               onOpenChange(false)
@@ -116,7 +118,7 @@ export function SearchCommand({ open, onOpenChange }: SearchCommandProps) {
             }}
           >
             <LogOut className="mr-2 h-4 w-4" />
-            <span>Se déconnecter</span>
+            <span>{t('auth.logout')}</span>
           </CommandItem>
         </CommandGroup>
       </CommandList>

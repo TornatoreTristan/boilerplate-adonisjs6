@@ -3,6 +3,7 @@ import { BaseModel, column, manyToMany, hasMany, hasOne } from '@adonisjs/lucid/
 import type { ManyToMany, HasMany, HasOne } from '@adonisjs/lucid/types/relations'
 import User from '#users/models/user'
 import Subscription from '#billing/models/subscription'
+import type { TranslatableFieldNullable } from '#shared/helpers/translatable'
 
 export default class Organization extends BaseModel {
   @column({ isPrimary: true })
@@ -14,8 +15,16 @@ export default class Organization extends BaseModel {
   @column()
   declare slug: string
 
-  @column()
-  declare description: string | null
+  @column({
+    columnName: 'description_i18n',
+    prepare: (value: TranslatableFieldNullable | null) =>
+      value ? JSON.stringify(value) : null,
+    consume: (value: string | TranslatableFieldNullable | null) => {
+      if (value === null) return null
+      return typeof value === 'string' ? JSON.parse(value) : value
+    },
+  })
+  declare descriptionI18n: TranslatableFieldNullable | null
 
   @column()
   declare website: string | null

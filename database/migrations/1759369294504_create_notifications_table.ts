@@ -10,8 +10,8 @@ export default class extends BaseSchema {
       table.uuid('organization_id').references('organizations.id').onDelete('CASCADE').nullable()
 
       table.string('type').notNullable()
-      table.string('title').notNullable()
-      table.text('message').notNullable()
+      table.jsonb('title_i18n').notNullable()
+      table.jsonb('message_i18n').notNullable()
       table.jsonb('data').nullable()
 
       table.timestamp('read_at').nullable()
@@ -34,8 +34,10 @@ export default class extends BaseSchema {
       CREATE OR REPLACE FUNCTION ${this.tableName}_search_trigger() RETURNS trigger AS $$
       BEGIN
         NEW.search_vector :=
-          setweight(to_tsvector('french', COALESCE(NEW.title, '')), 'A') ||
-          setweight(to_tsvector('french', COALESCE(NEW.message, '')), 'B') ||
+          setweight(to_tsvector('french', COALESCE(NEW.title_i18n->>'fr', '')), 'A') ||
+          setweight(to_tsvector('english', COALESCE(NEW.title_i18n->>'en', '')), 'A') ||
+          setweight(to_tsvector('french', COALESCE(NEW.message_i18n->>'fr', '')), 'B') ||
+          setweight(to_tsvector('english', COALESCE(NEW.message_i18n->>'en', '')), 'B') ||
           setweight(to_tsvector('french', COALESCE(NEW.type, '')), 'C');
         RETURN NEW;
       END
@@ -47,8 +49,10 @@ export default class extends BaseSchema {
 
       -- Populate existing data
       UPDATE ${this.tableName} SET search_vector =
-        setweight(to_tsvector('french', COALESCE(title, '')), 'A') ||
-        setweight(to_tsvector('french', COALESCE(message, '')), 'B') ||
+        setweight(to_tsvector('french', COALESCE(title_i18n->>'fr', '')), 'A') ||
+        setweight(to_tsvector('english', COALESCE(title_i18n->>'en', '')), 'A') ||
+        setweight(to_tsvector('french', COALESCE(message_i18n->>'fr', '')), 'B') ||
+        setweight(to_tsvector('english', COALESCE(message_i18n->>'en', '')), 'B') ||
         setweight(to_tsvector('french', COALESCE(type, '')), 'C');
     `)
   }

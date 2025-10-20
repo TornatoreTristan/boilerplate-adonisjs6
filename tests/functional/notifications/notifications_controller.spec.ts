@@ -31,15 +31,15 @@ test.group('NotificationsController', (group) => {
       userId: user.id,
       organizationId: organization.id,
       type: 'user.mentioned',
-      title: 'Notification 1',
-      message: 'Message 1',
+      titleI18n: { fr: 'Notification 1', en: 'Notification 1' },
+      messageI18n: { fr: 'Message 1', en: 'Message 1' },
     })
 
     await repository.create({
       userId: user.id,
       type: 'system.announcement',
-      title: 'Notification 2',
-      message: 'Message 2',
+      titleI18n: { fr: 'Notification 2', en: 'Notification 2' },
+      messageI18n: { fr: 'Message 2', en: 'Message 2' },
     })
 
     const otherUser = await User.create({
@@ -50,8 +50,8 @@ test.group('NotificationsController', (group) => {
     await repository.create({
       userId: otherUser.id,
       type: 'user.mentioned',
-      title: 'Other notification',
-      message: 'Other message',
+      titleI18n: { fr: 'Other notification', en: 'Other notification' },
+      messageI18n: { fr: 'Other message', en: 'Other message' },
     })
 
     const response = await client.get('/api/notifications').withSession({ user_id: user.id })
@@ -59,8 +59,8 @@ test.group('NotificationsController', (group) => {
     response.assertStatus(200)
     response.assertBodyContains({
       notifications: [
-        { title: 'Notification 1', type: 'user.mentioned' },
-        { title: 'Notification 2', type: 'system.announcement' },
+        { titleI18n: { fr: 'Notification 1', en: 'Notification 1' }, type: 'user.mentioned' },
+        { titleI18n: { fr: 'Notification 2', en: 'Notification 2' }, type: 'system.announcement' },
       ],
     })
   })
@@ -71,15 +71,15 @@ test.group('NotificationsController', (group) => {
     await repository.create({
       userId: user.id,
       type: 'user.mentioned',
-      title: 'Unread',
-      message: 'Unread message',
+      titleI18n: { fr: 'Unread', en: 'Unread' },
+      messageI18n: { fr: 'Unread message', en: 'Unread message' },
     })
 
     const readNotif = await repository.create({
       userId: user.id,
       type: 'user.mentioned',
-      title: 'Read',
-      message: 'Read message',
+      titleI18n: { fr: 'Read', en: 'Read' },
+      messageI18n: { fr: 'Read message', en: 'Read message' },
     })
 
     await repository.markAsRead(readNotif.id)
@@ -97,8 +97,8 @@ test.group('NotificationsController', (group) => {
       throw new Error(`Expected 1 notification, got ${notifications.length}`)
     }
 
-    if (notifications[0].title !== 'Unread') {
-      throw new Error(`Expected title 'Unread', got ${notifications[0].title}`)
+    if (notifications[0].titleI18n.fr !== 'Unread') {
+      throw new Error(`Expected title 'Unread', got ${notifications[0].titleI18n.fr}`)
     }
   })
 
@@ -106,22 +106,22 @@ test.group('NotificationsController', (group) => {
     await repository.create({
       userId: user.id,
       type: 'user.mentioned',
-      title: 'Unread 1',
-      message: 'Message 1',
+      titleI18n: { fr: 'Unread 1', en: 'Unread 1' },
+      messageI18n: { fr: 'Message 1', en: 'Message 1' },
     })
 
     await repository.create({
       userId: user.id,
       type: 'user.mentioned',
-      title: 'Unread 2',
-      message: 'Message 2',
+      titleI18n: { fr: 'Unread 2', en: 'Unread 2' },
+      messageI18n: { fr: 'Message 2', en: 'Message 2' },
     })
 
     const readNotif = await repository.create({
       userId: user.id,
       type: 'user.mentioned',
-      title: 'Read',
-      message: 'Read message',
+      titleI18n: { fr: 'Read', en: 'Read' },
+      messageI18n: { fr: 'Read message', en: 'Read message' },
     })
 
     await repository.markAsRead(readNotif.id)
@@ -141,8 +141,8 @@ test.group('NotificationsController', (group) => {
     const notification = await repository.create({
       userId: user.id,
       type: 'user.mentioned',
-      title: 'Test',
-      message: 'Test message',
+      titleI18n: { fr: 'Test', en: 'Test' },
+      messageI18n: { fr: 'Test message', en: 'Test message' },
     })
 
     const response = await client
@@ -163,15 +163,15 @@ test.group('NotificationsController', (group) => {
     await repository.create({
       userId: user.id,
       type: 'user.mentioned',
-      title: 'Unread 1',
-      message: 'Message 1',
+      titleI18n: { fr: 'Unread 1', en: 'Unread 1' },
+      messageI18n: { fr: 'Message 1', en: 'Message 1' },
     })
 
     await repository.create({
       userId: user.id,
       type: 'user.mentioned',
-      title: 'Unread 2',
-      message: 'Message 2',
+      titleI18n: { fr: 'Unread 2', en: 'Unread 2' },
+      messageI18n: { fr: 'Message 2', en: 'Message 2' },
     })
 
     const response = await client
@@ -192,8 +192,8 @@ test.group('NotificationsController', (group) => {
     const notification = await repository.create({
       userId: user.id,
       type: 'user.mentioned',
-      title: 'Test',
-      message: 'Test message',
+      titleI18n: { fr: 'Test', en: 'Test' },
+      messageI18n: { fr: 'Test message', en: 'Test message' },
     })
 
     const response = await client
@@ -224,8 +224,8 @@ test.group('NotificationsController', (group) => {
     const notification = await repository.create({
       userId: otherUser.id,
       type: 'user.mentioned',
-      title: 'Other user notification',
-      message: 'Message',
+      titleI18n: { fr: 'Other user notification', en: 'Other user notification' },
+      messageI18n: { fr: 'Message', en: 'Message' },
     })
 
     const response = await client
