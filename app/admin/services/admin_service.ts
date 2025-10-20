@@ -174,7 +174,7 @@ export default class AdminService {
         'organizations.id as organizationId',
         'organizations.name as organizationName',
         'plans.id as planId',
-        'plans.name as planName',
+        'plans.name_i18n as planNameI18n',
         'plans.stripe_price_id_monthly as stripePriceIdMonthly',
         'plans.stripe_price_id_yearly as stripePriceIdYearly',
         'plans.price_monthly as priceMonthly',

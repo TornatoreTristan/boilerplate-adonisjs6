@@ -333,7 +333,7 @@ export default class AdminController {
         organizationId: sub.organizationId,
         organizationName: sub.organizationName,
         planId: sub.planId,
-        planName: sub.planName,
+        planNameI18n: sub.planNameI18n,
         stripePriceIdMonthly: sub.stripePriceIdMonthly,
         stripePriceIdYearly: sub.stripePriceIdYearly,
         subscriptionPrice: sub.subscriptionPrice,

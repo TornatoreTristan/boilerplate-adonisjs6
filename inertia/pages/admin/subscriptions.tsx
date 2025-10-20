@@ -5,6 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
+import { getTranslation } from '@/lib/translatable'
+import { useI18n } from '@/hooks/use-i18n'
 import {
   Receipt,
   MoreVertical,
@@ -53,7 +55,7 @@ interface Subscription {
   organizationId: string
   organizationName: string
   planId: string
-  planName: string
+  planNameI18n: { fr: string; en: string }
   stripePriceIdMonthly: string | null
   stripePriceIdYearly: string | null
   subscriptionPrice: number
@@ -65,7 +67,7 @@ interface Subscription {
 
 interface Plan {
   id: string
-  name: string
+  nameI18n: { fr: string; en: string }
 }
 
 interface Stats {
@@ -89,6 +91,7 @@ interface Props {
 }
 
 const SubscriptionsPage = ({ subscriptions, stats, plans, filters }: Props) => {
+  const { locale } = useI18n()
   const [searchInput, setSearchInput] = useState(filters.search || '')
 
   const formatDate = (date: string | null) => {
@@ -335,7 +338,7 @@ const SubscriptionsPage = ({ subscriptions, stats, plans, filters }: Props) => {
                     <SelectItem value="all">Tous les plans</SelectItem>
                     {plans.map((plan) => (
                       <SelectItem key={plan.id} value={plan.id}>
-                        {getTranslation(plan.nameI18n)}
+                        {getTranslation(plan.nameI18n, locale as 'fr' | 'en')}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -390,7 +393,7 @@ const SubscriptionsPage = ({ subscriptions, stats, plans, filters }: Props) => {
                             {subscription.organizationName}
                           </TableCell>
                           <TableCell>
-                            {subscription.planName}
+                            {getTranslation(subscription.planNameI18n, locale as 'fr' | 'en')}
                           </TableCell>
                           <TableCell>
                             <Badge variant="outline" className="w-fit">
