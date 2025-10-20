@@ -39,7 +39,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { MoreHorizontal, UserPlus, Trash2, Shield, Clock, X } from 'lucide-react'
+import { MoreHorizontal, UserPlus, Trash2, Shield, Clock, X, Eye } from 'lucide-react'
 import { useState } from 'react'
 import { usePage } from '@inertiajs/react'
 
@@ -87,9 +87,11 @@ const OrganizationSettingsUsersPage = ({
   })
 
   const [memberToDelete, setMemberToDelete] = useState<Member | null>(null)
+  const [memberToView, setMemberToView] = useState<Member | null>(null)
   const [changingRoleFor, setChangingRoleFor] = useState<string | null>(null)
 
   const canManageMembers = ['owner', 'admin'].includes(userRole)
+  const isAdmin = ['owner', 'admin'].includes(userRole)
 
   const handleInviteSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -325,52 +327,66 @@ const OrganizationSettingsUsersPage = ({
                         </TableCell>
                         {canManageMembers && (
                           <TableCell>
-                            {!isCurrentUser && (
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    disabled={isChangingRole}
-                                  >
-                                    <MoreHorizontal className="h-4 w-4" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem
-                                    onClick={() => handleRoleChange(member.id, 'member')}
-                                    disabled={member.role === 'member'}
-                                  >
-                                    <Shield className="mr-2 h-4 w-4" />
-                                    Définir comme Membre
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem
-                                    onClick={() => handleRoleChange(member.id, 'admin')}
-                                    disabled={member.role === 'admin'}
-                                  >
-                                    <Shield className="mr-2 h-4 w-4" />
-                                    Définir comme Admin
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem
-                                    onClick={() => handleRoleChange(member.id, 'owner')}
-                                    disabled={member.role === 'owner'}
-                                  >
-                                    <Shield className="mr-2 h-4 w-4" />
-                                    Définir comme Propriétaire
-                                  </DropdownMenuItem>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem
-                                    onClick={() => setMemberToDelete(member)}
-                                    className="text-destructive focus:text-destructive"
-                                  >
-                                    <Trash2 className="mr-2 h-4 w-4" />
-                                    Retirer de l'organisation
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            )}
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  disabled={isChangingRole}
+                                >
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem onClick={() => setMemberToView(member)}>
+                                  <Eye className="mr-2 h-4 w-4" />
+                                  Voir
+                                </DropdownMenuItem>
+                                {isAdmin && !isCurrentUser && (
+                                  <>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem
+                                      onClick={() => setMemberToDelete(member)}
+                                      className="text-destructive focus:text-destructive"
+                                    >
+                                      <Trash2 className="mr-2 h-4 w-4" />
+                                      Supprimer
+                                    </DropdownMenuItem>
+                                  </>
+                                )}
+                                {!isCurrentUser && (
+                                  <>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuLabel className="text-xs text-muted-foreground font-normal">
+                                      Modifier le rôle
+                                    </DropdownMenuLabel>
+                                    <DropdownMenuItem
+                                      onClick={() => handleRoleChange(member.id, 'member')}
+                                      disabled={member.role === 'member'}
+                                    >
+                                      <Shield className="mr-2 h-4 w-4" />
+                                      Définir comme Membre
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                      onClick={() => handleRoleChange(member.id, 'admin')}
+                                      disabled={member.role === 'admin'}
+                                    >
+                                      <Shield className="mr-2 h-4 w-4" />
+                                      Définir comme Admin
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                      onClick={() => handleRoleChange(member.id, 'owner')}
+                                      disabled={member.role === 'owner'}
+                                    >
+                                      <Shield className="mr-2 h-4 w-4" />
+                                      Définir comme Propriétaire
+                                    </DropdownMenuItem>
+                                  </>
+                                )}
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                           </TableCell>
                         )}
                       </TableRow>
@@ -381,6 +397,55 @@ const OrganizationSettingsUsersPage = ({
             </CardContent>
           </Card>
         </div>
+
+        <AlertDialog open={!!memberToView} onOpenChange={() => setMemberToView(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Détails de l'utilisateur</AlertDialogTitle>
+            </AlertDialogHeader>
+            {memberToView && (
+              <div className="space-y-4">
+                <div className="flex items-center gap-4">
+                  <Avatar className="h-16 w-16">
+                    <AvatarImage src={memberToView.avatarUrl || ''} alt={memberToView.fullName || ''} />
+                    <AvatarFallback className="text-xl">
+                      {memberToView.fullName?.charAt(0) || memberToView.email.charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-lg">{memberToView.fullName || memberToView.email}</h3>
+                    <p className="text-sm text-muted-foreground">{memberToView.email}</p>
+                  </div>
+                </div>
+                <div className="grid gap-3">
+                  <div className="flex justify-between py-2 border-b">
+                    <span className="text-sm font-medium">Rôle</span>
+                    <Badge variant={getRoleBadgeVariant(memberToView.role)}>
+                      {getRoleLabel(memberToView.role)}
+                    </Badge>
+                  </div>
+                  <div className="flex justify-between py-2 border-b">
+                    <span className="text-sm font-medium">Membre depuis</span>
+                    <span className="text-sm text-muted-foreground">
+                      {new Date(memberToView.joinedAt).toLocaleDateString('fr-FR', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                      })}
+                    </span>
+                  </div>
+                  <div className="flex justify-between py-2">
+                    <span className="text-sm font-medium">ID utilisateur</span>
+                    <span className="text-sm text-muted-foreground font-mono">{memberToView.id}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+            <AlertDialogFooter>
+              <AlertDialogCancel>Fermer</AlertDialogCancel>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
 
         <AlertDialog open={!!memberToDelete} onOpenChange={() => setMemberToDelete(null)}>
           <AlertDialogContent>
@@ -395,7 +460,7 @@ const OrganizationSettingsUsersPage = ({
             <AlertDialogFooter>
               <AlertDialogCancel>Annuler</AlertDialogCancel>
               <AlertDialogAction onClick={handleDeleteMember} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                Retirer
+                Supprimer
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
