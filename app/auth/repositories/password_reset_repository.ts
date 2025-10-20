@@ -1,5 +1,7 @@
+import { injectable } from 'inversify'
 import { DateTime } from 'luxon'
 import PasswordResetToken from '#auth/models/password_reset_token'
+import { BaseRepository } from '#shared/repositories/base_repository'
 import type { CreateTokenResult } from '#auth/services/password_reset_service'
 
 export interface CreatePasswordResetTokenData {
@@ -8,12 +10,12 @@ export interface CreatePasswordResetTokenData {
   expiresAt: DateTime
 }
 
-export default class PasswordResetRepository {
-  /**
-   * Crée un nouveau token de réinitialisation
-   */
-  async create(data: CreatePasswordResetTokenData): Promise<CreateTokenResult> {
-    const token = await PasswordResetToken.create(data)
+@injectable()
+export default class PasswordResetRepository extends BaseRepository<typeof PasswordResetToken> {
+  protected model = PasswordResetToken
+
+  async createToken(data: CreatePasswordResetTokenData): Promise<CreateTokenResult> {
+    const token = await this.create(data)
     return {
       id: token.id,
       email: token.email,
@@ -22,65 +24,43 @@ export default class PasswordResetRepository {
     }
   }
 
-  /**
-   * Trouve un token par sa valeur
-   */
   async findByToken(token: string): Promise<PasswordResetToken | null> {
-    return await PasswordResetToken.findBy('token', token)
+    return this.findOneBy({ token })
   }
 
-  /**
-   * Marque un token comme utilisé
-   */
   async markAsUsed(tokenId: string): Promise<void> {
-    const token = await PasswordResetToken.findOrFail(tokenId)
-    token.usedAt = DateTime.now()
-    await token.save()
+    await this.update(tokenId, {
+      usedAt: DateTime.now(),
+    } as any)
   }
 
-  /**
-   * Supprime tous les tokens expirés
-   */
   async deleteExpiredTokens(): Promise<number> {
-    // Compter d'abord les tokens à supprimer
-    const toDelete = await PasswordResetToken.query()
+    const expiredTokens = await this.buildBaseQuery()
       .where('expires_at', '<', DateTime.now().toSQL())
-      .count('* as total')
+      .exec()
 
-    const count = Number.parseInt(toDelete[0].$extras.total)
-
-    if (count > 0) {
-      // Supprimer les tokens expirés
-      await PasswordResetToken.query().where('expires_at', '<', DateTime.now().toSQL()).delete()
+    for (const token of expiredTokens) {
+      await this.delete(token.id, { soft: false })
     }
 
-    return count
+    return expiredTokens.length
   }
 
-  /**
-   * Supprime tous les tokens pour un email donné
-   */
   async deleteByEmail(email: string): Promise<number> {
-    // Compter d'abord les tokens à supprimer
-    const toDelete = await PasswordResetToken.query().where('email', email).count('* as total')
+    const tokens = await this.findBy({ email })
 
-    const count = Number.parseInt(toDelete[0].$extras.total)
-
-    if (count > 0) {
-      // Supprimer les tokens
-      await PasswordResetToken.query().where('email', email).delete()
+    for (const token of tokens) {
+      await this.delete(token.id, { soft: false })
     }
 
-    return count
+    return tokens.length
   }
 
-  /**
-   * Trouve tous les tokens valides pour un email
-   */
   async findValidByEmail(email: string): Promise<PasswordResetToken[]> {
-    return await PasswordResetToken.query()
+    return this.buildBaseQuery()
       .where('email', email)
       .where('expires_at', '>', DateTime.now().toSQL())
       .whereNull('used_at')
+      .exec()
   }
 }

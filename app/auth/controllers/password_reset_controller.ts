@@ -1,7 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
+import { getService } from '#shared/container/container'
+import { TYPES } from '#shared/container/types'
 import PasswordResetService from '#auth/services/password_reset_service'
-import PasswordResetRepository from '#auth/repositories/password_reset_repository'
-import UserRepository from '#users/repositories/user_repository'
 import {
   forgotPasswordValidator,
   resetPasswordValidator
@@ -9,29 +9,21 @@ import {
 import { errors } from '@vinejs/vine'
 
 export default class PasswordResetController {
-  private passwordResetService: PasswordResetService
-
-  constructor() {
-    const passwordResetRepository = new PasswordResetRepository()
-    const userRepository = new UserRepository()
-    this.passwordResetService = new PasswordResetService(
-      passwordResetRepository,
-      userRepository
-    )
-  }
 
   /**
    * Handle forgot password request
    * POST /password/forgot
    */
   async forgot({ request, response }: HttpContext) {
+    const passwordResetService = getService<PasswordResetService>(TYPES.PasswordResetService)
+
     try {
       // Valider les données
       const { email } = await request.validateUsing(forgotPasswordValidator)
 
       try {
         // Créer un token de réinitialisation
-        const tokenData = await this.passwordResetService.createPasswordResetToken(email)
+        const tokenData = await passwordResetService.createPasswordResetToken(email)
 
         // TODO: Envoyer l'email avec le lien de réinitialisation
         // Pour l'instant, on log le token en développement
@@ -71,9 +63,10 @@ export default class PasswordResetController {
    * GET /password/reset/:token
    */
   async validateToken({ params, response }: HttpContext) {
+    const passwordResetService = getService<PasswordResetService>(TYPES.PasswordResetService)
     const { token } = params
 
-    const validation = await this.passwordResetService.validateToken(token)
+    const validation = await passwordResetService.validateToken(token)
 
     if (!validation.valid) {
       return response.badRequest({
@@ -93,12 +86,14 @@ export default class PasswordResetController {
    * POST /password/reset
    */
   async reset({ request, response }: HttpContext) {
+    const passwordResetService = getService<PasswordResetService>(TYPES.PasswordResetService)
+
     try {
       // Valider les données
       const { token, password } = await request.validateUsing(resetPasswordValidator)
 
       // Vérifier le token d'abord
-      const validation = await this.passwordResetService.validateToken(token)
+      const validation = await passwordResetService.validateToken(token)
       if (!validation.valid) {
         return response.badRequest({
           success: false,
@@ -107,7 +102,7 @@ export default class PasswordResetController {
       }
 
       // Réinitialiser le mot de passe
-      const result = await this.passwordResetService.resetPassword(token, password)
+      const result = await passwordResetService.resetPassword(token, password)
 
       return response.ok(result)
     } catch (error) {

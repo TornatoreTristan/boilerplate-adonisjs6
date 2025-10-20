@@ -21,14 +21,11 @@ test.group('PasswordResetService', () => {
     } as any
 
     passwordResetRepository = {
-      create: async (data: any) => ({
+      createToken: async (data: any) => ({
         id: '456',
         email: data.email,
         token: data.token,
         expiresAt: data.expiresAt,
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-        usedAt: null,
       }),
       deleteExpiredTokens: async () => {},
     } as any

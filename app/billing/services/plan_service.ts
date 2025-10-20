@@ -57,7 +57,9 @@ export default class PlanService {
         data.priceYearly,
         data.currency,
         data.pricingModel,
-        data.pricingTiers
+        data.pricingTiers,
+        data.features,
+        data.limits
       )
       stripeProductId = stripeIds.productId
       stripePriceIdMonthly = stripeIds.priceIdMonthly
@@ -93,12 +95,14 @@ export default class PlanService {
 
     // Si le plan est synced avec Stripe
     if (plan.stripeProductId) {
-      // 1. Mettre à jour le nom/description du produit Stripe
-      if (data.name || data.description !== undefined) {
+      // 1. Mettre à jour le nom/description/features/limits du produit Stripe
+      if (data.name || data.description !== undefined || data.features !== undefined || data.limits !== undefined) {
         await this.updateStripeProduct(
           plan.stripeProductId,
           data.name || plan.name,
-          data.description !== undefined ? data.description : plan.description || ''
+          data.description !== undefined ? data.description : plan.description || '',
+          data.features !== undefined ? data.features : plan.features || undefined,
+          data.limits !== undefined ? data.limits : plan.limits || undefined
         )
       }
 
@@ -185,7 +189,13 @@ export default class PlanService {
     const plan = await this.planRepository.findByIdOrFail(planId)
 
     if (plan.stripeProductId && plan.stripePriceIdMonthly && plan.stripePriceIdYearly) {
-      await this.updateStripeProduct(plan.stripeProductId, plan.name, plan.description || '')
+      await this.updateStripeProduct(
+        plan.stripeProductId,
+        plan.name,
+        plan.description || '',
+        plan.features || undefined,
+        plan.limits || undefined
+      )
       return plan
     }
 
@@ -196,7 +206,9 @@ export default class PlanService {
       plan.priceYearly,
       plan.currency,
       plan.pricingModel,
-      plan.pricingTiers || undefined
+      plan.pricingTiers || undefined,
+      plan.features || undefined,
+      plan.limits || undefined
     )
 
     return this.planRepository.update(planId, {
@@ -253,7 +265,9 @@ export default class PlanService {
     priceYearly: number,
     currency: string,
     pricingModel: PricingModel,
-    pricingTiers?: PricingTier[]
+    pricingTiers?: PricingTier[],
+    features?: string[],
+    limits?: Record<string, any>
   ): Promise<{ productId: string; priceIdMonthly: string; priceIdYearly: string }> {
     const stripe = await this.getStripeClient()
 
@@ -261,10 +275,33 @@ export default class PlanService {
       throw new Error('Stripe integration not configured')
     }
 
-    // 1. Créer le produit Stripe
+    // 1. Préparer les marketing_features pour Stripe (max 15 features, 80 chars par nom)
+    const marketingFeatures: Array<{ name: string }> = []
+
+    if (features && features.length > 0) {
+      // Limiter à 15 features et 80 caractères par feature
+      features.slice(0, 15).forEach((feature) => {
+        const truncatedFeature = feature.length > 80 ? feature.substring(0, 77) + '...' : feature
+        marketingFeatures.push({ name: truncatedFeature })
+      })
+    }
+
+    // 2. Préparer les metadata pour usage interne (pricing model, limits)
+    const metadata: Record<string, string> = {
+      pricing_model: pricingModel,
+    }
+
+    // Stocker les limits dans metadata (usage interne)
+    if (limits && Object.keys(limits).length > 0) {
+      metadata.limits = JSON.stringify(limits)
+    }
+
+    // 3. Créer le produit Stripe avec marketing_features ET metadata
     const product = await stripe.products.create({
       name,
       description,
+      marketing_features: marketingFeatures.length > 0 ? marketingFeatures : undefined,
+      metadata,
     })
 
     // 2. Créer le prix mensuel
@@ -357,7 +394,9 @@ export default class PlanService {
   private async updateStripeProduct(
     productId: string,
     name: string,
-    description: string
+    description: string,
+    features?: string[],
+    limits?: Record<string, any>
   ): Promise<void> {
     const stripe = await this.getStripeClient()
 
@@ -365,9 +404,28 @@ export default class PlanService {
       throw new Error('Stripe integration not configured')
     }
 
+    // Préparer les marketing_features (max 15 features, 80 chars par nom)
+    const marketingFeatures: Array<{ name: string }> = []
+
+    if (features && features.length > 0) {
+      features.slice(0, 15).forEach((feature) => {
+        const truncatedFeature = feature.length > 80 ? feature.substring(0, 77) + '...' : feature
+        marketingFeatures.push({ name: truncatedFeature })
+      })
+    }
+
+    // Préparer les metadata pour usage interne
+    const metadata: Record<string, string> = {}
+
+    if (limits && Object.keys(limits).length > 0) {
+      metadata.limits = JSON.stringify(limits)
+    }
+
     await stripe.products.update(productId, {
       name,
       description,
+      marketing_features: marketingFeatures.length > 0 ? marketingFeatures : undefined,
+      metadata: Object.keys(metadata).length > 0 ? metadata : undefined,
     })
   }
 

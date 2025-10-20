@@ -1,5 +1,7 @@
+import { injectable, inject } from 'inversify'
 import { DateTime } from 'luxon'
 import crypto from 'node:crypto'
+import { TYPES } from '#shared/container/types'
 import PasswordResetRepository from '#auth/repositories/password_reset_repository'
 import UserRepository from '#users/repositories/user_repository'
 import hash from '@adonisjs/core/services/hash'
@@ -22,10 +24,11 @@ export interface ResetPasswordResult {
   message: string
 }
 
+@injectable()
 export default class PasswordResetService {
   constructor(
-    private passwordResetRepository: PasswordResetRepository,
-    private userRepository: UserRepository
+    @inject(TYPES.PasswordResetRepository) private passwordResetRepository: PasswordResetRepository,
+    @inject(TYPES.UserRepository) private userRepository: UserRepository
   ) {}
 
   /**
@@ -46,7 +49,7 @@ export default class PasswordResetService {
     const expiresAt = DateTime.now().plus({ hours: 1 })
 
     // Créer le token en base de données
-    const passwordResetToken = await this.passwordResetRepository.create({
+    const passwordResetToken = await this.passwordResetRepository.createToken({
       email,
       token,
       expiresAt

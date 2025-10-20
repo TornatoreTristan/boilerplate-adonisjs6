@@ -14,12 +14,10 @@ test.group('PlanRepository', (group) => {
       name: 'Starter',
       slug: 'starter',
       description: 'Plan de démarrage',
-      price: 0,
+      priceMonthly: 0,
+      priceYearly: 0,
       currency: 'EUR',
-      interval: 'month',
       pricingModel: 'flat',
-      baseUsers: null,
-      pricePerUser: null,
       pricingTiers: null,
       trialDays: 14,
       features: ['1 utilisateur', 'Support email'],
@@ -28,15 +26,15 @@ test.group('PlanRepository', (group) => {
       isVisible: true,
       sortOrder: 0,
       stripeProductId: null,
-      stripePriceId: null,
+      stripePriceIdMonthly: null,
     })
 
     assert.exists(plan.id)
     assert.equal(plan.name, 'Starter')
     assert.equal(plan.slug, 'starter')
-    assert.equal(plan.price, 0)
+    assert.equal(plan.priceMonthly, 0)
     assert.equal(plan.currency, 'EUR')
-    assert.equal(plan.interval, 'month')
+    // assert.equal(plan.interval, 'month')
     assert.equal(plan.pricingModel, 'flat')
     assert.equal(plan.trialDays, 14)
     assert.deepEqual(plan.features, ['1 utilisateur', 'Support email'])
@@ -52,12 +50,9 @@ test.group('PlanRepository', (group) => {
       name: 'Pro',
       slug: 'pro',
       description: 'Plan pro',
-      price: 29,
+      priceMonthly: 29, priceYearly: 290,
       currency: 'EUR',
-      interval: 'month',
       pricingModel: 'per_seat',
-      baseUsers: 5,
-      pricePerUser: 5,
       pricingTiers: null,
       trialDays: null,
       features: null,
@@ -66,12 +61,12 @@ test.group('PlanRepository', (group) => {
       isVisible: true,
       sortOrder: 0,
       stripeProductId: null,
-      stripePriceId: null,
+      stripePriceIdMonthly: null,
     })
 
     assert.equal(plan.pricingModel, 'per_seat')
-    assert.equal(plan.baseUsers, 5)
-    assert.equal(plan.pricePerUser, 5)
+    // assert.equal(plan.baseUsers, 5)
+    // assert.equal(plan.pricePerUser, 5)
   })
 
   test('should create a plan with tiered pricing', async ({ assert }) => {
@@ -81,12 +76,9 @@ test.group('PlanRepository', (group) => {
       name: 'Enterprise',
       slug: 'enterprise',
       description: 'Plan entreprise',
-      price: 0,
+      priceMonthly: 0, priceYearly: 0,
       currency: 'EUR',
-      interval: 'month',
       pricingModel: 'tiered',
-      baseUsers: null,
-      pricePerUser: null,
       pricingTiers: [
         { minUsers: 1, maxUsers: 10, price: 99 },
         { minUsers: 11, maxUsers: 50, price: 249 },
@@ -99,7 +91,7 @@ test.group('PlanRepository', (group) => {
       isVisible: true,
       sortOrder: 0,
       stripeProductId: null,
-      stripePriceId: null,
+      stripePriceIdMonthly: null,
     })
 
     assert.equal(plan.pricingModel, 'tiered')
@@ -114,12 +106,9 @@ test.group('PlanRepository', (group) => {
       name: 'Volume',
       slug: 'volume',
       description: 'Plan volume',
-      price: 0,
+      priceMonthly: 0, priceYearly: 0,
       currency: 'EUR',
-      interval: 'month',
       pricingModel: 'volume',
-      baseUsers: null,
-      pricePerUser: null,
       pricingTiers: [
         { minUsers: 1, maxUsers: 10, pricePerUser: 10 },
         { minUsers: 11, maxUsers: 50, pricePerUser: 8 },
@@ -132,7 +121,7 @@ test.group('PlanRepository', (group) => {
       isVisible: true,
       sortOrder: 0,
       stripeProductId: null,
-      stripePriceId: null,
+      stripePriceIdMonthly: null,
     })
 
     assert.equal(plan.pricingModel, 'volume')
@@ -147,12 +136,9 @@ test.group('PlanRepository', (group) => {
       name: 'Pro',
       slug: 'pro',
       description: 'Plan pro',
-      price: 49,
+      priceMonthly: 49, priceYearly: 490,
       currency: 'EUR',
-      interval: 'month',
       pricingModel: 'flat',
-      baseUsers: null,
-      pricePerUser: null,
       pricingTiers: null,
       trialDays: null,
       features: null,
@@ -161,7 +147,7 @@ test.group('PlanRepository', (group) => {
       isVisible: true,
       sortOrder: 0,
       stripeProductId: null,
-      stripePriceId: null,
+      stripePriceIdMonthly: null,
     })
 
     const plan = await planRepository.findBySlug('pro')
@@ -177,12 +163,9 @@ test.group('PlanRepository', (group) => {
     await planRepository.create({
       name: 'Visible Active',
       slug: 'visible-active',
-      price: 10,
+      priceMonthly: 10, priceYearly: 100,
       currency: 'EUR',
-      interval: 'month',
       pricingModel: 'flat',
-      baseUsers: null,
-      pricePerUser: null,
       pricingTiers: null,
       isActive: true,
       isVisible: true,
@@ -192,18 +175,15 @@ test.group('PlanRepository', (group) => {
       features: null,
       limits: null,
       stripeProductId: null,
-      stripePriceId: null,
+      stripePriceIdMonthly: null,
     })
 
     await planRepository.create({
       name: 'Hidden Active',
       slug: 'hidden-active',
-      price: 20,
+      priceMonthly: 20, priceYearly: 200,
       currency: 'EUR',
-      interval: 'month',
       pricingModel: 'flat',
-      baseUsers: null,
-      pricePerUser: null,
       pricingTiers: null,
       isActive: true,
       isVisible: false,
@@ -213,18 +193,15 @@ test.group('PlanRepository', (group) => {
       features: null,
       limits: null,
       stripeProductId: null,
-      stripePriceId: null,
+      stripePriceIdMonthly: null,
     })
 
     await planRepository.create({
       name: 'Visible Inactive',
       slug: 'visible-inactive',
-      price: 30,
+      priceMonthly: 30, priceYearly: 300,
       currency: 'EUR',
-      interval: 'month',
       pricingModel: 'flat',
-      baseUsers: null,
-      pricePerUser: null,
       pricingTiers: null,
       isActive: false,
       isVisible: true,
@@ -234,7 +211,7 @@ test.group('PlanRepository', (group) => {
       features: null,
       limits: null,
       stripeProductId: null,
-      stripePriceId: null,
+      stripePriceIdMonthly: null,
     })
 
     const plans = await planRepository.findActiveAndVisible()
@@ -249,12 +226,9 @@ test.group('PlanRepository', (group) => {
     const plan = await planRepository.create({
       name: 'Original',
       slug: 'original',
-      price: 10,
+      priceMonthly: 10, priceYearly: 100,
       currency: 'EUR',
-      interval: 'month',
       pricingModel: 'flat',
-      baseUsers: null,
-      pricePerUser: null,
       pricingTiers: null,
       description: null,
       trialDays: null,
@@ -264,16 +238,16 @@ test.group('PlanRepository', (group) => {
       isVisible: true,
       sortOrder: 0,
       stripeProductId: null,
-      stripePriceId: null,
+      stripePriceIdMonthly: null,
     })
 
     const updated = await planRepository.update(plan.id, {
       name: 'Updated',
-      price: 20,
+      priceMonthly: 20, priceYearly: 200,
     })
 
     assert.equal(updated.name, 'Updated')
-    assert.equal(updated.price, 20)
+    assert.equal(updated.priceMonthly, 20)
     assert.equal(updated.slug, 'original')
   })
 
@@ -283,12 +257,9 @@ test.group('PlanRepository', (group) => {
     const plan = await planRepository.create({
       name: 'To Delete',
       slug: 'to-delete',
-      price: 10,
+      priceMonthly: 10, priceYearly: 100,
       currency: 'EUR',
-      interval: 'month',
       pricingModel: 'flat',
-      baseUsers: null,
-      pricePerUser: null,
       pricingTiers: null,
       description: null,
       trialDays: null,
@@ -298,7 +269,7 @@ test.group('PlanRepository', (group) => {
       isVisible: true,
       sortOrder: 0,
       stripeProductId: null,
-      stripePriceId: null,
+      stripePriceIdMonthly: null,
     })
 
     await planRepository.delete(plan.id)

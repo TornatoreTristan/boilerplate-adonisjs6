@@ -193,3 +193,25 @@ export class RateLimitException extends AppException {
     super(message, details)
   }
 }
+
+// =====================================================
+// EXCEPTIONS ABONNEMENTS (BILLING)
+// =====================================================
+
+export class SubscriptionNotFoundException extends AppException {
+  readonly code = ERROR_CODES.USER_NOT_FOUND
+  readonly status = 404
+
+  constructor(message = 'Abonnement introuvable', details?: ErrorDetails) {
+    super(message, details)
+  }
+}
+
+export class SubscriptionNotSyncedException extends AppException {
+  readonly code = ERROR_CODES.INTERNAL_ERROR
+  readonly status = 500
+
+  constructor(message = 'L\'abonnement n\'est pas synchronisé avec Stripe', details?: ErrorDetails) {
+    super(message, details)
+  }
+}

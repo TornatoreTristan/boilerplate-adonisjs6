@@ -4,6 +4,8 @@ import { TYPES } from '#shared/container/types'
 import type UserRepository from '#users/repositories/user_repository'
 import type AdminService from '#admin/services/admin_service'
 import type StripeConnectService from '#integrations/services/stripe_connect_service'
+import type PlanService from '#billing/services/plan_service'
+import type SubscriptionService from '#billing/services/subscription_service'
 import { updateUserValidator } from '#admin/validators/update_user_validator'
 import { addUserToOrganizationValidator } from '#admin/validators/add_user_to_organization_validator'
 import { configureStripeValidator } from '#admin/validators/configure_stripe_validator'
@@ -137,12 +139,31 @@ export default class AdminController {
 
   async organizationDetail({ params, inertia }: HttpContext) {
     const adminService = getService<AdminService>(TYPES.AdminService)
+    const subscriptionService = getService<SubscriptionService>(TYPES.SubscriptionService)
 
     const detail = await adminService.getOrganizationDetail(params.id)
+
+    // Récupérer les factures de l'organisation
+    const invoices = await subscriptionService.getOrganizationInvoices(params.id, 50)
 
     return inertia.render('admin/organization-detail', {
       organization: detail.organization,
       members: detail.members,
+      invoices: invoices.map((invoice) => ({
+        id: invoice.id,
+        number: invoice.number,
+        status: invoice.status,
+        amountPaid: invoice.amount_paid / 100, // Convertir de centimes en euros
+        amountDue: invoice.amount_due / 100,
+        currency: invoice.currency.toUpperCase(),
+        created: invoice.created,
+        dueDate: invoice.due_date,
+        hostedInvoiceUrl: invoice.hosted_invoice_url,
+        invoicePdf: invoice.invoice_pdf,
+        paid: invoice.paid,
+        periodStart: invoice.period_start,
+        periodEnd: invoice.period_end,
+      })),
     })
   }
 
@@ -283,5 +304,57 @@ export default class AdminController {
     }
 
     return response.redirect('/admin/integrations')
+  }
+
+  async subscriptions({ inertia, request }: HttpContext) {
+    const adminService = getService<AdminService>(TYPES.AdminService)
+    const planService = getService<PlanService>(TYPES.PlanService)
+
+    const status = request.input('status')
+    const planId = request.input('planId')
+    const search = request.input('search')
+
+    const [subscriptions, stats, plans] = await Promise.all([
+      adminService.getAllSubscriptions({ status, planId, search }),
+      adminService.getSubscriptionsStats(),
+      planService.getPlans(),
+    ])
+
+    return inertia.render('admin/subscriptions', {
+      subscriptions: subscriptions.map((sub: any) => ({
+        id: sub.id,
+        status: sub.status,
+        billingInterval: sub.billingInterval,
+        stripePriceId: sub.stripePriceId,
+        currentPeriodStart: sub.currentPeriodStart,
+        currentPeriodEnd: sub.currentPeriodEnd,
+        canceledAt: sub.canceledAt,
+        createdAt: sub.createdAt,
+        organizationId: sub.organizationId,
+        organizationName: sub.organizationName,
+        planId: sub.planId,
+        planName: sub.planName,
+        stripePriceIdMonthly: sub.stripePriceIdMonthly,
+        stripePriceIdYearly: sub.stripePriceIdYearly,
+        subscriptionPrice: sub.subscriptionPrice,
+        subscriptionCurrency: sub.subscriptionCurrency,
+        priceMonthly: sub.priceMonthly,
+        priceYearly: sub.priceYearly,
+        planCurrency: sub.planCurrency,
+      })),
+      stats: {
+        total: Number(stats.total) || 0,
+        active: Number(stats.active) || 0,
+        trialing: Number(stats.trialing) || 0,
+        paused: Number(stats.paused) || 0,
+        canceled: Number(stats.canceled) || 0,
+        pastDue: Number(stats.pastDue) || 0,
+      },
+      plans: plans.map((plan: any) => ({
+        id: plan.id,
+        name: plan.name,
+      })),
+      filters: { status, planId, search },
+    })
   }
 }

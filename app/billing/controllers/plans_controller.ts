@@ -123,6 +123,8 @@ export default class PlansController {
         priceMonthly: plan.priceMonthly,
         priceYearly: plan.priceYearly,
         currency: plan.currency,
+        pricingModel: plan.pricingModel,
+        pricingTiers: plan.pricingTiers,
         trialDays: plan.trialDays,
         features: plan.features,
         limits: plan.limits,

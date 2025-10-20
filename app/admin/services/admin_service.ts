@@ -29,6 +29,9 @@ interface DashboardStats {
   activeUsers: number
   inactiveUsers: number
   totalUsers: number
+  totalRevenue: number
+  mrr: number
+  currency: string
 }
 
 interface UserWithActivity {
@@ -146,13 +149,79 @@ export default class AdminService {
     @inject(TYPES.IntegrationRepository) private integrationRepository: IntegrationRepository
   ) {}
 
+  async getAllSubscriptions(filters?: {
+    status?: string
+    planId?: string
+    search?: string
+  }) {
+    const { default: db } = await import('@adonisjs/lucid/services/db')
+
+    let query = db
+      .from('subscriptions')
+      .join('organizations', 'subscriptions.organization_id', 'organizations.id')
+      .join('plans', 'subscriptions.plan_id', 'plans.id')
+      .select(
+        'subscriptions.id',
+        'subscriptions.status',
+        'subscriptions.billing_interval as billingInterval',
+        'subscriptions.stripe_price_id as stripePriceId',
+        'subscriptions.price as subscriptionPrice',
+        'subscriptions.currency as subscriptionCurrency',
+        'subscriptions.current_period_start as currentPeriodStart',
+        'subscriptions.current_period_end as currentPeriodEnd',
+        'subscriptions.canceled_at as canceledAt',
+        'subscriptions.created_at as createdAt',
+        'organizations.id as organizationId',
+        'organizations.name as organizationName',
+        'plans.id as planId',
+        'plans.name as planName',
+        'plans.stripe_price_id_monthly as stripePriceIdMonthly',
+        'plans.stripe_price_id_yearly as stripePriceIdYearly',
+        'plans.price_monthly as priceMonthly',
+        'plans.price_yearly as priceYearly',
+        'plans.currency as planCurrency'
+      )
+      .orderBy('subscriptions.created_at', 'desc')
+
+    // Filtres
+    if (filters?.status) {
+      query = query.where('subscriptions.status', filters.status)
+    }
+
+    if (filters?.planId) {
+      query = query.where('subscriptions.plan_id', filters.planId)
+    }
+
+    if (filters?.search) {
+      query = query.where('organizations.name', 'LIKE', `%${filters.search}%`)
+    }
+
+    return query
+  }
+
+  async getSubscriptionsStats() {
+    const { default: db } = await import('@adonisjs/lucid/services/db')
+
+    const stats = await db.from('subscriptions').select(
+      db.raw('COUNT(*) as total'),
+      db.raw('SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as active', ['active']),
+      db.raw('SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as trialing', ['trialing']),
+      db.raw('SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as paused', ['paused']),
+      db.raw('SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as canceled', ['canceled']),
+      db.raw('SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as pastDue', ['past_due'])
+    )
+
+    return stats[0]
+  }
+
   async getDashboardStats(days: number = 30): Promise<DashboardStats> {
-    const [usersGrowth, sessionsGrowth, activeUsersStats, avgSessionsPerUser] = await Promise.all(
+    const [usersGrowth, sessionsGrowth, activeUsersStats, avgSessionsPerUser, revenueStats] = await Promise.all(
       [
         this.getUsersGrowth(days),
         this.getSessionsGrowth(days),
         this.getActiveUsersStats(days),
         this.getAverageSessionsPerUser(),
+        this.getRevenueStats(),
       ]
     )
 
@@ -163,6 +232,62 @@ export default class AdminService {
       activeUsers: activeUsersStats.activeUsers,
       inactiveUsers: activeUsersStats.inactiveUsers,
       totalUsers: activeUsersStats.totalUsers,
+      totalRevenue: revenueStats.totalRevenue,
+      mrr: revenueStats.mrr,
+      currency: revenueStats.currency,
+    }
+  }
+
+  async getRevenueStats(): Promise<{ totalRevenue: number; mrr: number; currency: string }> {
+    const { default: db } = await import('@adonisjs/lucid/services/db')
+
+    // Récupérer toutes les subscriptions actives et trialing
+    const subscriptions = await db
+      .from('subscriptions')
+      .select('price', 'currency', 'billing_interval', 'created_at', 'status')
+      .whereIn('status', ['active', 'trialing'])
+
+    if (subscriptions.length === 0) {
+      return { totalRevenue: 0, mrr: 0, currency: 'EUR' }
+    }
+
+    // Utiliser la devise de la première subscription
+    const currency = subscriptions[0].currency || 'EUR'
+
+    // Calculer le MRR (Monthly Recurring Revenue)
+    let mrr = 0
+    let totalRevenue = 0
+
+    for (const sub of subscriptions) {
+      const price = Number(sub.price) || 0
+
+      // Pour le MRR, normaliser tout en mensuel
+      if (sub.billing_interval === 'month') {
+        mrr += price
+      } else if (sub.billing_interval === 'year') {
+        mrr += price / 12 // Diviser le prix annuel par 12
+      }
+
+      // Pour le CA total, calculer depuis la création
+      if (sub.status !== 'trialing') { // Ne pas compter les trials dans le CA
+        const createdAt = new Date(sub.created_at)
+        const now = new Date()
+        const diffMs = now.getTime() - createdAt.getTime()
+
+        if (sub.billing_interval === 'month') {
+          const months = Math.floor(diffMs / (1000 * 60 * 60 * 24 * 30.44))
+          totalRevenue += price * (months + 1) // +1 pour inclure le paiement initial
+        } else if (sub.billing_interval === 'year') {
+          const years = Math.floor(diffMs / (1000 * 60 * 60 * 24 * 365.25))
+          totalRevenue += price * (years + 1) // +1 pour inclure le paiement initial
+        }
+      }
+    }
+
+    return {
+      totalRevenue: Math.round(totalRevenue * 100) / 100, // Arrondir à 2 décimales
+      mrr: Math.round(mrr * 100) / 100,
+      currency,
     }
   }
 

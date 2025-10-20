@@ -17,6 +17,9 @@ import {
   Shield,
   UserCog,
   Plus,
+  Receipt,
+  Download,
+  ExternalLink,
 } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { fr } from 'date-fns/locale'
@@ -60,9 +63,26 @@ interface Member {
   joinedAt: string
 }
 
+interface Invoice {
+  id: string
+  number: string | null
+  status: string | null
+  amountPaid: number
+  amountDue: number
+  currency: string
+  created: number
+  dueDate: number | null
+  hostedInvoiceUrl: string | null
+  invoicePdf: string | null
+  paid: boolean
+  periodStart: number | null
+  periodEnd: number | null
+}
+
 interface OrganizationDetailPageProps {
   organization: Organization
   members: Member[]
+  invoices: Invoice[]
 }
 
 const getRoleIcon = (role: string) => {
@@ -90,7 +110,7 @@ const getRoleBadge = (role: string) => {
   )
 }
 
-const OrganizationDetailPage = ({ organization, members }: OrganizationDetailPageProps) => {
+const OrganizationDetailPage = ({ organization, members, invoices }: OrganizationDetailPageProps) => {
   const adminCount = members.filter((m) => m.role === 'admin' || m.role === 'owner').length
   const [open, setOpen] = useState(false)
   const { flash } = usePage<any>().props
@@ -98,6 +118,39 @@ const OrganizationDetailPage = ({ organization, members }: OrganizationDetailPag
     email: '',
     role: 'member',
   })
+
+  const formatPrice = (amount: number, currency: string) => {
+    return new Intl.NumberFormat('fr-FR', {
+      style: 'currency',
+      currency: currency,
+    }).format(amount)
+  }
+
+  const formatDate = (timestamp: number) => {
+    return new Date(timestamp * 1000).toLocaleDateString('fr-FR', {
+      dateStyle: 'medium',
+    })
+  }
+
+  const getStatusBadge = (status: string | null, paid: boolean) => {
+    if (paid) {
+      return <Badge variant="default" className="bg-green-600">Payée</Badge>
+    }
+    if (status === 'open') {
+      return <Badge variant="secondary">En attente</Badge>
+    }
+    if (status === 'void') {
+      return <Badge variant="outline">Annulée</Badge>
+    }
+    if (status === 'uncollectible') {
+      return <Badge variant="destructive">Irrécouvrable</Badge>
+    }
+    return <Badge variant="outline">{status}</Badge>
+  }
+
+  const totalRevenue = invoices
+    .filter(inv => inv.paid)
+    .reduce((sum, inv) => sum + inv.amountPaid, 0)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -238,6 +291,16 @@ const OrganizationDetailPage = ({ organization, members }: OrganizationDetailPag
                   <span className="text-sm text-muted-foreground">Administrateurs</span>
                   <span className="font-semibold">{adminCount}</span>
                 </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-muted-foreground">Factures totales</span>
+                  <span className="font-semibold">{invoices.length}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-muted-foreground">CA total</span>
+                  <span className="font-semibold text-green-600">
+                    {invoices.length > 0 ? formatPrice(totalRevenue, invoices[0].currency) : '0 €'}
+                  </span>
+                </div>
                 {members.length > 0 && (
                   <div className="flex justify-between">
                     <span className="text-sm text-muted-foreground">Dernier membre ajouté</span>
@@ -357,6 +420,87 @@ const OrganizationDetailPage = ({ organization, members }: OrganizationDetailPag
                         </div>
                       </div>
                     </Link>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Factures et paiements */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Receipt className="h-5 w-5 text-primary" />
+                <CardTitle>Factures et paiements ({invoices.length})</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {invoices.length === 0 ? (
+                <div className="text-center py-12 text-muted-foreground">
+                  <Receipt className="mx-auto h-12 w-12 mb-4 opacity-50" />
+                  <p className="text-lg font-medium">Aucune facture</p>
+                  <p className="text-sm mt-2">Cette organisation n'a pas encore de factures</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {invoices.map((invoice) => (
+                    <div
+                      key={invoice.id}
+                      className="flex items-center justify-between border border-border/80 rounded-md p-4 hover:bg-muted/50 transition-colors"
+                    >
+                      <div className="flex flex-col gap-2">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">
+                            {invoice.number || `Facture ${invoice.id.substring(0, 8)}`}
+                          </span>
+                          {getStatusBadge(invoice.status, invoice.paid)}
+                        </div>
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                          <span>Créée le {formatDate(invoice.created)}</span>
+                          {invoice.periodStart && invoice.periodEnd && (
+                            <span>
+                              Période: {formatDate(invoice.periodStart)} → {formatDate(invoice.periodEnd)}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <div className="text-right">
+                          <div className="font-semibold text-lg">
+                            {formatPrice(invoice.paid ? invoice.amountPaid : invoice.amountDue, invoice.currency)}
+                          </div>
+                          {!invoice.paid && invoice.dueDate && (
+                            <div className="text-xs text-muted-foreground">
+                              Échéance: {formatDate(invoice.dueDate)}
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex gap-2">
+                          {invoice.hostedInvoiceUrl && (
+                            <a
+                              href={invoice.hostedInvoiceUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <Button variant="outline" size="sm">
+                                <ExternalLink className="h-4 w-4" />
+                              </Button>
+                            </a>
+                          )}
+                          {invoice.invoicePdf && (
+                            <a
+                              href={invoice.invoicePdf}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <Button variant="outline" size="sm">
+                                <Download className="h-4 w-4" />
+                              </Button>
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    </div>
                   ))}
                 </div>
               )}

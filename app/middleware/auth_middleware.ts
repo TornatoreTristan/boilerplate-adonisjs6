@@ -1,10 +1,13 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import type { NextFn } from '@adonisjs/core/types/http'
-import User from '#users/models/user'
+import { getService } from '#shared/container/container'
+import { TYPES } from '#shared/container/types'
+import UserRepository from '#users/repositories/user_repository'
 import { E } from '#shared/exceptions/index'
 
 export default class AuthMiddleware {
   async handle(ctx: HttpContext, next: NextFn) {
+    const userRepository = getService<UserRepository>(TYPES.UserRepository)
     const userId = ctx.session.get('user_id')
 
     // Si pas d'ID utilisateur en session
@@ -12,8 +15,13 @@ export default class AuthMiddleware {
       return this.handleUnauthenticated(ctx)
     }
 
-    // Charger l'utilisateur depuis la base
-    const user = await User.find(userId)
+    // Charger l'utilisateur depuis la base avec cache
+    const user = await userRepository.findById(userId, {
+      cache: {
+        ttl: 300,
+        tags: [`user_${userId}`, 'users']
+      }
+    })
 
     // Si l'utilisateur n'existe plus
     if (!user) {

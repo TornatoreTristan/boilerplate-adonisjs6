@@ -3,6 +3,8 @@ import { middleware } from '#start/kernel'
 
 const AdminController = () => import('#admin/controllers/admin_controller')
 const PlansController = () => import('#billing/controllers/plans_controller')
+const AdminSubscriptionsController = () =>
+  import('#admin/controllers/admin_subscriptions_controller')
 
 router
   .group(() => {
@@ -22,6 +24,8 @@ router
     router.get('/admin/integrations/stripe/callback', [AdminController, 'stripeConnectCallback'])
     router.post('/admin/integrations/stripe/disconnect', [AdminController, 'stripeDisconnect'])
 
+    router.get('/admin/subscriptions', [AdminController, 'subscriptions'])
+
     router.get('/admin/plans', [PlansController, 'index'])
     router.get('/admin/plans/create', [PlansController, 'create'])
     router.post('/admin/plans', [PlansController, 'store'])
@@ -30,6 +34,18 @@ router
     router.put('/admin/plans/:id', [PlansController, 'update'])
     router.delete('/admin/plans/:id', [PlansController, 'destroy'])
     router.post('/admin/plans/:id/sync-stripe', [PlansController, 'syncWithStripe'])
-    router.post('/admin/plans/:planId/subscriptions/:subscriptionId/migrate', [PlansController, 'migrateSubscription'])
+    router.post('/admin/plans/:planId/subscriptions/:subscriptionId/migrate', [
+      PlansController,
+      'migrateSubscription',
+    ])
+
+    // Routes pour gérer les abonnements (Admin)
+    router.post('/admin/subscriptions/:id/pause', [AdminSubscriptionsController, 'pause'])
+    router.post('/admin/subscriptions/:id/resume', [AdminSubscriptionsController, 'resume'])
+    router.post('/admin/subscriptions/:id/cancel', [AdminSubscriptionsController, 'cancel'])
+    router.post('/admin/subscriptions/:id/reactivate', [
+      AdminSubscriptionsController,
+      'reactivate',
+    ])
   })
   .use([middleware.auth(), middleware.superAdmin()])

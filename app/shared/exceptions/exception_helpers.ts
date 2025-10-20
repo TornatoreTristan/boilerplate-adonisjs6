@@ -13,6 +13,8 @@ import {
   InsufficientRoleException,
   SessionNotOwnedException,
   RateLimitException,
+  SubscriptionNotFoundException,
+  SubscriptionNotSyncedException,
 } from './domain_exceptions.js'
 import type { ErrorDetails } from './app_exception.js'
 
@@ -129,6 +131,21 @@ export class ExceptionHelpers {
 
   static tooManyRequests(message?: string, retryAfter?: number): never {
     throw new RateLimitException(message, { retryAfter })
+  }
+
+  // =====================================================
+  // SUBSCRIPTION HELPERS
+  // =====================================================
+
+  static subscriptionNotFound(id?: string | number, details?: ErrorDetails): never {
+    throw new SubscriptionNotFoundException(
+      id ? `Abonnement avec l'ID ${id} introuvable` : undefined,
+      details
+    )
+  }
+
+  static subscriptionNotSynced(details?: ErrorDetails): never {
+    throw new SubscriptionNotSyncedException(undefined, details)
   }
 
   // =====================================================

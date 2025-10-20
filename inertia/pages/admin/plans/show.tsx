@@ -13,6 +13,10 @@ import {
   Check,
   Building2,
   AlertCircle,
+  MoreVertical,
+  Eye,
+  Pause,
+  XCircle,
 } from 'lucide-react'
 import {
   Table,
@@ -23,6 +27,14 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 
 interface Plan {
   id: string
@@ -84,10 +96,54 @@ const ShowPlanPage = ({ plan, subscriptions }: Props) => {
   const handleMigrateSubscription = (subscriptionId: string) => {
     if (
       confirm(
-        'Voulez-vous vraiment migrer cet abonnement vers le nouveau prix ? Un prorata sera appliqué.'
+        'Voulez-vous vraiment migrer cet abonnement vers le nouveau prix ?\n\nLe nouveau prix s\'appliquera à la prochaine période de facturation (pas de prorata).'
       )
     ) {
       router.post(`/admin/plans/${plan.id}/subscriptions/${subscriptionId}/migrate`)
+    }
+  }
+
+  const handleViewSubscription = (subscriptionId: string, organizationId: string) => {
+    router.visit(`/admin/organizations/${organizationId}`)
+  }
+
+  const handlePauseSubscription = (subscriptionId: string) => {
+    if (
+      confirm(
+        'Voulez-vous vraiment mettre en pause cet abonnement ?\n\nL\'organisation n\'aura plus accès aux fonctionnalités jusqu\'à la reprise.'
+      )
+    ) {
+      router.post(`/admin/subscriptions/${subscriptionId}/pause`)
+    }
+  }
+
+  const handleResumeSubscription = (subscriptionId: string) => {
+    if (
+      confirm(
+        'Voulez-vous reprendre cet abonnement en pause ?\n\nLes factures recommenceront à être générées.'
+      )
+    ) {
+      router.post(`/admin/subscriptions/${subscriptionId}/resume`)
+    }
+  }
+
+  const handleCancelSubscription = (subscriptionId: string) => {
+    if (
+      confirm(
+        'Voulez-vous vraiment annuler cet abonnement ?\n\nL\'abonnement restera actif jusqu\'à la fin de la période en cours, puis sera annulé.'
+      )
+    ) {
+      router.post(`/admin/subscriptions/${subscriptionId}/cancel`)
+    }
+  }
+
+  const handleReactivateSubscription = (subscriptionId: string) => {
+    if (
+      confirm(
+        'Voulez-vous réactiver cet abonnement annulé ?\n\nL\'annulation sera annulée et l\'abonnement continuera normalement.'
+      )
+    ) {
+      router.post(`/admin/subscriptions/${subscriptionId}/reactivate`)
     }
   }
 
@@ -301,16 +357,87 @@ const ShowPlanPage = ({ plan, subscriptions }: Props) => {
                             {formatDate(subscription.createdAt)}
                           </TableCell>
                           <TableCell className="text-right">
-                            {isOutdated && subscription.status === 'active' && (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleMigrateSubscription(subscription.id)}
-                              >
-                                <ArrowRight className="mr-2 h-4 w-4" />
-                                Migrer
-                              </Button>
-                            )}
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="sm">
+                                  <MoreVertical className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="w-56">
+                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                <DropdownMenuSeparator />
+
+                                {/* Voir l'organisation - Toujours disponible */}
+                                <DropdownMenuItem
+                                  onClick={() =>
+                                    handleViewSubscription(subscription.id, subscription.organizationId)
+                                  }
+                                >
+                                  <Eye className="mr-2 h-4 w-4" />
+                                  Voir l'organisation
+                                </DropdownMenuItem>
+
+                                {/* Migrer vers nouveau prix - Si ancien prix et actif/trial */}
+                                {isOutdated &&
+                                  (subscription.status === 'active' ||
+                                    subscription.status === 'trialing') && (
+                                    <DropdownMenuItem
+                                      onClick={() => handleMigrateSubscription(subscription.id)}
+                                    >
+                                      <ArrowRight className="mr-2 h-4 w-4" />
+                                      Migrer vers nouveau prix
+                                    </DropdownMenuItem>
+                                  )}
+
+                                {/* Actions pour abonnements actifs/trial */}
+                                {(subscription.status === 'active' ||
+                                  subscription.status === 'trialing') && (
+                                  <>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem
+                                      onClick={() => handlePauseSubscription(subscription.id)}
+                                    >
+                                      <Pause className="mr-2 h-4 w-4" />
+                                      Mettre en pause
+                                    </DropdownMenuItem>
+
+                                    <DropdownMenuItem
+                                      onClick={() => handleCancelSubscription(subscription.id)}
+                                      className="text-destructive focus:text-destructive"
+                                    >
+                                      <XCircle className="mr-2 h-4 w-4" />
+                                      Annuler l'abonnement
+                                    </DropdownMenuItem>
+                                  </>
+                                )}
+
+                                {/* Reprendre - Si en pause */}
+                                {subscription.status === 'paused' && (
+                                  <>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem
+                                      onClick={() => handleResumeSubscription(subscription.id)}
+                                    >
+                                      <ArrowRight className="mr-2 h-4 w-4" />
+                                      Reprendre l'abonnement
+                                    </DropdownMenuItem>
+                                  </>
+                                )}
+
+                                {/* Réactiver - Si annulé mais pas encore terminé */}
+                                {subscription.status === 'canceled' && subscription.currentPeriodEnd && (
+                                  <>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem
+                                      onClick={() => handleReactivateSubscription(subscription.id)}
+                                    >
+                                      <Check className="mr-2 h-4 w-4" />
+                                      Réactiver l'abonnement
+                                    </DropdownMenuItem>
+                                  </>
+                                )}
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                           </TableCell>
                         </TableRow>
                       )

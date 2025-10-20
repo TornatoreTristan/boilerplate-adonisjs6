@@ -49,6 +49,8 @@ router
     router.get('/settings/subscriptions', [OrganizationSettingsController, 'subscriptions'])
     router.get('/pricing', [OrganizationSettingsController, 'pricing'])
     router.post('/subscriptions/checkout', [SubscriptionsController, 'createCheckoutSession'])
+    router.delete('/subscriptions/:id', [SubscriptionsController, 'cancelSubscription'])
+    router.post('/subscriptions/:id/reactivate', [SubscriptionsController, 'reactivateSubscription'])
   })
   .prefix('/organizations')
   .use([middleware.auth(), middleware.requireOrganization(), middleware.organizationContext()])

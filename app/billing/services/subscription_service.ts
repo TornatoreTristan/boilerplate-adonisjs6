@@ -5,6 +5,8 @@ import type PlanRepository from '#billing/repositories/plan_repository'
 import type Subscription from '#billing/models/subscription'
 import Stripe from 'stripe'
 import env from '#start/env'
+import { E } from '#shared/exceptions/exception_helpers'
+import { DateTime } from 'luxon'
 
 @injectable()
 export default class SubscriptionService {
@@ -65,12 +67,20 @@ export default class SubscriptionService {
           price: newStripePriceId,
         },
       ],
-      proration_behavior: 'create_prorations', // Créer un prorata pour la différence de prix
+      proration_behavior: 'none', // Pas de prorata
+      billing_cycle_anchor: 'unchanged', // Le nouveau prix s'appliquera à la prochaine période
     })
+
+    // Récupérer le nouveau prix
+    const newPrice = subscription.billingInterval === 'month'
+      ? plan.priceMonthly
+      : plan.priceYearly
 
     // Mettre à jour la base de données
     return this.subscriptionRepository.update(subscriptionId, {
       stripePriceId: newStripePriceId,
+      price: newPrice,
+      currency: plan.currency,
     })
   }
 
@@ -162,6 +172,53 @@ export default class SubscriptionService {
   }
 
   /**
+   * Annuler un abonnement à la fin de la période
+   * L'utilisateur garde l'accès jusqu'à la fin de la période payée
+   */
+  async cancelSubscription(subscriptionId: string): Promise<Subscription> {
+    const subscription = await this.subscriptionRepository.findById(subscriptionId)
+
+    E.assertExists(subscription, 'Subscription', subscriptionId)
+
+    if (!subscription.stripeSubscriptionId) {
+      E.subscriptionNotSynced()
+    }
+
+    const stripe = await this.getStripeClient()
+
+    await stripe.subscriptions.update(subscription.stripeSubscriptionId, {
+      cancel_at_period_end: true,
+    })
+
+    return this.subscriptionRepository.update(subscriptionId, {
+      canceledAt: DateTime.now(),
+    })
+  }
+
+  /**
+   * Réactiver un abonnement annulé (avant la fin de la période)
+   */
+  async reactivateSubscription(subscriptionId: string): Promise<Subscription> {
+    const subscription = await this.subscriptionRepository.findById(subscriptionId)
+
+    E.assertExists(subscription, 'Subscription', subscriptionId)
+
+    if (!subscription.stripeSubscriptionId) {
+      E.subscriptionNotSynced()
+    }
+
+    const stripe = await this.getStripeClient()
+
+    await stripe.subscriptions.update(subscription.stripeSubscriptionId, {
+      cancel_at_period_end: false,
+    })
+
+    return this.subscriptionRepository.update(subscriptionId, {
+      canceledAt: null,
+    })
+  }
+
+  /**
    * Obtenir le client Stripe
    */
   private async getStripeClient(): Promise<Stripe> {
@@ -173,6 +230,119 @@ export default class SubscriptionService {
 
     return new Stripe(secretKey, {
       apiVersion: '2024-11-20.acacia',
+    })
+  }
+
+  /**
+   * Mettre en pause un abonnement
+   * L'abonnement reste actif mais les factures ne sont plus générées
+   */
+  async pauseSubscription(subscriptionId: string): Promise<Subscription> {
+    const subscription = await this.subscriptionRepository.findByIdOrFail(subscriptionId)
+
+    if (!subscription.stripeSubscriptionId) {
+      E.subscriptionNotSynced(subscriptionId)
+    }
+
+    if (subscription.status === 'canceled') {
+      throw new Error('Impossible de mettre en pause un abonnement annulé')
+    }
+
+    const stripe = await this.getStripeClient()
+
+    // Mettre en pause dans Stripe
+    await stripe.subscriptions.update(subscription.stripeSubscriptionId, {
+      pause_collection: {
+        behavior: 'mark_uncollectible', // Les factures sont marquées comme non collectables
+      },
+    })
+
+    // Mettre à jour la base de données
+    return this.subscriptionRepository.update(subscriptionId, {
+      status: 'paused',
+    })
+  }
+
+  /**
+   * Reprendre un abonnement en pause
+   */
+  async resumeSubscription(subscriptionId: string): Promise<Subscription> {
+    const subscription = await this.subscriptionRepository.findByIdOrFail(subscriptionId)
+
+    if (!subscription.stripeSubscriptionId) {
+      E.subscriptionNotSynced(subscriptionId)
+    }
+
+    if (subscription.status !== 'paused') {
+      throw new Error('Seuls les abonnements en pause peuvent être repris')
+    }
+
+    const stripe = await this.getStripeClient()
+
+    // Reprendre dans Stripe
+    await stripe.subscriptions.update(subscription.stripeSubscriptionId, {
+      pause_collection: null, // Supprime la pause
+    })
+
+    // Mettre à jour la base de données
+    return this.subscriptionRepository.update(subscriptionId, {
+      status: 'active',
+    })
+  }
+
+  /**
+   * Annuler un abonnement à la fin de la période en cours
+   * L'abonnement reste actif jusqu'à currentPeriodEnd puis passe à canceled
+   */
+  async cancelSubscription(subscriptionId: string): Promise<Subscription> {
+    const subscription = await this.subscriptionRepository.findByIdOrFail(subscriptionId)
+
+    if (!subscription.stripeSubscriptionId) {
+      E.subscriptionNotSynced(subscriptionId)
+    }
+
+    if (subscription.status === 'canceled') {
+      throw new Error('Cet abonnement est déjà annulé')
+    }
+
+    const stripe = await this.getStripeClient()
+
+    // Annuler dans Stripe à la fin de période
+    await stripe.subscriptions.update(subscription.stripeSubscriptionId, {
+      cancel_at_period_end: true,
+    })
+
+    // Mettre à jour la base de données
+    return this.subscriptionRepository.update(subscriptionId, {
+      canceledAt: DateTime.now(),
+    })
+  }
+
+  /**
+   * Réactiver un abonnement annulé (avant la fin de période)
+   * Annule la demande d'annulation
+   */
+  async reactivateSubscription(subscriptionId: string): Promise<Subscription> {
+    const subscription = await this.subscriptionRepository.findByIdOrFail(subscriptionId)
+
+    if (!subscription.stripeSubscriptionId) {
+      E.subscriptionNotSynced(subscriptionId)
+    }
+
+    if (!subscription.canceledAt) {
+      throw new Error('Cet abonnement n\'est pas en cours d\'annulation')
+    }
+
+    const stripe = await this.getStripeClient()
+
+    // Annuler la demande d'annulation dans Stripe
+    await stripe.subscriptions.update(subscription.stripeSubscriptionId, {
+      cancel_at_period_end: false,
+    })
+
+    // Mettre à jour la base de données
+    return this.subscriptionRepository.update(subscriptionId, {
+      canceledAt: null,
     })
   }
 }

@@ -67,7 +67,8 @@ const PlansIndexPage = ({ plans }: PlansIndexProps) => {
             title="Plans d'abonnement"
             description={`Gérez les plans d'abonnement de votre SaaS • ${plans.length} plan${plans.length > 1 ? 's' : ''}`}
             icon={CreditCard}
-            action={
+            separator={false}
+            actions={
               <Link href="/admin/plans/create">
                 <Button>
                   <Plus className="mr-2 h-4 w-4" />

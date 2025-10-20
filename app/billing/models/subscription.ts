@@ -44,6 +44,12 @@ export default class Subscription extends BaseModel {
   declare billingInterval: PlanInterval
 
   @column()
+  declare price: number
+
+  @column()
+  declare currency: string
+
+  @column()
   declare status: SubscriptionStatus
 
   @column.dateTime()

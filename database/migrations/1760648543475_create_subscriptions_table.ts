@@ -21,6 +21,8 @@ export default class extends BaseSchema {
       table.integer('quantity').notNullable().defaultTo(1)
       table.integer('user_count').notNullable().defaultTo(1)
       table.enum('billing_interval', ['month', 'year']).notNullable().defaultTo('month')
+      table.decimal('price', 10, 2).notNullable().defaultTo(0)
+      table.string('currency', 3).notNullable().defaultTo('EUR')
 
       table
         .enum('status', ['active', 'canceled', 'past_due', 'trialing', 'incomplete', 'incomplete_expired'])

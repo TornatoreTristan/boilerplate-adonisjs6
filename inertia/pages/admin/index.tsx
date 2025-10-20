@@ -4,7 +4,7 @@ import { Head } from '@inertiajs/react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis, Pie, PieChart, Label } from 'recharts'
-import { Users, Activity, TrendingUp } from 'lucide-react'
+import { Users, Activity, TrendingUp, DollarSign, Repeat } from 'lucide-react'
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { useMemo } from 'react'
@@ -22,6 +22,9 @@ interface AdminIndexProps {
     activeUsers: number
     inactiveUsers: number
     totalUsers: number
+    totalRevenue: number
+    mrr: number
+    currency: string
   }
 }
 
@@ -53,6 +56,13 @@ const Index = ({ user, stats }: AdminIndexProps) => {
     [stats.activeUsers, stats.totalUsers]
   )
 
+  const formatPrice = (amount: number, currency: string) => {
+    return new Intl.NumberFormat('fr-FR', {
+      style: 'currency',
+      currency: currency,
+    }).format(amount)
+  }
+
   return (
     <>
       <Head title="Administration" />
@@ -65,10 +75,36 @@ const Index = ({ user, stats }: AdminIndexProps) => {
           />
 
           {/* Statistiques principales */}
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Utilisateurs totaux</CardTitle>
+                <CardTitle className="text-sm font-medium">CA Total HT</CardTitle>
+                <DollarSign className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-green-600">
+                  {formatPrice(stats.totalRevenue, stats.currency)}
+                </div>
+                <p className="text-xs text-muted-foreground">Chiffre d'affaires total</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">MRR</CardTitle>
+                <Repeat className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-blue-600">
+                  {formatPrice(stats.mrr, stats.currency)}
+                </div>
+                <p className="text-xs text-muted-foreground">Revenu récurrent mensuel</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Utilisateurs</CardTitle>
                 <Users className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
@@ -81,7 +117,7 @@ const Index = ({ user, stats }: AdminIndexProps) => {
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Sessions moyennes</CardTitle>
+                <CardTitle className="text-sm font-medium">Sessions moy.</CardTitle>
                 <Activity className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
@@ -92,12 +128,12 @@ const Index = ({ user, stats }: AdminIndexProps) => {
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Taux d'activité</CardTitle>
+                <CardTitle className="text-sm font-medium">Activité</CardTitle>
                 <TrendingUp className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{totalActivePercentage}%</div>
-                <p className="text-xs text-muted-foreground">Utilisateurs actifs (30j)</p>
+                <p className="text-xs text-muted-foreground">Actifs (30j)</p>
               </CardContent>
             </Card>
           </div>

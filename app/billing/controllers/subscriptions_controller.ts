@@ -60,4 +60,72 @@ export default class SubscriptionsController {
   async cancel({ response }: HttpContext) {
     return response.redirect('/organizations/pricing')
   }
+
+  /**
+   * Annuler un abonnement à la fin de la période
+   */
+  async cancelSubscription({ response, session, params, user, organization }: HttpContext) {
+    E.assertUserExists(user)
+    E.assertOrganizationExists(organization)
+
+    const subscriptionId = params.id
+    const subscriptionService = getService<SubscriptionService>(TYPES.SubscriptionService)
+
+    await subscriptionService.cancelSubscription(subscriptionId)
+
+    session.flash('success', 'Votre abonnement sera annulé à la fin de la période de facturation. Vous conservez l\'accès jusqu\'à cette date.')
+
+    return response.redirect().back()
+  }
+
+  /**
+   * Réactiver un abonnement annulé
+   */
+  async reactivateSubscription({ response, session, params, user, organization }: HttpContext) {
+    E.assertUserExists(user)
+    E.assertOrganizationExists(organization)
+
+    const subscriptionId = params.id
+    const subscriptionService = getService<SubscriptionService>(TYPES.SubscriptionService)
+
+    await subscriptionService.reactivateSubscription(subscriptionId)
+
+    session.flash('success', 'Votre abonnement a été réactivé avec succès !')
+
+    return response.redirect().back()
+  }
+
+  /**
+   * Mettre en pause un abonnement
+   */
+  async pauseSubscription({ response, session, params, user, organization }: HttpContext) {
+    E.assertUserExists(user)
+    E.assertOrganizationExists(organization)
+
+    const subscriptionId = params.id
+    const subscriptionService = getService<SubscriptionService>(TYPES.SubscriptionService)
+
+    await subscriptionService.pauseSubscription(subscriptionId)
+
+    session.flash('success', 'L\'abonnement a été mis en pause. Les factures ne seront plus générées.')
+
+    return response.redirect().back()
+  }
+
+  /**
+   * Reprendre un abonnement en pause
+   */
+  async resumeSubscription({ response, session, params, user, organization }: HttpContext) {
+    E.assertUserExists(user)
+    E.assertOrganizationExists(organization)
+
+    const subscriptionId = params.id
+    const subscriptionService = getService<SubscriptionService>(TYPES.SubscriptionService)
+
+    await subscriptionService.resumeSubscription(subscriptionId)
+
+    session.flash('success', 'L\'abonnement a été repris. Les factures seront à nouveau générées.')
+
+    return response.redirect().back()
+  }
 }

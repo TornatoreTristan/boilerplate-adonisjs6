@@ -30,20 +30,18 @@ export default class GoogleAuthService {
     let isNewUser = false
 
     if (!user) {
-      // Chercher même les users soft deleted (bypass du scope global)
-      const { default: db } = await import('@adonisjs/lucid/services/db')
-      const existingUser = await db.from('users').where('email', oauthData.email).first()
+      // Chercher même les users soft deleted
+      const existingUser = await this.userRepository.findByEmailIncludingDeleted(oauthData.email)
 
       if (existingUser) {
         // Si soft deleted, restaurer le compte
-        if (existingUser.deleted_at) {
-          await db.from('users').where('id', existingUser.id).update({ deleted_at: null })
+        if (existingUser.deletedAt) {
+          user = await this.userRepository.restoreDeletedUser(existingUser.id)
+        } else {
+          user = existingUser
         }
-        // Récupérer le user via le repository
-        user = await this.userRepository.findById(existingUser.id)
-        if (user) {
-          user = await this.linkGoogleAccount(user, oauthData)
-        }
+        // Lier le compte Google
+        user = await this.linkGoogleAccount(user, oauthData)
       } else {
         user = await this.createUserFromGoogle(oauthData)
         isNewUser = true

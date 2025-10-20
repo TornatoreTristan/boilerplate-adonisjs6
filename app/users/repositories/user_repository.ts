@@ -81,6 +81,22 @@ export default class UserRepository extends BaseRepository<typeof UserModel> {
   }
 
   /**
+   * Trouver un utilisateur par email incluant les soft deleted
+   */
+  async findByEmailIncludingDeleted(email: string): Promise<UserModel | null> {
+    return this.findOneBy({ email }, {
+      includeDeleted: true
+    })
+  }
+
+  /**
+   * Restaurer un utilisateur soft deleted
+   */
+  async restoreDeletedUser(id: string): Promise<UserModel> {
+    return this.restore(id)
+  }
+
+  /**
    * Hook après création - invalider les caches email
    */
   protected async afterCreate(user: UserModel): Promise<void> {

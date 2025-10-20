@@ -16,6 +16,7 @@ import EmailService from '#mailing/services/email_service'
 import UserRepository from '#users/repositories/user_repository'
 import OrganizationRepository from '#organizations/repositories/organization_repository'
 import SessionRepository from '#sessions/repositories/session_repository'
+import PasswordResetRepository from '#auth/repositories/password_reset_repository'
 import EmailVerificationRepository from '#auth/repositories/email_verification_repository'
 import NotificationRepository from '#notifications/repositories/notification_repository'
 import UploadRepository from '#uploads/repositories/upload_repository'
@@ -35,6 +36,7 @@ import UploadService from '#uploads/services/upload_service'
 
 // Domain Services
 import AuthService from '#auth/services/auth_service'
+import PasswordResetService from '#auth/services/password_reset_service'
 import UserService from '#users/services/user_service'
 import OrganizationService from '#organizations/services/organization_service'
 import SessionService from '#sessions/services/session_service'
@@ -99,6 +101,7 @@ export function configureContainer(): Container {
   container.bind(TYPES.UserRepository).to(UserRepository)
   container.bind(TYPES.OrganizationRepository).to(OrganizationRepository)
   container.bind(TYPES.SessionRepository).to(SessionRepository)
+  container.bind(TYPES.PasswordResetRepository).to(PasswordResetRepository)
   container.bind(TYPES.EmailVerificationRepository).to(EmailVerificationRepository)
   container.bind(TYPES.NotificationRepository).to(NotificationRepository)
   container.bind(TYPES.UploadRepository).to(UploadRepository)
@@ -115,6 +118,7 @@ export function configureContainer(): Container {
   // ==========================================
 
   container.bind<AuthService>(TYPES.AuthService).to(AuthService)
+  container.bind<PasswordResetService>(TYPES.PasswordResetService).to(PasswordResetService)
   container.bind<UserService>(TYPES.UserService).to(UserService)
   container.bind<OrganizationService>(TYPES.OrganizationService).to(OrganizationService)
   container.bind<SessionService>(TYPES.SessionService).to(SessionService)

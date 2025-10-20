@@ -135,6 +135,9 @@ export default class StripeWebhookController {
       // Créer le nouvel abonnement
       logger.info({ organizationId, planId, billingInterval }, 'Création du nouvel abonnement')
 
+      // Récupérer le prix depuis le plan
+      const price = billingInterval === 'month' ? plan.priceMonthly : plan.priceYearly
+
       try {
         const newSubscription = await subscriptionRepo.create({
           organizationId,
@@ -146,6 +149,8 @@ export default class StripeWebhookController {
           quantity: stripeSubscription.items.data[0].quantity || 1,
           userCount: 1,
           billingInterval,
+          price,
+          currency: plan.currency,
           status: stripeSubscription.status as any,
           currentPeriodStart: DateTime.fromSeconds(stripeSubscription.current_period_start),
           currentPeriodEnd: DateTime.fromSeconds(stripeSubscription.current_period_end),

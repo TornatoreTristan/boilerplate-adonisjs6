@@ -1,4 +1,4 @@
-import { Home, Users, Shield, Settings, Building2, ArrowLeft, Mail, Plug, CreditCard } from 'lucide-react'
+import { Home, Users, Shield, Settings, Building2, ArrowLeft, Mail, Plug, CreditCard, Receipt } from 'lucide-react'
 import { usePage } from '@inertiajs/react'
 
 import {
@@ -40,6 +40,11 @@ const items = [
     title: 'Organisations',
     url: '/admin/organizations',
     icon: Building2,
+  },
+  {
+    title: 'Abonnements',
+    url: '/admin/subscriptions',
+    icon: Receipt,
   },
   {
     title: 'Intégrations',
