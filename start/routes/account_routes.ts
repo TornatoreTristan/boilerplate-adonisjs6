@@ -25,4 +25,9 @@ router
     })
   })
   .prefix('/account')
-  .use([middleware.auth()])
+  .use([
+    middleware.auth(),
+    middleware.requireOrganization(),
+    middleware.organizationContext(),
+    middleware.updateSessionActivity(),
+  ])
