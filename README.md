@@ -6,7 +6,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue.svg)](https://typescriptlang.org)
 [![Node.js](https://img.shields.io/badge/Node.js-20+-green.svg)](https://nodejs.org)
 
-**Project start:** 27 sept 2025 | **Last update:** 01 oct 2025 | **Version:** 0.1.1
+**Project start:** 27 sept 2025 | **Last update:** 21 oct 2025 | **Version:** 0.1.2
 
 ## ✨ Fonctionnalités
 

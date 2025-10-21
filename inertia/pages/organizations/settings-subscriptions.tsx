@@ -25,6 +25,8 @@ import {
 } from 'lucide-react'
 import { formatDate } from '@/lib/utils'
 import { useState } from 'react'
+import { useI18n } from '@/hooks/use-i18n'
+import { getTranslation } from '@/lib/translatable'
 
 interface Plan {
   id: string
@@ -135,26 +137,7 @@ const OrganizationSettingsSubscriptionsPage = ({
   availablePlans,
   invoices,
 }: Props) => {
-  const { props } = usePage()
-  const locale = (props.locale as 'fr' | 'en') || 'fr'
-
-  // Traductions simples basées sur la locale
-  const translations = {
-    fr: {
-      subscription_management: 'Gestion des abonnements',
-      manage_subscription: 'Gérez votre abonnement et consultez les plans disponibles',
-      no_active_subscription: 'Aucun abonnement actif',
-      choose_plan: 'Choisissez un plan pour commencer à utiliser toutes les fonctionnalités',
-    },
-    en: {
-      subscription_management: 'Subscription Management',
-      manage_subscription: 'Manage your subscription and view available plans',
-      no_active_subscription: 'No Active Subscription',
-      choose_plan: 'Choose a plan to start using all features',
-    },
-  }
-  const t = (key: string) => translations[locale][key as keyof typeof translations['fr']] || key
-
+  const { t, locale } = useI18n()
   const canManageSubscription = ['owner', 'admin'].includes(userRole)
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
@@ -202,12 +185,12 @@ const OrganizationSettingsSubscriptionsPage = ({
                 <div className="flex items-start justify-between">
                   <div>
                     <CardTitle className="flex items-center gap-2">
-                      {getTranslation(currentSubscription.plan.nameI18n)}
+                      {getTranslation(currentSubscription.plan.nameI18n, locale as 'fr' | 'en')}
                       <Badge className={statusColors[currentSubscription.status]}>
                         {statusLabels[currentSubscription.status] || currentSubscription.status}
                       </Badge>
                     </CardTitle>
-                    <CardDescription>{getTranslation(currentSubscription.plan.descriptionI18n)}</CardDescription>
+                    <CardDescription>{getTranslation(currentSubscription.plan.descriptionI18n, locale as 'fr' | 'en')}</CardDescription>
                   </div>
                   <div className="text-right">
                     <div className="text-2xl font-bold">
@@ -331,7 +314,7 @@ const OrganizationSettingsSubscriptionsPage = ({
                           <AlertDialogHeader>
                             <AlertDialogTitle>Annuler votre abonnement ?</AlertDialogTitle>
                             <AlertDialogDescription>
-                              Votre abonnement {getTranslation(currentSubscription.plan.nameI18n)} sera annulé à la fin de la période de facturation.
+                              Votre abonnement {getTranslation(currentSubscription.plan.nameI18n, locale as 'fr' | 'en')} sera annulé à la fin de la période de facturation.
                               {currentSubscription.currentPeriodEnd && (
                                 <>
                                   {' '}
