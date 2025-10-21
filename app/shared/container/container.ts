@@ -20,6 +20,7 @@ import SessionRepository from '#sessions/repositories/session_repository'
 import PasswordResetRepository from '#auth/repositories/password_reset_repository'
 import EmailVerificationRepository from '#auth/repositories/email_verification_repository'
 import NotificationRepository from '#notifications/repositories/notification_repository'
+import UserNotificationPreferenceRepository from '#notifications/repositories/user_notification_preference_repository'
 import UploadRepository from '#uploads/repositories/upload_repository'
 import RoleRepository from '#roles/repositories/role_repository'
 import PermissionRepository from '#roles/repositories/permission_repository'
@@ -44,6 +45,7 @@ import SessionService from '#sessions/services/session_service'
 import GoogleAuthService from '#auth/services/google_auth_service'
 import EmailVerificationService from '#auth/services/email_verification_service'
 import NotificationService from '#notifications/services/notification_service'
+import UserNotificationPreferenceService from '#notifications/services/user_notification_preference_service'
 import AuthorizationService from '#roles/services/authorization_service'
 import AdminService from '#admin/services/admin_service'
 import StripeConnectService from '#integrations/services/stripe_connect_service'
@@ -53,6 +55,27 @@ import PricingCalculatorService from '#billing/services/pricing_calculator_servi
 
 // Listeners
 import NotificationListeners from '#notifications/listeners/notification_listeners'
+
+// Health Checks
+import HealthService from '#health/services/health_service'
+import DatabaseHealthCheck from '#health/services/health_checks/database_health_check'
+import RedisHealthCheck from '#health/services/health_checks/redis_health_check'
+import DiskHealthCheck from '#health/services/health_checks/disk_health_check'
+import EmailHealthCheck from '#health/services/health_checks/email_health_check'
+import MetricsService from '#health/services/metrics_service'
+import MonitoringService from '#health/services/monitoring_service'
+import HealthHistoryService from '#health/services/health_history_service'
+import HealthHistoryRepository from '#health/repositories/health_history_repository'
+
+// Logs
+import LogRepository from '#logs/repositories/log_repository'
+import LogService from '#logs/services/log_service'
+
+// GDPR
+import GdprService from '#gdpr/services/gdpr_service'
+
+// Monitoring
+import SentryService from '#monitoring/services/sentry_service'
 
 // Create container
 const container = new Container()
@@ -102,6 +125,39 @@ export function configureContainer(): Container {
   container.bind<LocaleService>(TYPES.LocaleService).to(LocaleService).inSingletonScope()
 
   // ==========================================
+  // HEALTH CHECKS & MONITORING
+  // ==========================================
+
+  container.bind<HealthHistoryRepository>(TYPES.HealthHistoryRepository).to(HealthHistoryRepository)
+  container.bind<DatabaseHealthCheck>(TYPES.DatabaseHealthCheck).to(DatabaseHealthCheck).inSingletonScope()
+  container.bind<RedisHealthCheck>(TYPES.RedisHealthCheck).to(RedisHealthCheck).inSingletonScope()
+  container.bind<DiskHealthCheck>(TYPES.DiskHealthCheck).to(DiskHealthCheck).inSingletonScope()
+  container.bind<EmailHealthCheck>(TYPES.EmailHealthCheck).to(EmailHealthCheck).inSingletonScope()
+  container.bind<HealthService>(TYPES.HealthService).to(HealthService).inSingletonScope()
+  container.bind<MetricsService>(TYPES.MetricsService).to(MetricsService).inSingletonScope()
+  container.bind<HealthHistoryService>(TYPES.HealthHistoryService).to(HealthHistoryService)
+  container.bind<MonitoringService>(TYPES.MonitoringService).to(MonitoringService).inSingletonScope()
+
+  // ==========================================
+  // LOGS
+  // ==========================================
+
+  container.bind<LogRepository>(TYPES.LogRepository).to(LogRepository)
+  container.bind<LogService>(TYPES.LogService).to(LogService)
+
+  // ==========================================
+  // GDPR
+  // ==========================================
+
+  container.bind<GdprService>(TYPES.GdprService).to(GdprService)
+
+  // ==========================================
+  // MONITORING
+  // ==========================================
+
+  container.bind<SentryService>(TYPES.SentryService).to(SentryService).inSingletonScope()
+
+  // ==========================================
   // LISTENERS
   // ==========================================
 
@@ -117,6 +173,9 @@ export function configureContainer(): Container {
   container.bind(TYPES.PasswordResetRepository).to(PasswordResetRepository)
   container.bind(TYPES.EmailVerificationRepository).to(EmailVerificationRepository)
   container.bind(TYPES.NotificationRepository).to(NotificationRepository)
+  container
+    .bind(TYPES.UserNotificationPreferenceRepository)
+    .to(UserNotificationPreferenceRepository)
   container.bind(TYPES.UploadRepository).to(UploadRepository)
   container.bind(TYPES.RoleRepository).to(RoleRepository)
   container.bind(TYPES.PermissionRepository).to(PermissionRepository)
@@ -138,6 +197,9 @@ export function configureContainer(): Container {
   container.bind<GoogleAuthService>(TYPES.GoogleAuthService).to(GoogleAuthService)
   container.bind<EmailVerificationService>(TYPES.EmailVerificationService).to(EmailVerificationService)
   container.bind<NotificationService>(TYPES.NotificationService).to(NotificationService)
+  container
+    .bind<UserNotificationPreferenceService>(TYPES.UserNotificationPreferenceService)
+    .to(UserNotificationPreferenceService)
   container.bind<AuthorizationService>(TYPES.AuthorizationService).to(AuthorizationService)
   container.bind<AdminService>(TYPES.AdminService).to(AdminService)
   container.bind<StripeConnectService>(TYPES.StripeConnectService).to(StripeConnectService)

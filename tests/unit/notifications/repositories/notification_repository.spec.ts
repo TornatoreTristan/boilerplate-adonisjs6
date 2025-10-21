@@ -282,4 +282,132 @@ test.group('NotificationRepository', (group) => {
     assert.lengthOf(result, 1)
     assert.equal(result[0].title, 'Unread')
   })
+
+  test('devrait créer une notification avec priorité', async ({ assert }) => {
+    const repository = new NotificationRepository()
+    const notificationData = {
+      userId: user.id,
+      type: 'system.announcement' as const,
+      priority: 'urgent' as const,
+      titleI18n: { fr: 'Alerte critique', en: 'Critical alert' },
+      messageI18n: { fr: 'Maintenance d\'urgence', en: 'Emergency maintenance' },
+    }
+
+    const result = await repository.create(notificationData)
+
+    assert.isObject(result)
+    assert.equal(result.priority, 'urgent')
+  })
+
+  test('devrait utiliser la priorité "normal" par défaut', async ({ assert }) => {
+    const repository = new NotificationRepository()
+    const notificationData = {
+      userId: user.id,
+      type: 'user.mentioned' as const,
+      titleI18n: { fr: 'Test', en: 'Test' },
+      messageI18n: { fr: 'Test message', en: 'Test message' },
+    }
+
+    const result = await repository.create(notificationData)
+
+    assert.isObject(result)
+    assert.equal(result.priority, 'normal')
+  })
+
+  test('devrait trier les notifications par priorité puis date', async ({ assert }) => {
+    const repository = new NotificationRepository()
+
+    await Notification.create({
+      userId: user.id,
+      type: 'user.mentioned',
+      priority: 'normal',
+      titleI18n: { fr: 'Normal 1', en: 'Normal 1' },
+      messageI18n: { fr: 'Message normal', en: 'Normal message' },
+    })
+
+    await Notification.create({
+      userId: user.id,
+      type: 'system.announcement',
+      priority: 'urgent',
+      titleI18n: { fr: 'Urgent 1', en: 'Urgent 1' },
+      messageI18n: { fr: 'Message urgent', en: 'Urgent message' },
+    })
+
+    await Notification.create({
+      userId: user.id,
+      type: 'system.announcement',
+      priority: 'high',
+      titleI18n: { fr: 'High 1', en: 'High 1' },
+      messageI18n: { fr: 'Message high', en: 'High message' },
+    })
+
+    await Notification.create({
+      userId: user.id,
+      type: 'user.mentioned',
+      priority: 'low',
+      titleI18n: { fr: 'Low 1', en: 'Low 1' },
+      messageI18n: { fr: 'Message low', en: 'Low message' },
+    })
+
+    const result = await repository.findByUserIdSortedByPriority(user.id)
+
+    assert.isArray(result)
+    assert.lengthOf(result, 4)
+    assert.equal(result[0].priority, 'urgent')
+    assert.equal(result[1].priority, 'high')
+    assert.equal(result[2].priority, 'normal')
+    assert.equal(result[3].priority, 'low')
+  })
+
+  test('devrait créer une notification avec actions', async ({ assert }) => {
+    const repository = new NotificationRepository()
+    const actions = [
+      {
+        label: 'Accepter',
+        labelI18n: { fr: 'Accepter', en: 'Accept' },
+        endpoint: '/api/invitations/123/accept',
+        method: 'POST' as const,
+        style: 'primary' as const,
+      },
+      {
+        label: 'Refuser',
+        labelI18n: { fr: 'Refuser', en: 'Decline' },
+        endpoint: '/api/invitations/123/decline',
+        method: 'POST' as const,
+        style: 'secondary' as const,
+      },
+    ]
+
+    const notificationData = {
+      userId: user.id,
+      type: 'org.invitation' as const,
+      titleI18n: { fr: 'Invitation', en: 'Invitation' },
+      messageI18n: { fr: 'Vous êtes invité', en: 'You are invited' },
+      actions,
+    }
+
+    const result = await repository.create(notificationData)
+
+    assert.isObject(result)
+    assert.isArray(result.actions)
+    assert.lengthOf(result.actions!, 2)
+    assert.equal(result.actions![0].label, 'Accepter')
+    assert.equal(result.actions![0].method, 'POST')
+    assert.equal(result.actions![0].style, 'primary')
+  })
+
+  test('devrait créer une notification sans actions', async ({ assert }) => {
+    const repository = new NotificationRepository()
+    const notificationData = {
+      userId: user.id,
+      type: 'user.mentioned' as const,
+      titleI18n: { fr: 'Test', en: 'Test' },
+      messageI18n: { fr: 'Test message', en: 'Test message' },
+    }
+
+    const result = await repository.create(notificationData)
+
+    assert.isObject(result)
+    assert.isTrue(result.actions === null || result.actions === undefined)
+  })
 })

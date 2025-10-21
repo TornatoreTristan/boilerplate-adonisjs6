@@ -5,6 +5,9 @@ import type { StatusPageRange, StatusPageRenderer } from '@adonisjs/core/types/h
 import { AppException } from '#shared/exceptions/app_exception'
 import { InternalServerException } from '#shared/exceptions/domain_exceptions'
 import { ERROR_CODES } from '#shared/constants/error_codes'
+import { getService } from '#shared/container/container'
+import { TYPES } from '#shared/container/types'
+import type SentryService from '#monitoring/services/sentry_service'
 
 export default class HttpExceptionHandler extends ExceptionHandler {
   /**
@@ -175,6 +178,35 @@ export default class HttpExceptionHandler extends ExceptionHandler {
    * @note You should not attempt to send a response from this method.
    */
   async report(error: unknown, ctx: HttpContext) {
+    // Report to Sentry in production
+    if (app.inProduction) {
+      try {
+        const sentryService = getService<SentryService>(TYPES.SentryService)
+
+        if (sentryService.isInitialized()) {
+          // Capture HTTP context
+          sentryService.captureHttpContext(ctx)
+
+          // Skip reporting for certain errors
+          const shouldSkip =
+            this.isVineError(error) || // Validation errors
+            this.isRouteNotFoundError(error) // 404 errors
+
+          if (!shouldSkip && error instanceof Error) {
+            sentryService.captureException(error, {
+              route: ctx.route?.pattern,
+              controller: ctx.route?.meta?.resolvedHandler,
+              isAppException: error instanceof AppException,
+              errorCode: error instanceof AppException ? error.code : undefined,
+            })
+          }
+        }
+      } catch (sentryError) {
+        // If Sentry fails, don't crash the app
+        logger.error('Failed to report error to Sentry', { error: sentryError })
+      }
+    }
+
     // Si c'est une AppException et qu'elle doit être loggée, on l'a déjà fait dans handle()
     if (error instanceof AppException && error.shouldLog()) {
       return

@@ -17,6 +17,11 @@ export default class extends BaseSchema {
       // Validation
       table.timestamp('email_verified_at').nullable()
 
+      // Communication preferences
+      table.boolean('newsletter_enabled').defaultTo(true).notNullable()
+      table.boolean('tips_enabled').defaultTo(false).notNullable()
+      table.boolean('promotional_offers_enabled').defaultTo(false).notNullable()
+
       // Soft delete
       table.timestamp('deleted_at').nullable()
 

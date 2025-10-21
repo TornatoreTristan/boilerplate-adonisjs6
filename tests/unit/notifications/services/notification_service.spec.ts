@@ -1,11 +1,12 @@
 import { test } from '@japa/runner'
 import NotificationService from '#notifications/services/notification_service'
 import NotificationRepository from '#notifications/repositories/notification_repository'
+import UserNotificationPreferenceService from '#notifications/services/user_notification_preference_service'
 import Notification from '#notifications/models/notification'
 import User from '#users/models/user'
 import Organization from '#organizations/models/organization'
 import testUtils from '@adonisjs/core/services/test_utils'
-import { container } from '#shared/container/container'
+import { serviceContainer, getService } from '#shared/container/container'
 import { TYPES } from '#shared/container/types'
 
 test.group('NotificationService', (group) => {
@@ -15,6 +16,7 @@ test.group('NotificationService', (group) => {
   let organization: Organization
   let service: NotificationService
   let repository: NotificationRepository
+  let preferenceService: UserNotificationPreferenceService
 
   group.each.setup(async () => {
     user = await User.create({
@@ -29,7 +31,10 @@ test.group('NotificationService', (group) => {
     })
 
     repository = new NotificationRepository()
-    service = new NotificationService(repository)
+    preferenceService = getService<UserNotificationPreferenceService>(
+      TYPES.UserNotificationPreferenceService
+    )
+    service = new NotificationService(repository, preferenceService)
   })
 
   test('devrait créer une notification pour un utilisateur', async ({ assert }) => {
@@ -237,5 +242,98 @@ test.group('NotificationService', (group) => {
 
     const deleted = await Notification.find(notification.id)
     assert.isNotNull(deleted?.deleted_at)
+  })
+
+  test('devrait créer une notification avec actions', async ({ assert }) => {
+    const actions = [
+      {
+        label: 'Accepter',
+        labelI18n: { fr: 'Accepter', en: 'Accept' },
+        endpoint: '/api/invitations/123/accept',
+        method: 'POST' as const,
+        style: 'primary' as const,
+      },
+    ]
+
+    const result = await service.createNotification({
+      userId: user.id,
+      type: 'org.invitation',
+      priority: 'high',
+      title: 'Invitation',
+      message: 'Vous êtes invité',
+      actions,
+    })
+
+    assert.isObject(result)
+    assert.isArray(result.actions)
+    assert.lengthOf(result.actions!, 1)
+    assert.equal(result.actions![0].label, 'Accepter')
+    assert.equal(result.priority, 'high')
+  })
+
+  test('devrait exécuter une action de notification', async ({ assert }) => {
+    const actions = [
+      {
+        label: 'Approuver',
+        labelI18n: { fr: 'Approuver', en: 'Approve' },
+        endpoint: '/api/test/approve',
+        method: 'POST' as const,
+        style: 'primary' as const,
+      },
+    ]
+
+    const notification = await service.createNotification({
+      userId: user.id,
+      type: 'org.invitation',
+      title: 'Test',
+      message: 'Test message',
+      actions,
+    })
+
+    const result = await service.executeNotificationAction(notification.id, 0, user.id)
+
+    assert.isObject(result)
+    assert.property(result, 'success')
+    assert.isTrue(result.success)
+    assert.property(result, 'action')
+    assert.equal(result.action?.endpoint, '/api/test/approve')
+  })
+
+  test('devrait échouer si l\'action n\'existe pas', async ({ assert }) => {
+    const notification = await service.createNotification({
+      userId: user.id,
+      type: 'user.mentioned',
+      title: 'Test',
+      message: 'Test message',
+    })
+
+    await assert.rejects(
+      () => service.executeNotificationAction(notification.id, 0, user.id),
+      'No actions available for this notification'
+    )
+  })
+
+  test('devrait échouer si l\'index d\'action est invalide', async ({ assert }) => {
+    const actions = [
+      {
+        label: 'Accepter',
+        labelI18n: { fr: 'Accepter', en: 'Accept' },
+        endpoint: '/api/invitations/123/accept',
+        method: 'POST' as const,
+      },
+    ]
+
+    const notification = await service.createNotification({
+      userId: user.id,
+      type: 'org.invitation',
+      title: 'Test',
+      message: 'Test message',
+      actions,
+    })
+
+    await assert.rejects(
+      () => service.executeNotificationAction(notification.id, 5, user.id),
+      'Invalid action index'
+    )
   })
 })

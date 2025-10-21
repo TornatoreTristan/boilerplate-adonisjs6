@@ -4,5 +4,7 @@
   "roles": "Roles",
   "organizations": "Organizations",
   "plans": "Plans",
+  "monitoring": "Monitoring",
+  "logs": "Logs",
   "back_to_app": "Back to app"
 }

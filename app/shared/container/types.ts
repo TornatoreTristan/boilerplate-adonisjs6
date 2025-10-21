@@ -10,6 +10,7 @@ export const TYPES = {
   PasswordResetRepository: Symbol.for('PasswordResetRepository'),
   EmailVerificationRepository: Symbol.for('EmailVerificationRepository'),
   NotificationRepository: Symbol.for('NotificationRepository'),
+  UserNotificationPreferenceRepository: Symbol.for('UserNotificationPreferenceRepository'),
   UploadRepository: Symbol.for('UploadRepository'),
   RoleRepository: Symbol.for('RoleRepository'),
   PermissionRepository: Symbol.for('PermissionRepository'),
@@ -28,6 +29,7 @@ export const TYPES = {
   EmailVerificationService: Symbol.for('EmailVerificationService'),
   GoogleAuthService: Symbol.for('GoogleAuthService'),
   NotificationService: Symbol.for('NotificationService'),
+  UserNotificationPreferenceService: Symbol.for('UserNotificationPreferenceService'),
   UploadService: Symbol.for('UploadService'),
   StorageService: Symbol.for('StorageService'),
   LocalStorageDriver: Symbol.for('LocalStorageDriver'),
@@ -38,6 +40,27 @@ export const TYPES = {
   PlanService: Symbol.for('PlanService'),
   SubscriptionService: Symbol.for('SubscriptionService'),
   PricingCalculatorService: Symbol.for('PricingCalculatorService'),
+
+  // Health Checks
+  HealthService: Symbol.for('HealthService'),
+  DatabaseHealthCheck: Symbol.for('DatabaseHealthCheck'),
+  RedisHealthCheck: Symbol.for('RedisHealthCheck'),
+  DiskHealthCheck: Symbol.for('DiskHealthCheck'),
+  EmailHealthCheck: Symbol.for('EmailHealthCheck'),
+  MetricsService: Symbol.for('MetricsService'),
+  MonitoringService: Symbol.for('MonitoringService'),
+  HealthHistoryService: Symbol.for('HealthHistoryService'),
+  HealthHistoryRepository: Symbol.for('HealthHistoryRepository'),
+
+  // Logs
+  LogRepository: Symbol.for('LogRepository'),
+  LogService: Symbol.for('LogService'),
+
+  // GDPR
+  GdprService: Symbol.for('GdprService'),
+
+  // Monitoring
+  SentryService: Symbol.for('SentryService'),
 
   // Infrastructure
   CacheService: Symbol.for('CacheService'),

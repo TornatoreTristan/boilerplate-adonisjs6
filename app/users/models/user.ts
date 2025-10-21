@@ -28,6 +28,15 @@ export default class User extends BaseModel {
   @column.dateTime()
   declare emailVerifiedAt: DateTime | null
 
+  @column()
+  declare newsletterEnabled: boolean
+
+  @column()
+  declare tipsEnabled: boolean
+
+  @column()
+  declare promotionalOffersEnabled: boolean
+
   @column.dateTime()
   declare deleted_at: DateTime
 

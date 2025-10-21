@@ -16,6 +16,7 @@
       "#mailing/*": ["./app/mailing/*"],
       "#integrations/*": ["./app/integrations/*"],
       "#billing/*": ["./app/billing/*"],
+      "#health/*": ["./app/health/*"],
       "@/*": ["./inertia/*"]
     }
   },

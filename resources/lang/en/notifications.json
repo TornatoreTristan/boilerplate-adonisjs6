@@ -7,5 +7,43 @@
   "empty": "No notifications yet",
   "all": "All",
   "unread": "Unread",
-  "read": "Read"
+  "read": "Read",
+  "priority": {
+    "urgent": "Urgent",
+    "high": "High",
+    "normal": "Normal",
+    "low": "Low"
+  },
+  "action_executing": "Executing...",
+  "preferences": {
+    "title": "Notification Preferences",
+    "description": "Manage your notification preferences by type and channel",
+    "save": "Save preferences",
+    "save_success": "Preferences saved successfully",
+    "save_error": "Error saving preferences",
+    "enable_all": "Enable all",
+    "disable_all": "Disable all",
+    "channels": {
+      "in_app": "In-app",
+      "email": "Email",
+      "push": "Push"
+    },
+    "types": {
+      "user": {
+        "title": "User notifications",
+        "mentioned": "When you are mentioned"
+      },
+      "org": {
+        "title": "Organization notifications",
+        "invitation": "Invitations to join an organization",
+        "member_joined": "A member joined the organization",
+        "member_left": "A member left the organization"
+      },
+      "system": {
+        "title": "System notifications",
+        "announcement": "Important announcements",
+        "maintenance": "Scheduled maintenance"
+      }
+    }
+  }
 }

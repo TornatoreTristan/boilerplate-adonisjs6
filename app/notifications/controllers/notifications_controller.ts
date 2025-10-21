@@ -35,9 +35,11 @@ export default class NotificationsController {
     const serializedNotifications = sortedNotifications.map((n) => ({
       id: n.id,
       type: n.type,
+      priority: n.priority,
       titleI18n: n.titleI18n,
       messageI18n: n.messageI18n,
       data: n.data,
+      actions: n.actions,
       readAt: n.readAt ? n.readAt.toISO() : null,
       createdAt: n.createdAt.toISO(),
     }))
@@ -116,5 +118,34 @@ export default class NotificationsController {
     await notificationService.deleteNotification(notificationId)
 
     return response.status(303).redirect().back()
+  }
+
+  async executeAction({ params, response, session }: HttpContext) {
+    const userId = session.get('user_id')
+    const notificationId = params.id
+    const actionIndex = parseInt(params.actionIndex, 10)
+
+    if (!userId) {
+      return response.status(401).json({ error: 'Non authentifié' })
+    }
+
+    if (isNaN(actionIndex)) {
+      return response.status(400).json({ error: 'Invalid action index' })
+    }
+
+    const notificationService = getService<NotificationService>(TYPES.NotificationService)
+
+    try {
+      const result = await notificationService.executeNotificationAction(
+        notificationId,
+        actionIndex,
+        userId
+      )
+
+      return response.json(result)
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      return response.status(400).json({ error: errorMessage })
+    }
   }
 }

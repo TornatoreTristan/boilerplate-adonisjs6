@@ -6,38 +6,69 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue.svg)](https://typescriptlang.org)
 [![Node.js](https://img.shields.io/badge/Node.js-20+-green.svg)](https://nodejs.org)
 
-**Project start:** 27 sept 2025 | **Last update:** 21 oct 2025 | **Version:** 0.1.2
+**Project start:** 27 sept 2025 | **Last update:** 21 oct 2025 | **Version:** 0.2.0
 
 ## ✨ Fonctionnalités
 
-- 🔐 **Authentification complète** - Login/logout avec sessions sécurisées
-- 🔑 **Google OAuth** - Connexion avec Google (auto-création et liaison de compte)
-- 👥 **Multi-tenant** - Gestion d'organisations avec contexte utilisateur
-- 📦 **File Upload System** - Multi-storage (local/S3) avec polymorphic attachments
-- 🗄️ **Repository Pattern** - CRUD avancé avec soft deletes et cache Redis
-- 🎯 **DDD Architecture** - Domain-Driven Design avec IoC Container (Inversify)
-- ⚡ **Performance** - Cache Redis avec invalidation par tags
-- 🔍 **Full-Text Search** - Recherche PostgreSQL avec tsvector, GIN indexes et ranking
-- 🌍 **Internationalization** - Multi-langue FR/EN avec AdonisJS I18n + React i18next
-- 📊 **Audit & Tracking** - Suivi des sessions utilisateur avec UTM/referrer
-- 🔧 **Error Handling** - Système d'exceptions personnalisées robuste
-- 🎪 **Event System** - Événements asynchrones avec Inngest (workflows, retry, observability)
-- 🛡️ **Rate Limiting** - Protection contre les abus avec Redis sliding window
-- 🔔 **Notifications** - Système complet avec types personnalisables
-- 📡 **Real-time Notifications** - Server-Sent Events avec Transmit (SSE)
-- 🧪 **Tests complets** - Unit & functional tests avec Japa
+### 🔐 Authentification & Sécurité
+- **Authentification complète** - Login/logout avec sessions sécurisées
+- **Google OAuth** - Connexion avec Google (auto-création et liaison de compte)
+- **Roles & Permissions** - Système RBAC complet avec vérifications granulaires
+- **Rate Limiting** - Protection contre les abus avec Redis sliding window
+- **GDPR Compliance** - Export données + suppression compte (Articles 17 & 20)
+
+### 👥 Multi-tenancy & Organizations
+- **Gestion d'organisations** - Multi-tenant avec contexte utilisateur
+- **Invitations** - Système d'invitation avec emails
+- **Rôles par organisation** - Permissions contextuelles
+
+### 💳 Billing & Subscriptions
+- **Plans & Pricing** - Gestion de plans avec pricing flexible
+- **Stripe Integration** - Abonnements et paiements sécurisés
+- **Subscription Management** - Pause, annulation, changement de plan
+
+### 📦 Storage & Uploads
+- **File Upload System** - Multi-storage (local/S3) avec polymorphic attachments
+- **Validation avancée** - Type MIME, taille, quotas
+
+### 🔔 Notifications & Communication
+- **Système de notifications** - Types personnalisables avec préférences utilisateur
+- **Real-time Notifications** - Server-Sent Events avec Transmit (SSE)
+- **Email System** - Templates + Queue avec Bull + Logs
+
+### 📊 Monitoring & Observability
+- **Sentry Integration** - Error tracking production (backend + frontend)
+- **Health Checks** - Liveness, readiness, deep health checks
+- **Monitoring Dashboard** - Métriques temps réel avec graphiques (CPU, RAM, DB, Redis)
+- **System Logs** - Logs centralisés avec full-text search et filtres
+
+### 🏗️ Architecture & Performance
+- **Repository Pattern** - CRUD avancé avec soft deletes et cache Redis
+- **DDD Architecture** - Domain-Driven Design avec IoC Container (Inversify)
+- **Cache Redis** - Invalidation par tags et TTL configurable
+- **Full-Text Search** - PostgreSQL tsvector, GIN indexes, ranking, multi-langue
+- **Event System** - Événements asynchrones avec Inngest (workflows, retry)
+
+### 🌍 Developer Experience
+- **Internationalization** - Multi-langue FR/EN (AdonisJS I18n + React i18next)
+- **Error Handling** - Système d'exceptions personnalisées robuste
+- **Tests complets** - Unit & functional tests avec Japa
+- **TypeScript strict** - Types complets pour backend + frontend
 
 ## 🛠️ Stack Technique
 
 - **Backend:** AdonisJS 6 + TypeScript
 - **Base de données:** PostgreSQL avec Lucid ORM
 - **Cache:** Redis avec stratégie de tags
+- **Queue:** Bull pour jobs asynchrones (emails, etc.)
 - **Storage:** Local filesystem + AWS S3
 - **Events & Workflows:** Inngest (reliable, observable, avec retry automatique)
 - **Real-time:** Transmit (Server-Sent Events) pour notifications en temps réel
+- **Error Monitoring:** Sentry (backend + frontend)
+- **Payments:** Stripe (subscriptions + one-time)
 - **DI Container:** Inversify pour l'injection de dépendances
 - **Tests:** Japa avec couverture complète
-- **Frontend:** Inertia.js + React + TypeScript
+- **Frontend:** Inertia.js + React + TypeScript + shadcn/ui
 
 ## 🚀 Installation Rapide
 

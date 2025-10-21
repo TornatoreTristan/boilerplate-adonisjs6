@@ -10,9 +10,11 @@ export default class extends BaseSchema {
       table.uuid('organization_id').references('organizations.id').onDelete('CASCADE').nullable()
 
       table.string('type').notNullable()
+      table.enum('priority', ['low', 'normal', 'high', 'urgent']).defaultTo('normal').notNullable()
       table.jsonb('title_i18n').notNullable()
       table.jsonb('message_i18n').notNullable()
       table.jsonb('data').nullable()
+      table.jsonb('actions').nullable()
 
       table.timestamp('read_at').nullable()
       table.timestamp('created_at').notNullable()
@@ -22,6 +24,7 @@ export default class extends BaseSchema {
       table.index(['user_id', 'read_at'])
       table.index(['organization_id'])
       table.index(['type'])
+      table.index(['priority'])
       table.index(['deleted_at'])
     })
 

@@ -1,5 +1,6 @@
 import { injectable, inject } from 'inversify'
 import NotificationRepository from '#notifications/repositories/notification_repository'
+import UserNotificationPreferenceService from '#notifications/services/user_notification_preference_service'
 import Notification from '#notifications/models/notification'
 import type { CreateNotificationData, NotificationType } from '#notifications/types/notification'
 import { TYPES } from '#shared/container/types'
@@ -15,26 +16,46 @@ export interface GetNotificationsOptions {
 @injectable()
 export default class NotificationService {
   constructor(
-    @inject(TYPES.NotificationRepository) private notificationRepo: NotificationRepository
+    @inject(TYPES.NotificationRepository) private notificationRepo: NotificationRepository,
+    @inject(TYPES.UserNotificationPreferenceService)
+    private preferenceService: UserNotificationPreferenceService
   ) {}
 
-  async createNotification(data: CreateNotificationData): Promise<Notification> {
-    // 1. Créer la notification en base de données
+  async createNotification(data: CreateNotificationData): Promise<Notification | null> {
+    // 1. Vérifier si l'utilisateur a activé ce type de notification (in_app)
+    const isEnabled = await this.preferenceService.isNotificationEnabled(
+      data.userId,
+      data.type,
+      'in_app'
+    )
+
+    if (!isEnabled) {
+      // L'utilisateur a désactivé ce type de notification
+      logger.debug(
+        { userId: data.userId, type: data.type },
+        'Notification skipped - user has disabled this type'
+      )
+      return null
+    }
+
+    // 2. Créer la notification en base de données
     const notification = await this.notificationRepo.create(
       {
         userId: data.userId,
         organizationId: data.organizationId || null,
         type: data.type,
+        priority: data.priority || 'normal',
         titleI18n: { fr: data.title, en: data.title },
         messageI18n: { fr: data.message, en: data.message },
         data: data.data || null,
+        actions: data.actions || null,
       } as any,
       {
         cache: { tags: ['notifications', `user_${data.userId}_notifications`] },
       }
     )
 
-    // 2. Broadcast en temps réel via Transmit (SSE)
+    // 3. Broadcast en temps réel via Transmit (SSE)
     try {
       transmit.broadcast(`user/${data.userId}/notifications`, {
         type: 'notification:new',
@@ -111,5 +132,39 @@ export default class NotificationService {
 
   async deleteNotification(notificationId: string): Promise<void> {
     await this.notificationRepo.delete(notificationId, { soft: true })
+  }
+
+  async executeNotificationAction(
+    notificationId: string,
+    actionIndex: number,
+    userId: string
+  ): Promise<{ success: boolean; action: any }> {
+    const notification = await this.notificationRepo.findById(notificationId)
+
+    if (!notification) {
+      throw new Error('Notification not found')
+    }
+
+    if (notification.userId !== userId) {
+      throw new Error('Unauthorized to execute this action')
+    }
+
+    if (!notification.actions || notification.actions.length === 0) {
+      throw new Error('No actions available for this notification')
+    }
+
+    if (actionIndex < 0 || actionIndex >= notification.actions.length) {
+      throw new Error('Invalid action index')
+    }
+
+    const action = notification.actions[actionIndex]
+
+    // Mark notification as read after action execution
+    await this.markAsRead(notificationId)
+
+    return {
+      success: true,
+      action,
+    }
   }
 }

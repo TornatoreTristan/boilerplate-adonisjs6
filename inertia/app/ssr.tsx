@@ -1,3 +1,4 @@
+import '../css/app.css'
 import ReactDOMServer from 'react-dom/server'
 import { createInertiaApp } from '@inertiajs/react'
 import { ThemeProvider } from '@/components/theme-provider'

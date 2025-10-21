@@ -7,6 +7,11 @@ import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from '@adonisjs/inertia/helpers'
 import { ThemeProvider } from '@/components/theme-provider'
 import { AppWrapper } from '@/components/app-wrapper'
+import { SentryErrorBoundary } from '@/components/sentry-error-boundary'
+import { initSentry } from '@/lib/sentry'
+
+// Initialize Sentry as early as possible
+initSentry()
 
 const appName = import.meta.env.VITE_APP_NAME || 'AdonisJS'
 
@@ -25,11 +30,13 @@ createInertiaApp({
   setup({ el, App, props }) {
 
     hydrateRoot(el,
-      <ThemeProvider defaultTheme="system" storageKey="app-theme">
-        <AppWrapper>
-          <App {...props} />
-        </AppWrapper>
-      </ThemeProvider>
+      <SentryErrorBoundary>
+        <ThemeProvider defaultTheme="system" storageKey="app-theme">
+          <AppWrapper>
+            <App {...props} />
+          </AppWrapper>
+        </ThemeProvider>
+      </SentryErrorBoundary>
     )
 
   },

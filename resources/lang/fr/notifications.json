@@ -7,5 +7,43 @@
   "empty": "Aucune notification pour le moment",
   "all": "Toutes",
   "unread": "Non lues",
-  "read": "Lues"
+  "read": "Lues",
+  "priority": {
+    "urgent": "Urgent",
+    "high": "Haute",
+    "normal": "Normale",
+    "low": "Basse"
+  },
+  "action_executing": "Exécution en cours...",
+  "preferences": {
+    "title": "Préférences de notification",
+    "description": "Gérez vos préférences de notification par type et canal",
+    "save": "Enregistrer les préférences",
+    "save_success": "Préférences enregistrées avec succès",
+    "save_error": "Erreur lors de l'enregistrement des préférences",
+    "enable_all": "Tout activer",
+    "disable_all": "Tout désactiver",
+    "channels": {
+      "in_app": "Dans l'application",
+      "email": "Email",
+      "push": "Push"
+    },
+    "types": {
+      "user": {
+        "title": "Notifications utilisateur",
+        "mentioned": "Quand vous êtes mentionné"
+      },
+      "org": {
+        "title": "Notifications d'organisation",
+        "invitation": "Invitations à rejoindre une organisation",
+        "member_joined": "Un membre a rejoint l'organisation",
+        "member_left": "Un membre a quitté l'organisation"
+      },
+      "system": {
+        "title": "Notifications système",
+        "announcement": "Annonces importantes",
+        "maintenance": "Maintenance planifiée"
+      }
+    }
+  }
 }

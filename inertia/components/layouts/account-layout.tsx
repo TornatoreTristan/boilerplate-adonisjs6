@@ -2,7 +2,7 @@ import { ReactNode } from 'react'
 import { Link, usePage } from '@inertiajs/react'
 import AppLayout from '@/components/layouts/app-layout'
 import { PageHeader } from '@/components/core/page-header'
-import { User, Monitor, Settings } from 'lucide-react'
+import { User, Monitor, Settings, Shield } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useI18n } from '@/hooks/use-i18n'
 
@@ -30,6 +30,11 @@ export default function AccountLayout({ children }: AccountLayoutProps) {
       title: t('account.layout.preferences'),
       href: '/account/preferences',
       icon: Settings,
+    },
+    {
+      title: t('account.layout.data_privacy'),
+      href: '/account/data-privacy',
+      icon: Shield,
     },
   ]
 

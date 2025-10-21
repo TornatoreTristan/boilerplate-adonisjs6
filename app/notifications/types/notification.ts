@@ -2,9 +2,11 @@ export interface CreateNotificationData {
   userId: string
   organizationId?: string | null
   type: NotificationType
+  priority?: NotificationPriority
   title: string
   message: string
   data?: Record<string, any> | null
+  actions?: NotificationAction[] | null
 }
 
 export interface UpdateNotificationData {
@@ -26,6 +28,17 @@ export type NotificationType =
   | 'org.member_left'
   | 'system.announcement'
   | 'system.maintenance'
+
+export type NotificationPriority = 'low' | 'normal' | 'high' | 'urgent'
+
+export interface NotificationAction {
+  label: string
+  labelI18n?: { fr: string; en: string }
+  url?: string
+  method?: 'GET' | 'POST' | 'PATCH' | 'DELETE'
+  endpoint?: string
+  style?: 'primary' | 'secondary' | 'danger'
+}
 
 export interface NotificationData {
   [key: string]: any

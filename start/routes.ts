@@ -2,6 +2,7 @@ import router from '@adonisjs/core/services/router'
 import transmit from '@adonisjs/transmit/services/main'
 
 // Import all routes files
+import './routes/health_routes.js'
 import './routes/auth_routes.js'
 import './routes/session_routes.js'
 import './routes/google_auth_routes.js'

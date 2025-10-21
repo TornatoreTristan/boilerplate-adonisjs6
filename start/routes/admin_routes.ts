@@ -5,6 +5,8 @@ const AdminController = () => import('#admin/controllers/admin_controller')
 const PlansController = () => import('#billing/controllers/plans_controller')
 const AdminSubscriptionsController = () =>
   import('#admin/controllers/admin_subscriptions_controller')
+const MonitoringController = () => import('#admin/controllers/monitoring_controller')
+const LogsController = () => import('#admin/controllers/logs_controller')
 
 router
   .group(() => {
@@ -47,5 +49,15 @@ router
       AdminSubscriptionsController,
       'reactivate',
     ])
+
+    // Routes pour le monitoring système
+    router.get('/admin/monitoring', [MonitoringController, 'index'])
+    router.get('/api/admin/monitoring/data', [MonitoringController, 'data'])
+    router.get('/api/admin/monitoring/history', [MonitoringController, 'history'])
+
+    // Routes pour les logs
+    router.get('/admin/logs', [LogsController, 'index'])
+    router.get('/api/admin/logs/list', [LogsController, 'list'])
+    router.get('/api/admin/logs/stats', [LogsController, 'stats'])
   })
   .use([middleware.auth(), middleware.superAdmin()])

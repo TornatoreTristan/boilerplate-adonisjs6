@@ -4,6 +4,7 @@ import { TYPES } from '#shared/container/types'
 import type UserRepository from '#users/repositories/user_repository'
 import type SessionService from '#sessions/services/session_service'
 import { updateProfileValidator } from '#users/validators/update_profile_validator'
+import vine from '@vinejs/vine'
 
 export default class UsersController {
   /**
@@ -52,5 +53,36 @@ export default class UsersController {
     session.flash('success', 'Votre compte a été supprimé avec succès')
 
     return response.redirect('/login')
+  }
+
+  /**
+   * Mettre à jour les préférences de communication
+   */
+  async updateCommunicationPreferences({ request, response, session }: HttpContext) {
+    const userId = session.get('user_id')
+    const userRepository = getService<UserRepository>(TYPES.UserRepository)
+
+    // Validation
+    const communicationPreferencesValidator = vine.compile(
+      vine.object({
+        newsletter_enabled: vine.boolean(),
+        tips_enabled: vine.boolean(),
+        promotional_offers_enabled: vine.boolean(),
+      })
+    )
+
+    const data = await request.validateUsing(communicationPreferencesValidator)
+
+    // Mise à jour
+    await userRepository.update(userId, {
+      newsletterEnabled: data.newsletter_enabled,
+      tipsEnabled: data.tips_enabled,
+      promotionalOffersEnabled: data.promotional_offers_enabled,
+    } as any)
+
+    return response.json({
+      success: true,
+      message: 'Préférences de communication mises à jour',
+    })
   }
 }

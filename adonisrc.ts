@@ -56,7 +56,8 @@ export default defineConfig({
     () => import('@adonisjs/redis/redis_provider'),
     () => import('@adonisjs/ally/ally_provider'),
     () => import('@adonisjs/i18n/i18n_provider'),
-    () => import('@adonisjs/transmit/transmit_provider')
+    () => import('@adonisjs/transmit/transmit_provider'),
+    () => import('#providers/sentry_provider')
   ],
 
   /*
