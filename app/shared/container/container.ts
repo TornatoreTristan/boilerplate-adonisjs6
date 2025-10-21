@@ -55,6 +55,7 @@ import PricingCalculatorService from '#billing/services/pricing_calculator_servi
 
 // Listeners
 import NotificationListeners from '#notifications/listeners/notification_listeners'
+import AuditLogListeners from '#audit/listeners/audit_log_listeners'
 
 // Health Checks
 import HealthService from '#health/services/health_service'
@@ -73,6 +74,10 @@ import LogService from '#logs/services/log_service'
 
 // GDPR
 import GdprService from '#gdpr/services/gdpr_service'
+
+// Audit
+import AuditLogRepository from '#audit/repositories/audit_log_repository'
+import AuditLogService from '#audit/services/audit_log_service'
 
 // Monitoring
 import SentryService from '#monitoring/services/sentry_service'
@@ -152,6 +157,13 @@ export function configureContainer(): Container {
   container.bind<GdprService>(TYPES.GdprService).to(GdprService)
 
   // ==========================================
+  // AUDIT
+  // ==========================================
+
+  container.bind<AuditLogRepository>(TYPES.AuditLogRepository).to(AuditLogRepository)
+  container.bind<AuditLogService>(TYPES.AuditLogService).to(AuditLogService)
+
+  // ==========================================
   // MONITORING
   // ==========================================
 
@@ -162,6 +174,7 @@ export function configureContainer(): Container {
   // ==========================================
 
   container.bind<NotificationListeners>(TYPES.NotificationListeners).to(NotificationListeners).inSingletonScope()
+  container.bind<AuditLogListeners>(TYPES.AuditLogListeners).to(AuditLogListeners).inSingletonScope()
 
   // ==========================================
   // REPOSITORIES

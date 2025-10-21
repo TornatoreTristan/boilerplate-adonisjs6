@@ -6,6 +6,7 @@ import type AdminService from '#admin/services/admin_service'
 import type StripeConnectService from '#integrations/services/stripe_connect_service'
 import type PlanService from '#billing/services/plan_service'
 import type SubscriptionService from '#billing/services/subscription_service'
+import type AuditLogService from '#audit/services/audit_log_service'
 import { updateUserValidator } from '#admin/validators/update_user_validator'
 import { addUserToOrganizationValidator } from '#admin/validators/add_user_to_organization_validator'
 import { configureStripeValidator } from '#admin/validators/configure_stripe_validator'
@@ -54,9 +55,11 @@ export default class AdminController {
   async userDetail({ params, inertia }: HttpContext) {
     const userRepository = getService<UserRepository>(TYPES.UserRepository)
     const adminService = getService<AdminService>(TYPES.AdminService)
+    const auditLogService = getService<AuditLogService>(TYPES.AuditLogService)
 
     const user = await userRepository.findById(params.id)
     const sessions = await adminService.getUserSessions(params.id)
+    const auditLogs = await auditLogService.getUserLogs(params.id, 50)
 
     return inertia.render('admin/user-detail', {
       user: {
@@ -82,6 +85,15 @@ export default class AdminController {
         deviceType: session.deviceType,
         os: session.os,
         browser: session.browser,
+      })),
+      auditLogs: auditLogs.map((log) => ({
+        id: log.id,
+        action: log.action,
+        resourceType: log.resourceType,
+        resourceId: log.resourceId,
+        ipAddress: log.ipAddress,
+        metadata: log.metadata,
+        createdAt: log.createdAt.toISO(),
       })),
     })
   }

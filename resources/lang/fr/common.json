@@ -45,5 +45,9 @@
   "my_account": "Mon compte",
   "security": "Sécurité",
   "active_sessions": "Sessions actives",
-  "user_management": "Gestion des utilisateurs"
+  "user_management": "Gestion des utilisateurs",
+  "system": "Système",
+  "times": "fois",
+  "none": "Aucun",
+  "load_more": "Charger plus"
 }

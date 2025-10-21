@@ -6,7 +6,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue.svg)](https://typescriptlang.org)
 [![Node.js](https://img.shields.io/badge/Node.js-20+-green.svg)](https://nodejs.org)
 
-**Project start:** 27 sept 2025 | **Last update:** 21 oct 2025 | **Version:** 0.1.3
+**Project start:** 27 sept 2025 | **Last update:** 22 oct 2025 | **Version:** 0.1.4
 
 ## ✨ Fonctionnalités
 
@@ -47,6 +47,7 @@
 - **Health Checks** - Liveness, readiness, deep health checks
 - **Monitoring Dashboard** - Métriques temps réel avec graphiques (CPU, RAM, DB, Redis)
 - **System Logs** - Logs centralisés avec full-text search et filtres
+- **Audit Logs** - Trail complet des actions utilisateurs avec 41+ événements trackés automatiquement
 
 ### 🏗️ Architecture & Performance
 
@@ -109,6 +110,7 @@ npm run dev
 - [🏢 Organizations & Multi-tenancy](docs/features/organizations.md)
 - [📦 File Upload System](docs/features/uploads.md)
 - [🔔 Notifications](docs/features/notifications.md)
+- [📜 Audit Logs](docs/features/audit-logs.md)
 - [⚡ Inngest Event System](docs/features/inngest-events.md)
 - [⚡ Caching Strategy](docs/architecture/caching.md)
 - [🔍 Full-Text Search](docs/features/full-text-search.md)
@@ -207,6 +209,7 @@ app/
 ├── sessions/            # Tracking sessions
 ├── uploads/             # File upload system
 ├── notifications/       # Système de notifications
+├── audit/               # Audit logs & compliance
 ├── shared/              # Code partagé
 │   ├── container/       # IoC Container
 │   ├── repositories/    # BaseRepository
@@ -225,6 +228,7 @@ tests/                   # Tests complets
 - [x] Real-time Notifications (Transmit SSE)
 - [x] Full-Text Search (PostgreSQL)
 - [x] Internationalization (FR/EN)
+- [x] Audit Logs (41+ tracked events)
 - [ ] Multi-provider OAuth (GitHub, Facebook)
 - [ ] Super-admin Dashboard
 - [ ] Email Templates & Mailing

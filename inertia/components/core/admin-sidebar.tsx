@@ -1,4 +1,4 @@
-import { Home, Users, Shield, Settings, Building2, ArrowLeft, Mail, Plug, CreditCard, Receipt, Activity, FileText } from 'lucide-react'
+import { Home, Users, Shield, Settings, Building2, ArrowLeft, Mail, Plug, CreditCard, Receipt, Activity, FileText, ScrollText } from 'lucide-react'
 import { usePage } from '@inertiajs/react'
 import { useI18n } from '@/hooks/use-i18n'
 
@@ -81,6 +81,11 @@ export function AdminSidebar() {
       title: t('admin.logs'),
       url: '/admin/logs',
       icon: FileText,
+    },
+    {
+      title: t('admin.audit_logs.title'),
+      url: '/admin/audit-logs',
+      icon: ScrollText,
     },
     {
       title: t('common.settings'),

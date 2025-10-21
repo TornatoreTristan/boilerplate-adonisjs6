@@ -6,5 +6,31 @@
   "plans": "Plans",
   "monitoring": "Monitoring",
   "logs": "Logs",
+  "audit_logs": {
+    "title": "Logs d'audit",
+    "description": "Suivi de toutes les activités système et actions utilisateur pour la conformité et la sécurité",
+    "stats": {
+      "total_logs": "Total de logs",
+      "unique_users": "Utilisateurs uniques",
+      "unique_organizations": "Organisations uniques",
+      "top_action": "Action principale"
+    },
+    "search": {
+      "title": "Rechercher dans les logs d'audit",
+      "description": "Recherchez dans tous les logs d'audit par mots-clés, actions ou types de ressource",
+      "placeholder": "Rechercher par action, utilisateur, ressource..."
+    },
+    "table": {
+      "title": "Activité récente",
+      "description": "Affichage de {{total}} entrées de log",
+      "action": "Action",
+      "user": "Utilisateur",
+      "organization": "Organisation",
+      "resource": "Ressource",
+      "ip_address": "Adresse IP",
+      "date": "Date",
+      "no_results": "Aucun log d'audit trouvé"
+    }
+  },
   "back_to_app": "Retour à l'app"
 }

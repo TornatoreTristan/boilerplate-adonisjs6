@@ -19,6 +19,7 @@ export const TYPES = {
   PlanRepository: Symbol.for('PlanRepository'),
   SubscriptionRepository: Symbol.for('SubscriptionRepository'),
   OrganizationInvitationRepository: Symbol.for('OrganizationInvitationRepository'),
+  AuditLogRepository: Symbol.for('AuditLogRepository'),
 
   // Services
   AuthService: Symbol.for('AuthService'),
@@ -59,6 +60,9 @@ export const TYPES = {
   // GDPR
   GdprService: Symbol.for('GdprService'),
 
+  // Audit
+  AuditLogService: Symbol.for('AuditLogService'),
+
   // Monitoring
   SentryService: Symbol.for('SentryService'),
 
@@ -73,6 +77,7 @@ export const TYPES = {
 
   // Listeners
   NotificationListeners: Symbol.for('NotificationListeners'),
+  AuditLogListeners: Symbol.for('AuditLogListeners'),
 
   // External services
   RedisClient: Symbol.for('RedisClient'),

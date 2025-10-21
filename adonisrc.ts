@@ -57,7 +57,9 @@ export default defineConfig({
     () => import('@adonisjs/ally/ally_provider'),
     () => import('@adonisjs/i18n/i18n_provider'),
     () => import('@adonisjs/transmit/transmit_provider'),
-    () => import('#providers/sentry_provider')
+    () => import('#providers/sentry_provider'),
+    () => import('#providers/notification_listeners_provider'),
+    () => import('#providers/audit_log_listeners_provider')
   ],
 
   /*

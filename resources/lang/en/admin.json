@@ -6,5 +6,31 @@
   "plans": "Plans",
   "monitoring": "Monitoring",
   "logs": "Logs",
+  "audit_logs": {
+    "title": "Audit Logs",
+    "description": "Track all system activities and user actions for compliance and security",
+    "stats": {
+      "total_logs": "Total Logs",
+      "unique_users": "Unique Users",
+      "unique_organizations": "Unique Organizations",
+      "top_action": "Top Action"
+    },
+    "search": {
+      "title": "Search Audit Logs",
+      "description": "Search across all audit logs using keywords, actions, or resource types",
+      "placeholder": "Search by action, user, resource..."
+    },
+    "table": {
+      "title": "Recent Activity",
+      "description": "Showing {{total}} audit log entries",
+      "action": "Action",
+      "user": "User",
+      "organization": "Organization",
+      "resource": "Resource",
+      "ip_address": "IP Address",
+      "date": "Date",
+      "no_results": "No audit logs found"
+    }
+  },
   "back_to_app": "Back to app"
 }

@@ -16,6 +16,7 @@ import {
   Pencil,
   Save,
   X,
+  ScrollText,
 } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { fr } from 'date-fns/locale'
@@ -49,9 +50,20 @@ interface Session {
   browser: string | null
 }
 
+interface AuditLog {
+  id: string
+  action: string
+  resourceType: string | null
+  resourceId: string | null
+  ipAddress: string | null
+  metadata: Record<string, any> | null
+  createdAt: string
+}
+
 interface UserDetailPageProps {
   user: User
   sessions: Session[]
+  auditLogs: AuditLog[]
 }
 
 const getDeviceIcon = (deviceType: string | null) => {
@@ -61,7 +73,18 @@ const getDeviceIcon = (deviceType: string | null) => {
   return <Monitor className="h-4 w-4" />
 }
 
-const UserDetailPage = ({ user, sessions }: UserDetailPageProps) => {
+const formatAction = (action: string): string => {
+  const parts = action.split('.')
+  return parts.map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join(' ')
+}
+
+const getActionBadgeVariant = (action: string): 'default' | 'secondary' | 'destructive' => {
+  if (action.includes('deleted') || action.includes('failed')) return 'destructive'
+  if (action.includes('created') || action.includes('success')) return 'default'
+  return 'secondary'
+}
+
+const UserDetailPage = ({ user, sessions, auditLogs }: UserDetailPageProps) => {
   const [isEditing, setIsEditing] = useState(false)
   const { data, setData, put, processing, errors } = useForm({
     fullName: user.fullName || '',
@@ -301,6 +324,64 @@ const UserDetailPage = ({ user, sessions }: UserDetailPageProps) => {
                             Dernière activité: Il y a{' '}
                             {formatDistanceToNow(new Date(session.lastActivity), { locale: fr })}
                           </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Audit Logs */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <ScrollText className="h-5 w-5" />
+                  Audit Logs ({auditLogs.length})
+                </CardTitle>
+                {auditLogs.length > 0 && (
+                  <Link href="/admin/audit-logs">
+                    <Button variant="outline" size="sm">
+                      Voir tout
+                    </Button>
+                  </Link>
+                )}
+              </div>
+            </CardHeader>
+            <CardContent>
+              {auditLogs.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  Aucun audit log enregistré
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {auditLogs.map((log) => (
+                    <div
+                      key={log.id}
+                      className="flex items-start justify-between border border-border/80 rounded-md p-4"
+                    >
+                      <div className="flex-1 space-y-1">
+                        <div className="flex items-center gap-2">
+                          <Badge variant={getActionBadgeVariant(log.action)} className="text-xs">
+                            {formatAction(log.action)}
+                          </Badge>
+                          {log.resourceType && (
+                            <span className="text-xs text-muted-foreground">
+                              {log.resourceType}
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          {log.ipAddress && (
+                            <span className="font-mono">{log.ipAddress}</span>
+                          )}
+                          <span>·</span>
+                          <span>
+                            Il y a{' '}
+                            {formatDistanceToNow(new Date(log.createdAt), { locale: fr })}
+                          </span>
                         </div>
                       </div>
                     </div>

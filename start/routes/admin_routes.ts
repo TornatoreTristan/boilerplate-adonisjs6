@@ -7,6 +7,7 @@ const AdminSubscriptionsController = () =>
   import('#admin/controllers/admin_subscriptions_controller')
 const MonitoringController = () => import('#admin/controllers/monitoring_controller')
 const LogsController = () => import('#admin/controllers/logs_controller')
+const AuditLogsController = () => import('#audit/controllers/audit_logs_controller')
 
 router
   .group(() => {
@@ -59,5 +60,21 @@ router
     router.get('/admin/logs', [LogsController, 'index'])
     router.get('/api/admin/logs/list', [LogsController, 'list'])
     router.get('/api/admin/logs/stats', [LogsController, 'stats'])
+
+    // Routes pour les audit logs
+    router.get('/admin/audit-logs', [AuditLogsController, 'index'])
+    router.get('/admin/audit-logs/:id', [AuditLogsController, 'show'])
+    router.get('/api/admin/audit-logs/stats', [AuditLogsController, 'stats'])
+    router.get('/api/admin/audit-logs/search', [AuditLogsController, 'search'])
+    router.get('/api/admin/audit-logs/recent', [AuditLogsController, 'recent'])
+    router.get('/api/admin/audit-logs/user/:userId', [AuditLogsController, 'userLogs'])
+    router.get('/api/admin/audit-logs/organization/:organizationId', [
+      AuditLogsController,
+      'organizationLogs',
+    ])
+    router.get('/api/admin/audit-logs/resource/:resourceType/:resourceId', [
+      AuditLogsController,
+      'resourceLogs',
+    ])
   })
   .use([middleware.auth(), middleware.superAdmin()])

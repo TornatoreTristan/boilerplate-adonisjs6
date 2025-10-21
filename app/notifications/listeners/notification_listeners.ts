@@ -35,8 +35,6 @@ export default class NotificationListeners {
     this.registerUserCreatedListener()
     this.registerOrganizationInvitationCreatedListener()
     this.registerSubscriptionCreatedListener()
-
-    logger.info('✅ Notification listeners registered')
   }
 
   /**
@@ -47,7 +45,6 @@ export default class NotificationListeners {
       this.eventBus.off(eventName, handler)
     }
     this.handlers.clear()
-    logger.info('🔕 Notification listeners unregistered')
   }
 
   /**
