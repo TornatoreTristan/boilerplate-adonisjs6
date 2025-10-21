@@ -6,11 +6,12 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue.svg)](https://typescriptlang.org)
 [![Node.js](https://img.shields.io/badge/Node.js-20+-green.svg)](https://nodejs.org)
 
-**Project start:** 27 sept 2025 | **Last update:** 21 oct 2025 | **Version:** 0.2.0
+**Project start:** 27 sept 2025 | **Last update:** 21 oct 2025 | **Version:** 0.1.3
 
 ## ✨ Fonctionnalités
 
 ### 🔐 Authentification & Sécurité
+
 - **Authentification complète** - Login/logout avec sessions sécurisées
 - **Google OAuth** - Connexion avec Google (auto-création et liaison de compte)
 - **Roles & Permissions** - Système RBAC complet avec vérifications granulaires
@@ -18,31 +19,37 @@
 - **GDPR Compliance** - Export données + suppression compte (Articles 17 & 20)
 
 ### 👥 Multi-tenancy & Organizations
+
 - **Gestion d'organisations** - Multi-tenant avec contexte utilisateur
 - **Invitations** - Système d'invitation avec emails
 - **Rôles par organisation** - Permissions contextuelles
 
 ### 💳 Billing & Subscriptions
+
 - **Plans & Pricing** - Gestion de plans avec pricing flexible
 - **Stripe Integration** - Abonnements et paiements sécurisés
 - **Subscription Management** - Pause, annulation, changement de plan
 
 ### 📦 Storage & Uploads
+
 - **File Upload System** - Multi-storage (local/S3) avec polymorphic attachments
 - **Validation avancée** - Type MIME, taille, quotas
 
 ### 🔔 Notifications & Communication
+
 - **Système de notifications** - Types personnalisables avec préférences utilisateur
 - **Real-time Notifications** - Server-Sent Events avec Transmit (SSE)
 - **Email System** - Templates + Queue avec Bull + Logs
 
 ### 📊 Monitoring & Observability
+
 - **Sentry Integration** - Error tracking production (backend + frontend)
 - **Health Checks** - Liveness, readiness, deep health checks
 - **Monitoring Dashboard** - Métriques temps réel avec graphiques (CPU, RAM, DB, Redis)
 - **System Logs** - Logs centralisés avec full-text search et filtres
 
 ### 🏗️ Architecture & Performance
+
 - **Repository Pattern** - CRUD avancé avec soft deletes et cache Redis
 - **DDD Architecture** - Domain-Driven Design avec IoC Container (Inversify)
 - **Cache Redis** - Invalidation par tags et TTL configurable
@@ -50,6 +57,7 @@
 - **Event System** - Événements asynchrones avec Inngest (workflows, retry)
 
 ### 🌍 Developer Experience
+
 - **Internationalization** - Multi-langue FR/EN (AdonisJS I18n + React i18next)
 - **Error Handling** - Système d'exceptions personnalisées robuste
 - **Tests complets** - Unit & functional tests avec Japa
