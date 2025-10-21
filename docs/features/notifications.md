@@ -378,24 +378,173 @@ npm run test -- --files="notifications_controller.spec.ts"
 npm run test
 ```
 
-## 🚀 Prochaines Évolutions
+## 🔴 Real-time avec Transmit (SSE)
 
-### WebSocket Real-time (future)
+Le système de notifications utilise **AdonisJS Transmit** pour les mises à jour en temps réel via Server-Sent Events.
 
-Intégration avec `@adonisjs/transmit` pour push temps réel :
+### Backend - Broadcast des notifications
 
 ```typescript
-// Future implementation
+// app/notifications/services/notification_service.ts
 import transmit from '@adonisjs/transmit/services/main'
 
-await notificationService.createNotification(data)
+async createNotification(data: CreateNotificationData): Promise<Notification> {
+  const notification = await this.notificationRepo.create(data, {
+    cache: { tags: ['notifications', `user_${data.userId}_notifications`] }
+  })
 
-// Broadcast via WebSocket
-transmit.broadcast(`user.${userId}`, {
-  type: 'notification.created',
-  notification: data,
-})
+  // Broadcast en temps réel via Transmit
+  transmit.broadcast(`user/${data.userId}/notifications`, {
+    type: 'notification:new',
+    notification: {
+      id: notification.id,
+      type: notification.type,
+      titleI18n: notification.titleI18n,
+      messageI18n: notification.messageI18n,
+      data: notification.data,
+      readAt: notification.readAt ? notification.readAt.toISO() : null,
+      createdAt: notification.createdAt.toISO(),
+    },
+  })
+
+  return notification
+}
 ```
+
+### Frontend - Hook React avec Transmit
+
+**⚠️ IMPORTANT: Singleton Pattern Obligatoire**
+
+Transmit doit être instancié **UNE SEULE FOIS** pour toute l'application. Créer plusieurs instances cause une accumulation de connexions SSE qui finit par bloquer l'application (limite HTTP/2 de 6 connexions par domaine).
+
+#### Singleton Transmit Client
+
+```typescript
+// inertia/lib/transmit.ts
+import { Transmit } from '@adonisjs/transmit-client'
+
+let transmitInstance: Transmit | null = null
+
+export function getTransmitInstance(): Transmit {
+  if (!transmitInstance) {
+    transmitInstance = new Transmit({
+      baseUrl: window.location.origin,
+    })
+  }
+  return transmitInstance
+}
+```
+
+#### Hook useNotifications
+
+```typescript
+// inertia/hooks/use-notifications.ts
+import { useEffect, useState, useRef } from 'react'
+import { usePage } from '@inertiajs/react'
+import { toast } from 'sonner'
+import { getTransmitInstance } from '@/lib/transmit'
+
+export function useNotifications() {
+  const { auth, i18n } = usePage<{
+    auth: { user: { id: string } | null }
+    i18n: { locale: string }
+  }>().props
+  const [notifications, setNotifications] = useState<Notification[]>([])
+  const [unreadCount, setUnreadCount] = useState(0)
+  const [isConnected, setIsConnected] = useState(false)
+  const localeRef = useRef(i18n.locale)
+
+  // Sync locale ref
+  useEffect(() => {
+    localeRef.current = i18n.locale
+  }, [i18n.locale])
+
+  useEffect(() => {
+    if (!auth.user) return
+
+    // UTILISER LE SINGLETON - JAMAIS new Transmit() ici !
+    const transmit = getTransmitInstance()
+    const channelName = `user/${auth.user.id}/notifications`
+    const subscription = transmit.subscription(channelName)
+
+    const stopListening = subscription.onMessage((payload) => {
+      if (payload.type === 'notification:new' && payload.notification) {
+        const newNotification = payload.notification
+        setNotifications((prev) => [newNotification, ...prev])
+
+        if (!newNotification.readAt) {
+          setUnreadCount((prev) => prev + 1)
+        }
+
+        // Toast notification
+        const currentLocale = (localeRef.current || 'fr') as 'fr' | 'en'
+        const title = newNotification.titleI18n[currentLocale] ||
+                     newNotification.titleI18n.fr
+        const message = newNotification.messageI18n[currentLocale] ||
+                       newNotification.messageI18n.fr
+
+        toast.info(title, {
+          description: message,
+          duration: 5000,
+        })
+      }
+
+      if (payload.type === 'notification:read' && payload.notificationId) {
+        setNotifications((prev) =>
+          prev.map((n) =>
+            n.id === payload.notificationId
+              ? { ...n, readAt: new Date().toISOString() }
+              : n
+          )
+        )
+        setUnreadCount((prev) => Math.max(0, prev - 1))
+      }
+    })
+
+    subscription.create().then(() => {
+      setIsConnected(true)
+    }).catch((error) => {
+      console.error('Failed to connect to notifications stream:', error)
+      setIsConnected(false)
+    })
+
+    return () => {
+      stopListening()
+      subscription.delete().catch(() => {})
+      setIsConnected(false)
+    }
+  }, [auth.user]) // ⚠️ UNIQUEMENT auth.user - PAS de locale ou autres deps
+
+  return { notifications, unreadCount, isConnected }
+}
+```
+
+### Problème Résolu: Freeze après suppressions multiples
+
+**Symptôme**: Après exactement 5 suppressions de notifications, l'application se figeait avec un chargement infini.
+
+**Cause**:
+- Chaque suppression déclenchait un reload Inertia de la page
+- Le composant React se démontait et remontait
+- Sans singleton, `new Transmit()` créait une nouvelle instance à chaque fois
+- Les anciennes subscriptions SSE restaient actives (pending)
+- Après 5 reloads = 5 connexions SSE + 1 nouvelle = **6 connexions**
+- Limite HTTP/2 atteinte (6 connexions max par domaine)
+- La 6e requête `subscribe` restait bloquée en pending → freeze
+
+**Solution**: Utiliser un **singleton Transmit** partagé par toute l'application via `getTransmitInstance()`. La même instance est réutilisée même après les reloads Inertia.
+
+### Best Practices Transmit
+
+1. ✅ **UNE seule instance Transmit** par application (singleton)
+2. ✅ **Stocker `stopListening()`** retourné par `onMessage()`
+3. ✅ **Cleanup complet** dans le `return` du `useEffect`:
+   - Appeler `stopListening()` pour arrêter le handler
+   - Appeler `subscription.delete()` pour unsubscribe
+4. ✅ **Dependencies minimales** dans `useEffect` (`[auth.user]` uniquement)
+5. ✅ **Utiliser refs** pour les valeurs qui changent sans re-render (locale)
+6. ❌ **JAMAIS** `new Transmit()` dans un composant React
+7. ❌ **JAMAIS** oublier le cleanup dans le return du `useEffect`
 
 ### Email Digest
 

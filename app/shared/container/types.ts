@@ -48,6 +48,9 @@ export const TYPES = {
   EmailService: Symbol.for('EmailService'),
   LocaleService: Symbol.for('LocaleService'),
 
+  // Listeners
+  NotificationListeners: Symbol.for('NotificationListeners'),
+
   // External services
   RedisClient: Symbol.for('RedisClient'),
 } as const

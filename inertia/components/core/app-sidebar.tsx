@@ -1,4 +1,4 @@
-import { Home, Settings } from 'lucide-react'
+import { Bell, Home, Settings } from 'lucide-react'
 import { usePage } from '@inertiajs/react'
 import { useI18n } from '@/hooks/use-i18n'
 
@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/sidebar'
 import { NavUser } from './nav-user'
 import { OrganizationSwitcher, type Organization } from './organization-switcher'
+import { NotificationBell } from '@/components/notifications/notification-bell'
 
 export function AppSidebar() {
   const { t } = useI18n()
@@ -46,6 +47,11 @@ export function AppSidebar() {
   ]
 
   const organizationItems = [
+    {
+      title: t('common.notifications'),
+      url: '/notifications',
+      icon: Bell,
+    },
     {
       title: t('common.settings'),
       url: '/organizations/settings',
@@ -90,18 +96,25 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+      </SidebarContent>
+      <SidebarFooter>
         {organizations && organizations.current && (
           <SidebarGroup>
-            <SidebarGroupLabel>{t('common.organization')}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {organizationItems.map((item) => (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild>
-                      <a href={item.url}>
-                        <item.icon />
-                        <span>{item.title}</span>
-                      </a>
+                      {item.icon === Bell ? (
+                        <div>
+                          <NotificationBell showLabel label={item.title} />
+                        </div>
+                      ) : (
+                        <a href={item.url}>
+                          <item.icon />
+                          <span>{item.title}</span>
+                        </a>
+                      )}
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}
@@ -109,8 +122,6 @@ export function AppSidebar() {
             </SidebarGroupContent>
           </SidebarGroup>
         )}
-      </SidebarContent>
-      <SidebarFooter>
         {userData && <NavUser user={userData} isSuperAdmin={auth.user?.isSuperAdmin} />}
       </SidebarFooter>
     </Sidebar>

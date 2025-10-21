@@ -19,26 +19,13 @@ export default class Notification extends BaseModel {
   @column()
   declare type: NotificationType
 
-  @column({
-    columnName: 'title_i18n',
-    prepare: (value: TranslatableField) => JSON.stringify(value),
-    consume: (value: string | TranslatableField) =>
-      typeof value === 'string' ? JSON.parse(value) : value,
-  })
+  @column({ columnName: 'title_i18n' })
   declare titleI18n: TranslatableField
 
-  @column({
-    columnName: 'message_i18n',
-    prepare: (value: TranslatableField) => JSON.stringify(value),
-    consume: (value: string | TranslatableField) =>
-      typeof value === 'string' ? JSON.parse(value) : value,
-  })
+  @column({ columnName: 'message_i18n' })
   declare messageI18n: TranslatableField
 
-  @column({
-    prepare: (value: Record<string, any> | null) => JSON.stringify(value),
-    consume: (value: string) => (value ? JSON.parse(value) : null),
-  })
+  @column()
   declare data: Record<string, any> | null
 
   @column.dateTime()

@@ -1,4 +1,5 @@
 import router from '@adonisjs/core/services/router'
+import transmit from '@adonisjs/transmit/services/main'
 
 // Import all routes files
 import './routes/auth_routes.js'
@@ -13,6 +14,9 @@ import './routes/organization_routes.js'
 import './routes/webhook_routes.js'
 import { middleware } from './kernel.js'
 
+// Register Transmit SSE endpoint (auth is handled by transmit.authorize() in start/transmit.ts)
+transmit.registerRoutes()
+
 // Locale switching route (accessible to everyone)
 const LocaleController = () => import('#shared/controllers/locale_controller')
 router.post('/locale', [LocaleController, 'update'])
@@ -22,6 +26,17 @@ router
   .on('/')
   .renderInertia('home')
   .use([middleware.auth(), middleware.requireOrganization(), middleware.organizationContext()])
+
+// Page des notifications
+const NotificationsController = () => import('#notifications/controllers/notifications_controller')
+router
+  .get('/notifications', [NotificationsController, 'index'])
+  .use([
+    middleware.auth(),
+    middleware.requireOrganization(),
+    middleware.organizationContext(),
+    middleware.updateSessionActivity(),
+  ])
 
 // Route temporaire pour tester le middleware
 router

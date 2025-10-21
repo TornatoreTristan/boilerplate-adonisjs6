@@ -51,6 +51,9 @@ import PlanService from '#billing/services/plan_service'
 import SubscriptionService from '#billing/services/subscription_service'
 import PricingCalculatorService from '#billing/services/pricing_calculator_service'
 
+// Listeners
+import NotificationListeners from '#notifications/listeners/notification_listeners'
+
 // Create container
 const container = new Container()
 
@@ -97,6 +100,12 @@ export function configureContainer(): Container {
 
   // Locale Service
   container.bind<LocaleService>(TYPES.LocaleService).to(LocaleService).inSingletonScope()
+
+  // ==========================================
+  // LISTENERS
+  // ==========================================
+
+  container.bind<NotificationListeners>(TYPES.NotificationListeners).to(NotificationListeners).inSingletonScope()
 
   // ==========================================
   // REPOSITORIES

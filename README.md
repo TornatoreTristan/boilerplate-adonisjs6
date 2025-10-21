@@ -24,6 +24,7 @@
 - 🎪 **Event System** - Événements asynchrones avec Inngest (workflows, retry, observability)
 - 🛡️ **Rate Limiting** - Protection contre les abus avec Redis sliding window
 - 🔔 **Notifications** - Système complet avec types personnalisables
+- 📡 **Real-time Notifications** - Server-Sent Events avec Transmit (SSE)
 - 🧪 **Tests complets** - Unit & functional tests avec Japa
 
 ## 🛠️ Stack Technique
@@ -33,9 +34,10 @@
 - **Cache:** Redis avec stratégie de tags
 - **Storage:** Local filesystem + AWS S3
 - **Events & Workflows:** Inngest (reliable, observable, avec retry automatique)
+- **Real-time:** Transmit (Server-Sent Events) pour notifications en temps réel
 - **DI Container:** Inversify pour l'injection de dépendances
 - **Tests:** Japa avec couverture complète
-- **Frontend:** Inertia.js + React (prêt)
+- **Frontend:** Inertia.js + React + TypeScript
 
 ## 🚀 Installation Rapide
 
@@ -181,11 +183,11 @@ tests/                   # Tests complets
 - [x] Google OAuth Integration
 - [x] File Upload System (Local + S3)
 - [x] Notifications System
+- [x] Real-time Notifications (Transmit SSE)
 - [x] Full-Text Search (PostgreSQL)
 - [x] Internationalization (FR/EN)
 - [ ] Multi-provider OAuth (GitHub, Facebook)
 - [ ] Super-admin Dashboard
-- [ ] WebSocket Real-time
 - [ ] Email Templates & Mailing
 
 ## 🤝 Contribution

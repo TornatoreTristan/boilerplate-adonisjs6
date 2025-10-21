@@ -55,7 +55,8 @@ export default defineConfig({
     () => import('@adonisjs/inertia/inertia_provider'),
     () => import('@adonisjs/redis/redis_provider'),
     () => import('@adonisjs/ally/ally_provider'),
-    () => import('@adonisjs/i18n/i18n_provider')
+    () => import('@adonisjs/i18n/i18n_provider'),
+    () => import('@adonisjs/transmit/transmit_provider')
   ],
 
   /*
@@ -66,7 +67,11 @@ export default defineConfig({
   | List of modules to import before starting the application.
   |
   */
-  preloads: [() => import('#start/routes'), () => import('#start/kernel')],
+  preloads: [
+    () => import('#start/routes'),
+    () => import('#start/kernel'),
+    () => import('#start/transmit'),
+  ],
 
   /*
   |--------------------------------------------------------------------------

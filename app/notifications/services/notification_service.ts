@@ -3,6 +3,8 @@ import NotificationRepository from '#notifications/repositories/notification_rep
 import Notification from '#notifications/models/notification'
 import type { CreateNotificationData, NotificationType } from '#notifications/types/notification'
 import { TYPES } from '#shared/container/types'
+import transmit from '@adonisjs/transmit/services/main'
+import logger from '@adonisjs/core/services/logger'
 
 export interface GetNotificationsOptions {
   unreadOnly?: boolean
@@ -17,7 +19,8 @@ export default class NotificationService {
   ) {}
 
   async createNotification(data: CreateNotificationData): Promise<Notification> {
-    return this.notificationRepo.create(
+    // 1. Créer la notification en base de données
+    const notification = await this.notificationRepo.create(
       {
         userId: data.userId,
         organizationId: data.organizationId || null,
@@ -30,10 +33,45 @@ export default class NotificationService {
         cache: { tags: ['notifications', `user_${data.userId}_notifications`] },
       }
     )
+
+    // 2. Broadcast en temps réel via Transmit (SSE)
+    try {
+      transmit.broadcast(`user/${data.userId}/notifications`, {
+        type: 'notification:new',
+        notification: {
+          id: notification.id,
+          type: notification.type,
+          titleI18n: notification.titleI18n,
+          messageI18n: notification.messageI18n,
+          data: notification.data,
+          readAt: notification.readAt,
+          createdAt: notification.createdAt.toISO(),
+        },
+      })
+    } catch (error) {
+      // Ne pas fail si le broadcast échoue (notification en base reste créée)
+      logger.error({ err: error }, 'Failed to broadcast notification via Transmit')
+    }
+
+    return notification
   }
 
   async markAsRead(notificationId: string): Promise<void> {
+    // Récupérer la notification pour avoir le userId
+    const notification = await this.notificationRepo.findById(notificationId)
+    if (!notification) return
+
     await this.notificationRepo.markAsRead(notificationId)
+
+    // Broadcast l'événement de lecture
+    try {
+      transmit.broadcast(`user/${notification.userId}/notifications`, {
+        type: 'notification:read',
+        notificationId,
+      })
+    } catch (error) {
+      logger.error({ err: error }, 'Failed to broadcast notification:read event')
+    }
   }
 
   async markAsReadBulk(notificationIds: string[]): Promise<number> {

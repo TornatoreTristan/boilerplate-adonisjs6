@@ -5,11 +5,9 @@ import NotificationService from '#notifications/services/notification_service'
 import type { NotificationType } from '#notifications/types/notification'
 
 export default class NotificationsController {
-  async index({ request, response, session }: HttpContext) {
-    const userId = session.get('user_id')
-
-    if (!userId) {
-      return response.status(401).json({ error: 'Non authentifié' })
+  async index({ request, user, inertia }: HttpContext) {
+    if (!user) {
+      return inertia.location('/login')
     }
 
     const notificationService = getService<NotificationService>(TYPES.NotificationService)
@@ -17,23 +15,36 @@ export default class NotificationsController {
     const unreadOnly = request.input('unread') === 'true'
     const type = request.input('type') as NotificationType | undefined
 
-    const notifications = await notificationService.getUserNotifications(userId, {
+    const notifications = await notificationService.getUserNotifications(user.id, {
       unreadOnly,
       type,
     })
 
-    return response.json({
-      notifications: notifications.map((n) => ({
-        id: n.id,
-        userId: n.userId,
-        organizationId: n.organizationId,
-        type: n.type,
-        titleI18n: n.titleI18n,
-        messageI18n: n.messageI18n,
-        data: n.data,
-        readAt: n.readAt?.toISO() || null,
-        createdAt: n.createdAt.toISO(),
-      })),
+    const unreadCount = await notificationService.getUnreadCount(user.id)
+
+    // Trier les notifications : non lues en premier, puis par date décroissante
+    const sortedNotifications = notifications.sort((a, b) => {
+      // Si une est lue et l'autre non, la non lue vient en premier
+      if (!a.readAt && b.readAt) return -1
+      if (a.readAt && !b.readAt) return 1
+      // Sinon, trier par date de création (plus récente en premier)
+      return b.createdAt.toMillis() - a.createdAt.toMillis()
+    })
+
+    // Convertir manuellement les notifications pour Inertia
+    const serializedNotifications = sortedNotifications.map((n) => ({
+      id: n.id,
+      type: n.type,
+      titleI18n: n.titleI18n,
+      messageI18n: n.messageI18n,
+      data: n.data,
+      readAt: n.readAt ? n.readAt.toISO() : null,
+      createdAt: n.createdAt.toISO(),
+    }))
+
+    return inertia.render('notifications', {
+      notifications: serializedNotifications,
+      unreadCount,
     })
   }
 
@@ -69,7 +80,7 @@ export default class NotificationsController {
 
     await notificationService.markAsRead(notificationId)
 
-    return response.json({ success: true })
+    return response.status(303).redirect().back()
   }
 
   async markAllAsRead({ response, session }: HttpContext) {
@@ -80,9 +91,9 @@ export default class NotificationsController {
     }
 
     const notificationService = getService<NotificationService>(TYPES.NotificationService)
-    const count = await notificationService.markAllAsReadForUser(userId)
+    await notificationService.markAllAsReadForUser(userId)
 
-    return response.json({ success: true, count })
+    return response.status(303).redirect().back()
   }
 
   async destroy({ params, response, session }: HttpContext) {
@@ -104,6 +115,6 @@ export default class NotificationsController {
 
     await notificationService.deleteNotification(notificationId)
 
-    return response.json({ success: true })
+    return response.status(303).redirect().back()
   }
 }
