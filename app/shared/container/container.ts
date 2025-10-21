@@ -35,6 +35,8 @@ import StorageService from '#uploads/services/storage_service'
 import LocalStorageDriver from '#uploads/services/storage/local_storage_driver'
 import S3StorageDriver from '#uploads/services/storage/s3_storage_driver'
 import UploadService from '#uploads/services/upload_service'
+import AntivirusService from '#uploads/services/antivirus_service'
+import ImageOptimizationService from '#uploads/services/image_optimization_service'
 
 // Domain Services
 import AuthService from '#auth/services/auth_service'
@@ -228,6 +230,10 @@ export function configureContainer(): Container {
   container.bind<S3StorageDriver>(TYPES.S3StorageDriver).to(S3StorageDriver).inSingletonScope()
   container.bind<StorageService>(TYPES.StorageService).to(StorageService).inSingletonScope()
   container.bind<UploadService>(TYPES.UploadService).to(UploadService)
+
+  // Upload Security Services
+  container.bind(TYPES.AntivirusService).to(AntivirusService).inSingletonScope()
+  container.bind(TYPES.ImageOptimizationService).to(ImageOptimizationService).inSingletonScope()
 
   return container
 }

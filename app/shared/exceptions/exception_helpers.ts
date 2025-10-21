@@ -15,6 +15,11 @@ import {
   RateLimitException,
   SubscriptionNotFoundException,
   SubscriptionNotSyncedException,
+  UploadNotFoundException,
+  VirusDetectedException,
+  FileTooLargeException,
+  InvalidMimeTypeException,
+  UploadFailedException,
 } from './domain_exceptions.js'
 import type { ErrorDetails } from './app_exception.js'
 
@@ -131,6 +136,57 @@ export class ExceptionHelpers {
 
   static tooManyRequests(message?: string, retryAfter?: number): never {
     throw new RateLimitException(message, { retryAfter })
+  }
+
+  // =====================================================
+  // UPLOAD HELPERS
+  // =====================================================
+
+  static uploadNotFound(id?: string | number, details?: ErrorDetails): never {
+    throw new UploadNotFoundException(
+      id ? `Fichier avec l'ID ${id} introuvable` : undefined,
+      details
+    )
+  }
+
+  static virusDetected(filename?: string, viruses?: string[], details?: ErrorDetails): never {
+    const virusDetails = {
+      ...details,
+      viruses,
+      filename,
+    }
+    throw new VirusDetectedException(
+      filename
+        ? `Virus détecté dans le fichier ${filename}${viruses && viruses.length > 0 ? `: ${viruses.join(', ')}` : ''}`
+        : undefined,
+      virusDetails
+    )
+  }
+
+  static fileTooLarge(maxSize?: number, actualSize?: number, details?: ErrorDetails): never {
+    throw new FileTooLargeException(
+      maxSize
+        ? `Fichier trop volumineux (max: ${maxSize} bytes${actualSize ? `, reçu: ${actualSize} bytes` : ''})`
+        : undefined,
+      details
+    )
+  }
+
+  static invalidMimeType(
+    mimeType?: string,
+    allowedTypes?: string[],
+    details?: ErrorDetails
+  ): never {
+    throw new InvalidMimeTypeException(
+      mimeType
+        ? `Type de fichier non autorisé: ${mimeType}${allowedTypes ? `. Types acceptés: ${allowedTypes.join(', ')}` : ''}`
+        : undefined,
+      details
+    )
+  }
+
+  static uploadFailed(message?: string, details?: ErrorDetails): never {
+    throw new UploadFailedException(message, details)
   }
 
   // =====================================================

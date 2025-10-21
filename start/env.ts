@@ -79,6 +79,27 @@ export default await Env.create(new URL('../', import.meta.url), {
   UPLOADS_MAX_SIZE: Env.schema.number(),
   UPLOADS_ALLOWED_MIMES: Env.schema.string(),
 
+  /*
+  |----------------------------------------------------------
+  | Variables for ClamAV antivirus scanning
+  |----------------------------------------------------------
+  */
+  CLAMAV_ENABLED: Env.schema.string.optional(),
+  CLAMAV_SOCKET: Env.schema.string.optional(),
+  CLAMAV_HOST: Env.schema.string.optional(),
+  CLAMAV_PORT: Env.schema.string.optional(),
+
+  /*
+  |----------------------------------------------------------
+  | Variables for image optimization
+  |----------------------------------------------------------
+  */
+  IMAGE_MAX_WIDTH: Env.schema.string.optional(),
+  IMAGE_MAX_HEIGHT: Env.schema.string.optional(),
+  IMAGE_QUALITY: Env.schema.string.optional(),
+  IMAGE_CONVERT_TO_WEBP: Env.schema.string.optional(),
+  IMAGE_STRIP_METADATA: Env.schema.string.optional(),
+
   AWS_ACCESS_KEY_ID: Env.schema.string.optional(),
   AWS_SECRET_ACCESS_KEY: Env.schema.string.optional(),
   AWS_REGION: Env.schema.string.optional(),

@@ -1,4 +1,4 @@
-import { Home, Users, Shield, Settings, Building2, ArrowLeft, Mail, Plug, CreditCard, Receipt, Activity, FileText, ScrollText } from 'lucide-react'
+import { Home, Users, Shield, Building2, ArrowLeft, Mail, Plug, CreditCard, Receipt, Activity, FileText, ScrollText } from 'lucide-react'
 import { usePage } from '@inertiajs/react'
 import { useI18n } from '@/hooks/use-i18n'
 
@@ -30,8 +30,8 @@ export function AdminSidebar() {
     }
   }>().props
 
-  // Menu items admin
-  const items = [
+  // Menu items groupés
+  const revenusItems = [
     {
       title: t('admin.dashboard'),
       url: '/admin',
@@ -43,35 +43,23 @@ export function AdminSidebar() {
       icon: Users,
     },
     {
-      title: t('admin.emails'),
-      url: '/admin/mails',
-      icon: Mail,
-    },
-    {
-      title: t('admin.roles'),
-      url: '/admin/roles',
-      icon: Shield,
-    },
-    {
-      title: t('admin.organizations'),
-      url: '/admin/organizations',
-      icon: Building2,
-    },
-    {
       title: t('common.subscriptions'),
       url: '/admin/subscriptions',
       icon: Receipt,
-    },
-    {
-      title: t('common.integrations'),
-      url: '/admin/integrations',
-      icon: Plug,
     },
     {
       title: t('admin.plans'),
       url: '/admin/plans',
       icon: CreditCard,
     },
+    {
+      title: t('admin.organizations'),
+      url: '/admin/organizations',
+      icon: Building2,
+    },
+  ]
+
+  const monitoringItems = [
     {
       title: t('admin.monitoring'),
       url: '/admin/monitoring',
@@ -87,10 +75,23 @@ export function AdminSidebar() {
       url: '/admin/audit-logs',
       icon: ScrollText,
     },
+  ]
+
+  const parametresItems = [
     {
-      title: t('common.settings'),
-      url: '/admin/settings',
-      icon: Settings,
+      title: t('common.integrations'),
+      url: '/admin/integrations',
+      icon: Plug,
+    },
+    {
+      title: t('admin.roles'),
+      url: '/admin/roles',
+      icon: Shield,
+    },
+    {
+      title: t('admin.emails'),
+      url: '/admin/mails',
+      icon: Mail,
     },
   ]
 
@@ -109,11 +110,51 @@ export function AdminSidebar() {
         <div>
           <h1 className="p-4 text-sm font-bold">{t('common.app_name')}</h1>
         </div>
+
+        {/* Groupe Revenus */}
         <SidebarGroup>
-          <SidebarGroupLabel>{t('common.administration')}</SidebarGroupLabel>
+          <SidebarGroupLabel>Revenus</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item) => (
+              {revenusItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <a href={item.url}>
+                      <item.icon />
+                      <span>{item.title}</span>
+                    </a>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Groupe Monitoring */}
+        <SidebarGroup>
+          <SidebarGroupLabel>Monitoring</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {monitoringItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <a href={item.url}>
+                      <item.icon />
+                      <span>{item.title}</span>
+                    </a>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Groupe Paramètres */}
+        <SidebarGroup>
+          <SidebarGroupLabel>Paramètres</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {parametresItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <a href={item.url}>

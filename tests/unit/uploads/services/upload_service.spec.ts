@@ -7,6 +7,7 @@ import UploadRepository from '#uploads/repositories/upload_repository'
 import testUtils from '@adonisjs/core/services/test_utils'
 import fs from 'node:fs/promises'
 import path from 'node:path'
+import sharp from 'sharp'
 
 test.group('UploadService', (group) => {
   group.each.setup(() => testUtils.db().withGlobalTransaction())
@@ -307,5 +308,237 @@ test.group('UploadService', (group) => {
     assert.isNotNull(found)
     assert.equal(found?.id, created.id)
     assert.equal(found?.filename, 'findable.txt')
+  })
+
+  test('should scan file for viruses when uploading', async ({ assert }) => {
+    const uploadService = getService<UploadService>(TYPES.UploadService)
+    const userRepo = getService<UserRepository>(TYPES.UserRepository)
+
+    const user = await userRepo.create({
+      email: 'virus@example.com',
+      password: 'password123',
+      fullName: 'Virus Test',
+    })
+
+    const mockFile = Buffer.from('safe file content')
+    const upload = await uploadService.uploadFile({
+      userId: user.id,
+      file: mockFile,
+      filename: 'safe.pdf',
+      mimeType: 'application/pdf',
+      size: mockFile.length,
+      disk: 'local',
+      visibility: 'private',
+    })
+
+    assert.exists(upload.id)
+    assert.isTrue(upload.metadata?.virusScanned || false)
+    assert.exists(upload.metadata?.virusScanDate)
+  })
+
+  test('should skip virus scan when requested', async ({ assert }) => {
+    const uploadService = getService<UploadService>(TYPES.UploadService)
+    const userRepo = getService<UserRepository>(TYPES.UserRepository)
+
+    const user = await userRepo.create({
+      email: 'skipvirus@example.com',
+      password: 'password123',
+      fullName: 'Skip Virus',
+    })
+
+    const mockFile = Buffer.from('file without scan')
+    const upload = await uploadService.uploadFile({
+      userId: user.id,
+      file: mockFile,
+      filename: 'noscan.txt',
+      mimeType: 'text/plain',
+      size: mockFile.length,
+      disk: 'local',
+      visibility: 'private',
+      skipVirusScan: true,
+    })
+
+    assert.exists(upload.id)
+    assert.isUndefined(upload.metadata?.virusScanned)
+    assert.isUndefined(upload.metadata?.virusScanDate)
+  })
+
+  test('should optimize image when uploading', async ({ assert }) => {
+    const uploadService = getService<UploadService>(TYPES.UploadService)
+    const userRepo = getService<UserRepository>(TYPES.UserRepository)
+
+    const user = await userRepo.create({
+      email: 'imageopt@example.com',
+      password: 'password123',
+      fullName: 'Image Optimizer',
+    })
+
+    const testImage = await sharp({
+      create: {
+        width: 1000,
+        height: 800,
+        channels: 3,
+        background: { r: 255, g: 0, b: 0 },
+      },
+    })
+      .jpeg()
+      .toBuffer()
+
+    const upload = await uploadService.uploadFile({
+      userId: user.id,
+      file: testImage,
+      filename: 'photo.jpg',
+      mimeType: 'image/jpeg',
+      size: testImage.length,
+      disk: 'local',
+      visibility: 'public',
+    })
+
+    assert.exists(upload.id)
+    assert.isTrue(upload.metadata?.imageOptimized || false)
+    assert.exists(upload.metadata?.imageOptimizationDate)
+    assert.exists(upload.metadata?.originalSize)
+    assert.exists(upload.metadata?.optimizedSize)
+    assert.exists(upload.metadata?.reductionPercent)
+    assert.exists(upload.metadata?.width)
+    assert.exists(upload.metadata?.height)
+    assert.isAtMost(upload.metadata?.width || 0, 2048)
+    assert.isAtMost(upload.metadata?.height || 0, 2048)
+  })
+
+  test('should skip image optimization when requested', async ({ assert }) => {
+    const uploadService = getService<UploadService>(TYPES.UploadService)
+    const userRepo = getService<UserRepository>(TYPES.UserRepository)
+
+    const user = await userRepo.create({
+      email: 'skipopt@example.com',
+      password: 'password123',
+      fullName: 'Skip Opt',
+    })
+
+    const testImage = await sharp({
+      create: {
+        width: 500,
+        height: 400,
+        channels: 3,
+        background: { r: 0, g: 255, b: 0 },
+      },
+    })
+      .jpeg()
+      .toBuffer()
+
+    const upload = await uploadService.uploadFile({
+      userId: user.id,
+      file: testImage,
+      filename: 'noopt.jpg',
+      mimeType: 'image/jpeg',
+      size: testImage.length,
+      disk: 'local',
+      visibility: 'private',
+      skipImageOptimization: true,
+    })
+
+    assert.exists(upload.id)
+    assert.isUndefined(upload.metadata?.imageOptimized)
+    assert.isUndefined(upload.metadata?.imageOptimizationDate)
+  })
+
+  test('should not optimize non-image files', async ({ assert }) => {
+    const uploadService = getService<UploadService>(TYPES.UploadService)
+    const userRepo = getService<UserRepository>(TYPES.UserRepository)
+
+    const user = await userRepo.create({
+      email: 'noimage@example.com',
+      password: 'password123',
+      fullName: 'No Image',
+    })
+
+    const pdfFile = Buffer.from('%PDF-1.4 test content')
+    const upload = await uploadService.uploadFile({
+      userId: user.id,
+      file: pdfFile,
+      filename: 'document.pdf',
+      mimeType: 'application/pdf',
+      size: pdfFile.length,
+      disk: 'local',
+      visibility: 'private',
+    })
+
+    assert.exists(upload.id)
+    assert.isUndefined(upload.metadata?.imageOptimized)
+  })
+
+  test('should convert image to WebP when optimizing', async ({ assert }) => {
+    const uploadService = getService<UploadService>(TYPES.UploadService)
+    const userRepo = getService<UserRepository>(TYPES.UserRepository)
+
+    const user = await userRepo.create({
+      email: 'webp@example.com',
+      password: 'password123',
+      fullName: 'WebP User',
+    })
+
+    const testImage = await sharp({
+      create: {
+        width: 600,
+        height: 400,
+        channels: 3,
+        background: { r: 100, g: 100, b: 255 },
+      },
+    })
+      .jpeg()
+      .toBuffer()
+
+    const upload = await uploadService.uploadFile({
+      userId: user.id,
+      file: testImage,
+      filename: 'convert.jpg',
+      mimeType: 'image/jpeg',
+      size: testImage.length,
+      disk: 'local',
+      visibility: 'public',
+    })
+
+    assert.exists(upload.id)
+  })
+
+  test('should perform both virus scan and image optimization', async ({ assert }) => {
+    const uploadService = getService<UploadService>(TYPES.UploadService)
+    const userRepo = getService<UserRepository>(TYPES.UserRepository)
+
+    const user = await userRepo.create({
+      email: 'fullprocess@example.com',
+      password: 'password123',
+      fullName: 'Full Process',
+    })
+
+    const testImage = await sharp({
+      create: {
+        width: 800,
+        height: 600,
+        channels: 3,
+        background: { r: 128, g: 128, b: 128 },
+      },
+    })
+      .png()
+      .toBuffer()
+
+    const upload = await uploadService.uploadFile({
+      userId: user.id,
+      file: testImage,
+      filename: 'fullprocess.png',
+      mimeType: 'image/png',
+      size: testImage.length,
+      disk: 'local',
+      visibility: 'private',
+    })
+
+    assert.exists(upload.id)
+    assert.isTrue(upload.metadata?.virusScanned || false)
+    assert.exists(upload.metadata?.virusScanDate)
+    assert.isTrue(upload.metadata?.imageOptimized || false)
+    assert.exists(upload.metadata?.imageOptimizationDate)
+    assert.exists(upload.metadata?.width)
+    assert.exists(upload.metadata?.height)
   })
 })

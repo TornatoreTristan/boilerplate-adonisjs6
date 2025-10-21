@@ -35,6 +35,8 @@ export const TYPES = {
   StorageService: Symbol.for('StorageService'),
   LocalStorageDriver: Symbol.for('LocalStorageDriver'),
   S3StorageDriver: Symbol.for('S3StorageDriver'),
+  AntivirusService: Symbol.for('AntivirusService'),
+  ImageOptimizationService: Symbol.for('ImageOptimizationService'),
   AuthorizationService: Symbol.for('AuthorizationService'),
   AdminService: Symbol.for('AdminService'),
   StripeConnectService: Symbol.for('StripeConnectService'),

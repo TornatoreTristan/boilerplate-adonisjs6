@@ -215,3 +215,52 @@ export class SubscriptionNotSyncedException extends AppException {
     super(message, details)
   }
 }
+
+// =====================================================
+// EXCEPTIONS UPLOADS
+// =====================================================
+
+export class UploadNotFoundException extends AppException {
+  readonly code = ERROR_CODES.UPLOAD_NOT_FOUND
+  readonly status = 404
+
+  constructor(message = 'Fichier introuvable', details?: ErrorDetails) {
+    super(message, details)
+  }
+}
+
+export class VirusDetectedException extends AppException {
+  readonly code = ERROR_CODES.UPLOAD_VIRUS_DETECTED
+  readonly status = 422
+
+  constructor(message = 'Virus détecté dans le fichier', details?: ErrorDetails) {
+    super(message, details)
+  }
+}
+
+export class FileTooLargeException extends AppException {
+  readonly code = ERROR_CODES.UPLOAD_FILE_TOO_LARGE
+  readonly status = 413
+
+  constructor(message = 'Fichier trop volumineux', details?: ErrorDetails) {
+    super(message, details)
+  }
+}
+
+export class InvalidMimeTypeException extends AppException {
+  readonly code = ERROR_CODES.UPLOAD_INVALID_MIME_TYPE
+  readonly status = 422
+
+  constructor(message = 'Type de fichier non autorisé', details?: ErrorDetails) {
+    super(message, details)
+  }
+}
+
+export class UploadFailedException extends AppException {
+  readonly code = ERROR_CODES.UPLOAD_FAILED
+  readonly status = 500
+
+  constructor(message = 'Échec de l\'upload du fichier', details?: ErrorDetails) {
+    super(message, details)
+  }
+}

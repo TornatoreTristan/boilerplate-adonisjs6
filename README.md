@@ -6,7 +6,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue.svg)](https://typescriptlang.org)
 [![Node.js](https://img.shields.io/badge/Node.js-20+-green.svg)](https://nodejs.org)
 
-**Project start:** 27 sept 2025 | **Last update:** 22 oct 2025 | **Version:** 0.1.4
+**Project start:** 27 sept 2025 | **Last update:** 22 oct 2025 | **Version:** 0.1.5
 
 ## ✨ Fonctionnalités
 
@@ -33,6 +33,8 @@
 ### 📦 Storage & Uploads
 
 - **File Upload System** - Multi-storage (local/S3) avec polymorphic attachments
+- **Antivirus Protection** - ClamAV integration pour scanner les fichiers
+- **Image Optimization** - Compression, redimensionnement, conversion WebP automatique
 - **Validation avancée** - Type MIME, taille, quotas
 
 ### 🔔 Notifications & Communication
@@ -223,7 +225,7 @@ tests/                   # Tests complets
 
 - [x] API Rate Limiting
 - [x] Google OAuth Integration
-- [x] File Upload System (Local + S3)
+- [x] File Upload System (Local + S3 + Antivirus + Image Optimization)
 - [x] Notifications System
 - [x] Real-time Notifications (Transmit SSE)
 - [x] Full-Text Search (PostgreSQL)
