@@ -3,6 +3,7 @@ import { getService } from '#shared/container/container'
 import { TYPES } from '#shared/container/types'
 import type OrganizationRepository from '#organizations/repositories/organization_repository'
 import type LocaleService from '#shared/services/locale_service'
+import type AppSettingsService from '#app_settings/services/app_settings_service'
 
 const inertiaConfig = defineConfig({
   /**
@@ -75,6 +76,25 @@ const inertiaConfig = defineConfig({
       return {
         locale,
         messages,
+      }
+    },
+    appSettings: async () => {
+      try {
+        const appSettingsService = getService<AppSettingsService>(TYPES.AppSettingsService)
+        const settings = await appSettingsService.getSettings()
+
+        // Type assertion pour accéder aux getters
+        const favicon = settings.favicon as any
+
+        return {
+          appName: settings.appName,
+          faviconUrl: favicon?.url || null,
+        }
+      } catch (error) {
+        return {
+          appName: 'My Application',
+          faviconUrl: null,
+        }
       }
     },
   },

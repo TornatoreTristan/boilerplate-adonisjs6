@@ -20,6 +20,7 @@ export const TYPES = {
   SubscriptionRepository: Symbol.for('SubscriptionRepository'),
   OrganizationInvitationRepository: Symbol.for('OrganizationInvitationRepository'),
   AuditLogRepository: Symbol.for('AuditLogRepository'),
+  AppSettingsRepository: Symbol.for('AppSettingsRepository'),
 
   // Services
   AuthService: Symbol.for('AuthService'),
@@ -43,6 +44,7 @@ export const TYPES = {
   PlanService: Symbol.for('PlanService'),
   SubscriptionService: Symbol.for('SubscriptionService'),
   PricingCalculatorService: Symbol.for('PricingCalculatorService'),
+  AppSettingsService: Symbol.for('AppSettingsService'),
 
   // Health Checks
   HealthService: Symbol.for('HealthService'),

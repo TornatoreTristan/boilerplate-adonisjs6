@@ -1,4 +1,4 @@
-import { Home, Users, Shield, Building2, ArrowLeft, Mail, Plug, CreditCard, Receipt, Activity, FileText, ScrollText } from 'lucide-react'
+import { Home, Users, Shield, Building2, ArrowLeft, Mail, Plug, CreditCard, Receipt, Activity, FileText, ScrollText, Settings } from 'lucide-react'
 import { usePage } from '@inertiajs/react'
 import { useI18n } from '@/hooks/use-i18n'
 
@@ -78,6 +78,11 @@ export function AdminSidebar() {
   ]
 
   const parametresItems = [
+    {
+      title: t('admin.app_settings'),
+      url: '/admin/settings',
+      icon: Settings,
+    },
     {
       title: t('common.integrations'),
       url: '/admin/integrations',

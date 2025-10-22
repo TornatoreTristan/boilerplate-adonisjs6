@@ -81,6 +81,10 @@ import GdprService from '#gdpr/services/gdpr_service'
 import AuditLogRepository from '#audit/repositories/audit_log_repository'
 import AuditLogService from '#audit/services/audit_log_service'
 
+// App Settings
+import AppSettingsRepository from '#app_settings/repositories/app_settings_repository'
+import AppSettingsService from '#app_settings/services/app_settings_service'
+
 // Monitoring
 import SentryService from '#monitoring/services/sentry_service'
 
@@ -164,6 +168,13 @@ export function configureContainer(): Container {
 
   container.bind<AuditLogRepository>(TYPES.AuditLogRepository).to(AuditLogRepository)
   container.bind<AuditLogService>(TYPES.AuditLogService).to(AuditLogService)
+
+  // ==========================================
+  // APP SETTINGS
+  // ==========================================
+
+  container.bind<AppSettingsRepository>(TYPES.AppSettingsRepository).to(AppSettingsRepository)
+  container.bind<AppSettingsService>(TYPES.AppSettingsService).to(AppSettingsService)
 
   // ==========================================
   // MONITORING

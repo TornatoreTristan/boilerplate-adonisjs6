@@ -80,4 +80,13 @@ export default class Upload extends BaseModel {
   get sizeInMb(): number {
     return Math.round((this.size / 1024 / 1024) * 100) / 100
   }
+
+  get url(): string {
+    // For public files, return the public URL path
+    if (this.isPublic) {
+      return `/uploads/${this.storagePath}`
+    }
+    // For private files, return API endpoint
+    return `/api/uploads/${this.id}`
+  }
 }

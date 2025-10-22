@@ -8,6 +8,7 @@ const AdminSubscriptionsController = () =>
 const MonitoringController = () => import('#admin/controllers/monitoring_controller')
 const LogsController = () => import('#admin/controllers/logs_controller')
 const AuditLogsController = () => import('#audit/controllers/audit_logs_controller')
+const AppSettingsController = () => import('#admin/controllers/app_settings_controller')
 
 router
   .group(() => {
@@ -76,5 +77,12 @@ router
       AuditLogsController,
       'resourceLogs',
     ])
+
+    // Routes pour les paramètres de l'application
+    router.get('/admin/settings', [AppSettingsController, 'index'])
+    router.post('/admin/settings/branding', [AppSettingsController, 'updateBranding'])
+    router.post('/admin/settings/legal', [AppSettingsController, 'updateLegal'])
+    router.post('/admin/settings/logo', [AppSettingsController, 'uploadLogo'])
+    router.post('/admin/settings/favicon', [AppSettingsController, 'uploadFavicon'])
   })
   .use([middleware.auth(), middleware.superAdmin()])

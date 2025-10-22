@@ -6,6 +6,7 @@
   "plans": "Plans",
   "monitoring": "Monitoring",
   "logs": "Logs",
+  "app_settings": "Paramètres de l'application",
   "audit_logs": {
     "title": "Logs d'audit",
     "description": "Suivi de toutes les activités système et actions utilisateur pour la conformité et la sécurité",

@@ -6,6 +6,7 @@
   "plans": "Plans",
   "monitoring": "Monitoring",
   "logs": "Logs",
+  "app_settings": "Application Settings",
   "audit_logs": {
     "title": "Audit Logs",
     "description": "Track all system activities and user actions for compliance and security",
